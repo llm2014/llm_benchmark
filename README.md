@@ -95,8 +95,8 @@
 | **YI-Lightning**                 | 67.89    | -        | 24.25    | -        | -       | -      | ¥0.99        | 1525        | ¥0.03     | 73          | 24-10-16 |
 | **Baichuan4 Turbo**              | 48.795   | -        | 17.43    | -        | -       | -      | ¥15.00       | 915         | ¥0.25     | 18          | 24-11-01 |
 
-* _*1 使用推荐温度1.0([https://github.com/MiniMax-AI/MiniMax-M1](https://github.com/MiniMax-AI/MiniMax-M1?tab=readme-ov-file#31-inference-parameters))_
-* _*2 使用推荐温度1.0_
+* _*1 使用推荐温度1.0_
+* _*2 使用推荐温度1.0([https://github.com/MiniMax-AI/MiniMax-M1](https://github.com/MiniMax-AI/MiniMax-M1?tab=readme-ov-file#31-inference-parameters))_
 
    
 ---
