@@ -107,6 +107,7 @@
 * _**1 使用推荐温度1.0_
 * _**2 使用推荐温度1.0([https://github.com/MiniMax-AI/MiniMax-M1](https://github.com/MiniMax-AI/MiniMax-M1?tab=readme-ov-file#31-inference-parameters))_
 * _**3 官方API不支持调节温度_
+* _**4 使用推荐温度0.6([https://huggingface.co/moonshotai/Kimi-K2-Instruct#5-model-usage](https://huggingface.co/moonshotai/Kimi-K2-Instruct#5-model-usage))_
    
 ---
 
