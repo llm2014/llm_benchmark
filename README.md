@@ -2,6 +2,7 @@
 # 大模型测评记录
 
 [编程榜](https://github.com/malody2014/llm_benchmark/tree/main/code)
+[视觉理解榜](https://github.com/malody2014/llm_benchmark/tree/main/vision)
 
 ## 简介
 1. 本评测是个人性质，使用滚动更新的私有题库进行长期跟踪评测。
