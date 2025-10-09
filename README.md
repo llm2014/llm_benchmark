@@ -1,7 +1,7 @@
 
 # 大模型测评记录
 
-[编程榜](https://github.com/malody2014/llm_benchmark/tree/main/code)
+[编程榜](https://github.com/malody2014/llm_benchmark/tree/main/code_v2)
 [视觉理解榜](https://github.com/malody2014/llm_benchmark/tree/main/vision)
 
 ## 简介
