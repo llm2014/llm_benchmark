@@ -1,0 +1,186 @@
+{
+  "datasets": [
+    {
+      "category": "code",
+      "reportDate": "2025-07",
+      "tableIndex": 0,
+      "title": "主要数据",
+      "csv": "data/code/2025-07.csv"
+    },
+    {
+      "category": "code",
+      "reportDate": "2025-08",
+      "tableIndex": 0,
+      "title": "主要数据",
+      "csv": "data/code/2025-08.csv"
+    },
+    {
+      "category": "code",
+      "reportDate": "2025-09",
+      "tableIndex": 0,
+      "title": "主要数据",
+      "csv": "data/code/2025-09.csv"
+    },
+    {
+      "category": "code",
+      "reportDate": "2025-09",
+      "tableIndex": 1,
+      "title": "各语言平均成绩",
+      "csv": "data/code/2025-09__各语言平均成绩.csv"
+    },
+    {
+      "category": "code",
+      "reportDate": "2025-10",
+      "tableIndex": 0,
+      "title": "主要数据",
+      "csv": "data/code/2025-10.csv"
+    },
+    {
+      "category": "code",
+      "reportDate": "2025-10",
+      "tableIndex": 1,
+      "title": "各语言平均成绩",
+      "csv": "data/code/2025-10__各语言平均成绩.csv"
+    },
+    {
+      "category": "vision",
+      "reportDate": "2025-05",
+      "tableIndex": 0,
+      "title": "主要数据",
+      "csv": "data/vision/2025-05.csv"
+    },
+    {
+      "category": "vision",
+      "reportDate": "2025-07",
+      "tableIndex": 0,
+      "title": "主要数据",
+      "csv": "data/vision/2025-07.csv"
+    },
+    {
+      "category": "vision",
+      "reportDate": "2025-09",
+      "tableIndex": 0,
+      "title": "主要数据",
+      "csv": "data/vision/2025-09.csv"
+    },
+    {
+      "category": "logic",
+      "reportDate": "2024-04",
+      "tableIndex": 0,
+      "title": "主要数据",
+      "csv": "data/logic/2024-04.csv"
+    },
+    {
+      "category": "logic",
+      "reportDate": "2024-05",
+      "tableIndex": 0,
+      "title": "主要数据",
+      "csv": "data/logic/2024-05.csv"
+    },
+    {
+      "category": "logic",
+      "reportDate": "2024-06",
+      "tableIndex": 0,
+      "title": "主要数据",
+      "csv": "data/logic/2024-06.csv"
+    },
+    {
+      "category": "logic",
+      "reportDate": "2024-07",
+      "tableIndex": 0,
+      "title": "主要数据",
+      "csv": "data/logic/2024-07.csv"
+    },
+    {
+      "category": "logic",
+      "reportDate": "2024-08",
+      "tableIndex": 0,
+      "title": "主要数据",
+      "csv": "data/logic/2024-08.csv"
+    },
+    {
+      "category": "logic",
+      "reportDate": "2024-09",
+      "tableIndex": 0,
+      "title": "主要数据",
+      "csv": "data/logic/2024-09.csv"
+    },
+    {
+      "category": "logic",
+      "reportDate": "2024-10",
+      "tableIndex": 0,
+      "title": "主要数据",
+      "csv": "data/logic/2024-10.csv"
+    },
+    {
+      "category": "logic",
+      "reportDate": "2024-11",
+      "tableIndex": 0,
+      "title": "主要数据",
+      "csv": "data/logic/2024-11.csv"
+    },
+    {
+      "category": "logic",
+      "reportDate": "2024-12",
+      "tableIndex": 0,
+      "title": "主要数据",
+      "csv": "data/logic/2024-12.csv"
+    },
+    {
+      "category": "logic",
+      "reportDate": "2025-01",
+      "tableIndex": 0,
+      "title": "主要数据",
+      "csv": "data/logic/2025-01.csv"
+    },
+    {
+      "category": "logic",
+      "reportDate": "2025-02",
+      "tableIndex": 0,
+      "title": "主要数据",
+      "csv": "data/logic/2025-02.csv"
+    },
+    {
+      "category": "logic",
+      "reportDate": "2025-03",
+      "tableIndex": 0,
+      "title": "主要数据",
+      "csv": "data/logic/2025-03.csv"
+    },
+    {
+      "category": "logic",
+      "reportDate": "2025-04",
+      "tableIndex": 0,
+      "title": "主要数据",
+      "csv": "data/logic/2025-04.csv"
+    },
+    {
+      "category": "logic",
+      "reportDate": "2025-05",
+      "tableIndex": 0,
+      "title": "主要数据",
+      "csv": "data/logic/2025-05.csv"
+    },
+    {
+      "category": "logic",
+      "reportDate": "2025-06",
+      "tableIndex": 0,
+      "title": "主要数据",
+      "csv": "data/logic/2025-06.csv"
+    },
+    {
+      "category": "logic",
+      "reportDate": "2025-07",
+      "tableIndex": 0,
+      "title": "主要数据",
+      "csv": "data/logic/2025-07.csv"
+    },
+    {
+      "category": "logic",
+      "reportDate": "2025-08",
+      "tableIndex": 0,
+      "title": "主要数据",
+      "csv": "data/logic/2025-08.csv"
+    }
+  ]
+}

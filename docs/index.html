@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LLM Benchmark Dashboard</title>
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body>
+    <header class="page-header">
+      <h1>LLM Benchmark Dashboard</h1>
+      <p class="subtitle">基于仓库 Markdown 数据的交互式概览，支持分类、时间与指标对比。</p>
+    </header>
+    <main>
+      <section class="controls">
+        <div class="control">
+          <label for="categorySelect">数据类别</label>
+          <select id="categorySelect" aria-label="选择数据类别"></select>
+        </div>
+        <div class="control">
+          <label for="datasetSelect">数据集</label>
+          <select id="datasetSelect" aria-label="选择数据集" disabled></select>
+        </div>
+        <div class="control search-control">
+          <label for="searchInput">搜索</label>
+          <input id="searchInput" type="search" placeholder="按模型或字段关键字过滤" disabled />
+        </div>
+      </section>
+
+      <section class="dataset-meta" id="datasetMeta"></section>
+
+      <section class="table-wrapper">
+        <div id="tableContainer" class="table-container">
+          <div class="placeholder" role="status">请选择数据集开始浏览。</div>
+        </div>
+      </section>
+    </main>
+    <footer class="page-footer">
+      <small>数据来源：仓库 Markdown 文件，转换为 CSV 后即时加载。</small>
+    </footer>
+
+    <script src="assets/app.js" type="module"></script>
+  </body>
+</html>
