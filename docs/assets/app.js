@@ -14,6 +14,8 @@ const state = {
   rows: [],
   filteredRows: [],
   searchQuery: "",
+  inferenceFilter: "all",
+  hasThinkColumn: false,
   sort: { columnIndex: null, direction: null },
 };
 
@@ -22,6 +24,7 @@ const csvCache = new Map();
 const elements = {
   categorySelect: document.getElementById("categorySelect"),
   datasetSelect: document.getElementById("datasetSelect"),
+  inferenceFilter: document.getElementById("inferenceFilter"),
   searchInput: document.getElementById("searchInput"),
   tableContainer: document.getElementById("tableContainer"),
   datasetMeta: document.getElementById("datasetMeta"),
@@ -36,7 +39,7 @@ async function init() {
   showPlaceholder("正在加载数据资源…");
   const manifest = await fetchManifest();
   if (!manifest.length) {
-    showPlaceholder("未找到任何数据集，请确认 scripts/md_to_csv.py 已正确运行。");
+    showPlaceholder("未找到任何数据集");
     return;
   }
 
@@ -103,6 +106,11 @@ function bindEventHandlers() {
     await loadDatasetByKey(key);
   });
 
+  elements.inferenceFilter.addEventListener("change", (event) => {
+    state.inferenceFilter = event.target.value;
+    applyFiltersAndRender();
+  });
+
   elements.searchInput.addEventListener("input", (event) => {
     state.searchQuery = (event.target.value || "").trim();
     applyFiltersAndRender();
@@ -116,6 +124,10 @@ async function handleCategoryChange(category) {
   elements.searchInput.disabled = true;
   elements.searchInput.value = "";
   state.searchQuery = "";
+  state.inferenceFilter = "all";
+  state.hasThinkColumn = false;
+  elements.inferenceFilter.value = "all";
+  elements.inferenceFilter.disabled = true;
   state.sort = { columnIndex: null, direction: null };
   state.headers = [];
   state.rows = [];
@@ -179,8 +191,34 @@ async function loadDatasetByKey(key) {
   showPlaceholder("正在加载表格…");
 
   const { headers, rows } = await fetchCsvDataset(dataset.csv);
-  state.headers = headers;
-  state.rows = rows;
+  const thinkIndex = headers.findIndex(
+    (header) => header && header.trim().toLowerCase() === "think"
+  );
+  state.hasThinkColumn = thinkIndex !== -1;
+
+  if (state.hasThinkColumn) {
+    elements.inferenceFilter.disabled = false;
+    elements.inferenceFilter.value = state.inferenceFilter;
+  } else {
+    state.inferenceFilter = "all";
+    elements.inferenceFilter.value = "all";
+    elements.inferenceFilter.disabled = true;
+  }
+
+  const displayHeaders =
+    thinkIndex === -1 ? headers.slice() : headers.filter((_, index) => index !== thinkIndex);
+
+  state.headers = displayHeaders;
+  state.rows = rows.map((row) => {
+    const cells =
+      thinkIndex === -1 ? row.slice() : row.filter((_, index) => index !== thinkIndex);
+    const thinkValue = thinkIndex === -1 ? null : row[thinkIndex];
+    return {
+      cells,
+      isThink: thinkIndex !== -1 && isThinkRow(thinkValue),
+    };
+  });
+
   applyFiltersAndRender();
 
   elements.searchInput.disabled = false;
@@ -258,9 +296,17 @@ function applyFiltersAndRender() {
   let rows = state.rows.slice();
   const query = state.searchQuery.toLowerCase();
 
+  if (state.hasThinkColumn) {
+    if (state.inferenceFilter === "think") {
+      rows = rows.filter((row) => row.isThink);
+    } else if (state.inferenceFilter === "non-think") {
+      rows = rows.filter((row) => !row.isThink);
+    }
+  }
+
   if (query) {
     rows = rows.filter((row) =>
-      row.some((cell) => cell.toLowerCase().includes(query))
+      row.cells.some((cell) => String(cell ?? "").toLowerCase().includes(query))
     );
   }
 
@@ -276,13 +322,13 @@ function applyFiltersAndRender() {
 function sortRows(rows, columnIndex, direction) {
   const multiplier = direction === "desc" ? -1 : 1;
   const numbers = rows
-    .map((row) => parseSortableNumber(row[columnIndex]))
+    .map((row) => parseSortableNumber(row.cells[columnIndex]))
     .filter((value) => value !== null);
   const isMostlyNumeric = numbers.length >= rows.length / 2;
 
   const sorted = rows.slice().sort((a, b) => {
-    const valueA = a[columnIndex] ?? "";
-    const valueB = b[columnIndex] ?? "";
+    const valueA = a.cells[columnIndex] ?? "";
+    const valueB = b.cells[columnIndex] ?? "";
 
     if (isMostlyNumeric) {
       const numA = parseSortableNumber(valueA);
@@ -312,6 +358,12 @@ function parseSortableNumber(value) {
   if (!normalized || normalized === "-" || normalized === ".") return null;
   const number = Number(normalized);
   return Number.isNaN(number) ? null : number;
+}
+
+function isThinkRow(value) {
+  if (value === undefined || value === null) return false;
+  const normalized = String(value).trim().toLowerCase();
+  return normalized === "1" || normalized === "true";
 }
 
 function renderTable() {
@@ -357,9 +409,19 @@ function renderTable() {
   const tbody = document.createElement("tbody");
   state.filteredRows.forEach((row) => {
     const tr = document.createElement("tr");
-    row.forEach((cell) => {
+    row.cells.forEach((cell, columnIndex) => {
       const td = document.createElement("td");
-      td.textContent = cell || "—";
+      const displayValue = cell || "—";
+      td.appendChild(document.createTextNode(displayValue));
+
+      if (columnIndex === 0 && row.isThink) {
+        td.classList.add("think-model");
+        const badge = document.createElement("span");
+        badge.className = "think-badge";
+        badge.textContent = "推理";
+        td.appendChild(badge);
+      }
+
       if (cell && /^\d+(\.\d+)?%$/.test(cell)) {
         td.style.fontFamily = "var(--font-family-mono)";
       }

@@ -9,7 +9,7 @@
   <body>
     <header class="page-header">
       <h1>LLM Benchmark Dashboard</h1>
-      <p class="subtitle">基于个人私有题目的大模型长期跟踪测评项目(<a href="https://github.com/malody2014/llm_benchmark/">GitHub</a>)</p>
+      <p class="subtitle">基于个人私有题目的大模型长期跟踪测评项目(<a href="https://github.com/llm2014/llm_benchmark/">GitHub</a>)</p>
     </header>
     <main>
       <section class="controls">
@@ -20,6 +20,14 @@
         <div class="control">
           <label for="datasetSelect">数据集</label>
           <select id="datasetSelect" aria-label="选择数据集" disabled></select>
+        </div>
+        <div class="control">
+          <label for="inferenceFilter">模型模式</label>
+          <select id="inferenceFilter" aria-label="筛选模型模式" disabled>
+            <option value="all">全部模型</option>
+            <option value="think">仅推理模型</option>
+            <option value="non-think">仅非推理模型</option>
+          </select>
         </div>
         <div class="control search-control">
           <label for="searchInput">搜索</label>
