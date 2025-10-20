@@ -8,30 +8,31 @@
   </head>
   <body>
     <header class="page-header">
-      <h1>LLM Benchmark Dashboard</h1>
-      <p class="subtitle">基于个人私有题目的大模型长期跟踪测评项目(<a href="https://github.com/llm2014/llm_benchmark/">GitHub</a>)</p>
+      <div class="locale-switcher">
+        <button id="languageToggle" type="button" class="locale-button" aria-label=""></button>
+      </div>
+      <h1 id="pageTitle">LLM Benchmark Dashboard</h1>
+      <p class="subtitle" id="pageSubtitle">
+        基于个人私有题目的大模型长期跟踪测评项目(<a href="https://github.com/llm2014/llm_benchmark/">GitHub</a>)
+      </p>
     </header>
     <main>
       <section class="controls">
         <div class="control">
-          <label for="categorySelect">数据类别</label>
-          <select id="categorySelect" aria-label="选择数据类别"></select>
+          <label for="categorySelect" id="categoryLabel">数据类别</label>
+          <select id="categorySelect" aria-label=""></select>
         </div>
         <div class="control">
-          <label for="datasetSelect">数据集</label>
-          <select id="datasetSelect" aria-label="选择数据集" disabled></select>
+          <label for="datasetSelect" id="datasetLabel">数据集</label>
+          <select id="datasetSelect" aria-label="" disabled></select>
         </div>
         <div class="control">
-          <label for="inferenceFilter">模型模式</label>
-          <select id="inferenceFilter" aria-label="筛选模型模式" disabled>
-            <option value="all">全部模型</option>
-            <option value="think">仅推理模型</option>
-            <option value="non-think">仅非推理模型</option>
-          </select>
+          <label for="inferenceFilter" id="inferenceLabel">模型模式</label>
+          <select id="inferenceFilter" aria-label="" disabled></select>
         </div>
         <div class="control search-control">
-          <label for="searchInput">搜索</label>
-          <input id="searchInput" type="search" placeholder="按模型或字段关键字过滤" disabled />
+          <label for="searchInput" id="searchLabel">搜索</label>
+          <input id="searchInput" type="search" placeholder="" aria-label="" disabled />
         </div>
       </section>
 
@@ -44,7 +45,7 @@
       </section>
     </main>
     <footer class="page-footer">
-      <small>Vibe Coding by Codex with 199K Tokens</small>
+      <small id="footerNote">Vibe Coding by Codex with 280K Tokens</small>
     </footer>
 
     <script src="assets/app.js" type="module"></script>

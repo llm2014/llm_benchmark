@@ -1,12 +1,25 @@
-const CATEGORY_LABELS = {
-  code: "代码",
-  logic: "推理",
-  vision: "视觉",
+import {
+  FALLBACK_LOCALE,
+  SUPPORTED_LOCALES,
+  getCurrentLocale,
+  getLocaleLabel,
+  onLocaleChange,
+  setLocale,
+  t,
+} from "./i18n.js";
+
+const DATASET_TITLE_KEYS = {
+  月榜: "dataset.title.monthly",
+  "各语言平均成绩": "dataset.title.averageByLanguage",
 };
+
+const DEFAULT_DATASET_TITLE_KEY = "dataset.title.default";
 
 const CATEGORY_ORDER = ["code", "logic", "vision"];
 
 const state = {
+  locale: getCurrentLocale(),
+  collator: createCollator(getCurrentLocale()),
   manifest: [],
   currentCategory: null,
   currentDatasetKey: null,
@@ -28,18 +41,138 @@ const elements = {
   searchInput: document.getElementById("searchInput"),
   tableContainer: document.getElementById("tableContainer"),
   datasetMeta: document.getElementById("datasetMeta"),
+  categoryLabel: document.getElementById("categoryLabel"),
+  datasetLabel: document.getElementById("datasetLabel"),
+  inferenceLabel: document.getElementById("inferenceLabel"),
+  searchLabel: document.getElementById("searchLabel"),
+  pageTitle: document.getElementById("pageTitle"),
+  pageSubtitle: document.getElementById("pageSubtitle"),
+  languageToggle: document.getElementById("languageToggle"),
+  footerNote: document.getElementById("footerNote"),
 };
+
+initializeLocaleUi();
 
 init().catch((error) => {
   console.error(error);
-  showPlaceholder("加载数据失败，请稍后重试。");
+  showPlaceholder(t("placeholders.loadingError"));
 });
 
+function createCollator(locale) {
+  try {
+    return new Intl.Collator(locale);
+  } catch (error) {
+    console.warn("Collator initialization failed, falling back to default locale.", error);
+    return new Intl.Collator(FALLBACK_LOCALE);
+  }
+}
+
+function initializeLocaleUi() {
+  updateStaticCopy();
+  updateLanguageToggle();
+
+  if (elements.languageToggle) {
+    elements.languageToggle.addEventListener("click", () => {
+      const nextLocale = getNextLocale();
+      setLocale(nextLocale);
+    });
+  }
+
+  onLocaleChange((locale) => {
+    state.locale = locale;
+    state.collator = createCollator(locale);
+    updateStaticCopy();
+    buildCategoryOptions(true);
+    if (state.currentCategory) {
+      refreshDatasetOptions();
+    }
+    applyFiltersAndRender();
+    updateLanguageToggle();
+    updateMeta();
+  });
+}
+
+function updateStaticCopy() {
+  document.title = t("app.title");
+  if (elements.pageTitle) {
+    elements.pageTitle.textContent = t("app.title");
+  }
+  if (elements.pageSubtitle) {
+    elements.pageSubtitle.innerHTML = t("header.subtitle");
+  }
+
+  if (elements.categoryLabel) {
+    elements.categoryLabel.textContent = t("controls.category.label");
+  }
+  if (elements.datasetLabel) {
+    elements.datasetLabel.textContent = t("controls.dataset.label");
+  }
+  if (elements.inferenceLabel) {
+    elements.inferenceLabel.textContent = t("controls.inference.label");
+  }
+  if (elements.searchLabel) {
+    elements.searchLabel.textContent = t("controls.search.label");
+  }
+  if (elements.categorySelect) {
+    elements.categorySelect.setAttribute("aria-label", t("controls.category.aria"));
+  }
+  if (elements.datasetSelect) {
+    elements.datasetSelect.setAttribute("aria-label", t("controls.dataset.aria"));
+  }
+  if (elements.inferenceFilter) {
+    elements.inferenceFilter.setAttribute("aria-label", t("controls.inference.aria"));
+    setSelectOptions(
+      elements.inferenceFilter,
+      [
+        { value: "all", label: t("controls.inference.option.all") },
+        { value: "think", label: t("controls.inference.option.think") },
+        { value: "non-think", label: t("controls.inference.option.nonThink") },
+      ],
+      state.inferenceFilter
+    );
+  }
+  if (elements.searchInput) {
+    elements.searchInput.setAttribute("aria-label", t("controls.search.aria"));
+    elements.searchInput.placeholder = t("controls.search.placeholder");
+  }
+  if (elements.footerNote) {
+    elements.footerNote.textContent = t("footer.note");
+  }
+}
+
+function updateLanguageToggle() {
+  if (!elements.languageToggle) return;
+  const nextLocale = getNextLocale();
+  const label = t("language.switcher.toggle", { target: getLocaleLabel(nextLocale) });
+  elements.languageToggle.textContent = label;
+  elements.languageToggle.setAttribute("aria-label", t("language.switcher.aria"));
+}
+
+function getNextLocale() {
+  const currentIndex = SUPPORTED_LOCALES.indexOf(state.locale);
+  if (currentIndex === -1) {
+    return FALLBACK_LOCALE;
+  }
+  const nextIndex = (currentIndex + 1) % SUPPORTED_LOCALES.length;
+  return SUPPORTED_LOCALES[nextIndex];
+}
+
+function setSelectOptions(select, options, selectedValue) {
+  if (!select) return;
+  const previousValue = typeof selectedValue === "string" ? selectedValue : select.value;
+  select.innerHTML = options
+    .map(({ value, label }) => `<option value="${value}">${label}</option>`)
+    .join("");
+  if (previousValue && options.some((option) => option.value === previousValue)) {
+    select.value = previousValue;
+  }
+}
+
 async function init() {
-  showPlaceholder("正在加载数据资源…");
+  showPlaceholder(t("placeholders.loadingData"));
   const manifest = await fetchManifest();
   if (!manifest.length) {
-    showPlaceholder("未找到任何数据集");
+    showPlaceholder(t("placeholders.noDatasets"));
     return;
   }
 
@@ -56,13 +189,14 @@ async function init() {
 async function fetchManifest() {
   const response = await fetch("data/datasets.json", { cache: "no-cache" });
   if (!response.ok) {
-    throw new Error(`无法加载清单：${response.status}`);
+    throw new Error(t("errors.manifestLoad", { status: response.status }, `Unable to load manifest: ${response.status}`));
   }
   const payload = await response.json();
   return Array.isArray(payload.datasets) ? payload.datasets : [];
 }
 
-function buildCategoryOptions() {
+function buildCategoryOptions(preserveSelection = false) {
+  if (!elements.categorySelect) return;
   const seen = new Set();
   const categories = state.manifest
     .map((entry) => entry.category)
@@ -78,20 +212,27 @@ function buildCategoryOptions() {
     const indexA = CATEGORY_ORDER.indexOf(a);
     const indexB = CATEGORY_ORDER.indexOf(b);
     if (indexA === -1 && indexB === -1) {
-      return a.localeCompare(b, "zh-CN");
+      return state.collator.compare(getCategoryLabel(a), getCategoryLabel(b));
     }
     if (indexA === -1) return 1;
     if (indexB === -1) return -1;
     return indexA - indexB;
   });
 
-  elements.categorySelect.innerHTML = categories
-    .map(
-      (category) =>
-        `<option value="${category}">${CATEGORY_LABELS[category] ?? category}</option>`
-    )
-    .join("");
+  const selected = preserveSelection ? state.currentCategory : undefined;
+  setSelectOptions(
+    elements.categorySelect,
+    categories.map((category) => ({
+      value: category,
+      label: getCategoryLabel(category),
+    })),
+    selected
+  );
   state.currentCategory = elements.categorySelect.value || null;
+}
+
+function getCategoryLabel(category) {
+  return t(`category.${category}`, undefined, category);
 }
 
 function bindEventHandlers() {
@@ -133,28 +274,48 @@ async function handleCategoryChange(category) {
   state.rows = [];
   state.filteredRows = [];
   updateMeta();
-  showPlaceholder("正在加载数据集列表…");
+  showPlaceholder(t("placeholders.loadingCategory"));
 
   const datasets = getDatasetsForCategory(category);
   if (!datasets.length) {
     elements.datasetSelect.innerHTML = "";
-    showPlaceholder("该类别暂无可用数据。");
+    showPlaceholder(t("placeholders.emptyCategory"));
     return;
   }
 
-  elements.datasetSelect.innerHTML = datasets
-    .map((dataset) => {
-      const label = buildDatasetLabel(dataset);
-      const key = buildDatasetKey(dataset);
-      return `<option value="${key}">${label}</option>`;
-    })
-    .join("");
+  setSelectOptions(
+    elements.datasetSelect,
+    datasets.map((dataset) => ({
+      value: buildDatasetKey(dataset),
+      label: buildDatasetLabel(dataset),
+    }))
+  );
 
   elements.datasetSelect.disabled = false;
   const firstKey = elements.datasetSelect.value;
   if (firstKey) {
     await loadDatasetByKey(firstKey);
   }
+}
+
+function refreshDatasetOptions() {
+  if (!elements.datasetSelect || !state.currentCategory) return;
+  const datasets = getDatasetsForCategory(state.currentCategory);
+  if (!datasets.length) {
+    elements.datasetSelect.innerHTML = "";
+    elements.datasetSelect.disabled = true;
+    return;
+  }
+
+  setSelectOptions(
+    elements.datasetSelect,
+    datasets.map((dataset) => ({
+      value: buildDatasetKey(dataset),
+      label: buildDatasetLabel(dataset),
+    })),
+    state.currentDatasetKey
+  );
+  elements.datasetSelect.disabled = false;
 }
 
 function getDatasetsForCategory(category) {
@@ -171,9 +332,20 @@ function getDatasetsForCategory(category) {
 function buildDatasetLabel(dataset) {
   const parts = [dataset.reportDate];
   if (dataset.title) {
-    parts.push(dataset.title);
+    parts.push(translateDatasetTitle(dataset.title));
   }
   return parts.join(" · ");
+}
+
+function translateDatasetTitle(title) {
+  if (!title) {
+    return t(DEFAULT_DATASET_TITLE_KEY);
+  }
+  const key = DATASET_TITLE_KEYS[title];
+  if (key) {
+    return t(key);
+  }
+  return title;
 }
 
 async function loadDatasetByKey(key) {
@@ -184,11 +356,11 @@ async function loadDatasetByKey(key) {
 
   const dataset = state.manifest.find((entry) => buildDatasetKey(entry) === key);
   if (!dataset) {
-    showPlaceholder("无法找到所选数据集。");
+    showPlaceholder(t("placeholders.datasetNotFound"));
     return;
   }
 
-  showPlaceholder("正在加载表格…");
+  showPlaceholder(t("placeholders.loadingTable"));
 
   const { headers, rows } = await fetchCsvDataset(dataset.csv);
   const thinkIndex = headers.findIndex(
@@ -236,7 +408,7 @@ async function fetchCsvDataset(path) {
   const promise = (async () => {
     const response = await fetch(path, { cache: "no-cache" });
     if (!response.ok) {
-      throw new Error(`无法加载 CSV：${path}`);
+      throw new Error(t("errors.csvLoad", { path }, `Unable to load CSV: ${path}`));
     }
     const text = await response.text();
     return parseCsv(text);
@@ -294,7 +466,7 @@ function parseCsvLine(line, expectedLength) {
 
 function applyFiltersAndRender() {
   let rows = state.rows.slice();
-  const query = state.searchQuery.toLowerCase();
+  const query = state.searchQuery.toLocaleLowerCase(state.locale);
 
   if (state.hasThinkColumn) {
     if (state.inferenceFilter === "think") {
@@ -306,7 +478,11 @@ function applyFiltersAndRender() {
 
   if (query) {
     rows = rows.filter((row) =>
-      row.cells.some((cell) => String(cell ?? "").toLowerCase().includes(query))
+      row.cells.some((cell) =>
+        String(cell ?? "")
+          .toLocaleLowerCase(state.locale)
+          .includes(query)
+      )
     );
   }
 
@@ -334,14 +510,16 @@ function sortRows(rows, columnIndex, direction) {
       const numA = parseSortableNumber(valueA);
       const numB = parseSortableNumber(valueB);
 
-      if (numA === null && numB === null) return valueA.localeCompare(valueB, "zh-CN");
+      if (numA === null && numB === null) {
+        return state.collator.compare(String(valueA), String(valueB));
+      }
       if (numA === null) return 1;
       if (numB === null) return -1;
       if (numA === numB) return 0;
       return numA > numB ? multiplier : -multiplier;
     }
 
-    return valueA.localeCompare(valueB, "zh-CN") * multiplier;
+    return state.collator.compare(String(valueA), String(valueB)) * multiplier;
   });
 
   return sorted;
@@ -371,12 +549,12 @@ function renderTable() {
   container.innerHTML = "";
 
   if (!state.headers.length) {
-    showPlaceholder("请选择数据集开始浏览。");
+    showPlaceholder(t("placeholders.selectDataset"));
     return;
   }
 
   if (!state.filteredRows.length) {
-    showPlaceholder("当前筛选条件下没有匹配的记录。");
+    showPlaceholder(t("placeholders.noMatches"));
     return;
   }
 
@@ -418,7 +596,7 @@ function renderTable() {
         td.classList.add("think-model");
         const badge = document.createElement("span");
         badge.className = "think-badge";
-        badge.textContent = "推理";
+        badge.textContent = t("table.reasoningBadge");
         td.appendChild(badge);
       }
 
@@ -465,15 +643,24 @@ function updateMeta(dataset = null) {
 
   const total = state.rows.length;
   const filtered = state.filteredRows.length;
-  const categoryLabel = CATEGORY_LABELS[dataset.category] ?? dataset.category;
+  const categoryLabel = getCategoryLabel(dataset.category);
   const datasetsForCategory = getDatasetsForCategory(dataset.category);
   const reportCount = datasetsForCategory.length;
+  const datasetTitle = dataset.title
+    ? translateDatasetTitle(dataset.title)
+    : t(DEFAULT_DATASET_TITLE_KEY);
+  const datasetLabel = `${dataset.reportDate} · ${datasetTitle}`;
+
+  const recordsLabel =
+    filtered !== total
+      ? t("meta.records.withTotal", { count: filtered, total })
+      : t("meta.records.single", { count: filtered });
 
   meta.innerHTML = `
-    <span><strong>类别：</strong>${categoryLabel}</span>
-    <span><strong>数据集：</strong>${dataset.reportDate} · ${dataset.title || "主要数据"}</span>
-    <span><strong>记录数：</strong>${filtered}${filtered !== total ? ` / ${total}` : ""}</span>
-    <span><strong>该类别数据集：</strong>${reportCount} 个</span>
+    <span>${t("meta.category", { label: categoryLabel })}</span>
+    <span>${t("meta.dataset", { label: datasetLabel })}</span>
+    <span>${recordsLabel}</span>
+    <span>${t("meta.datasetCount", { count: reportCount })}</span>
   `;
   meta.classList.add("active");
 }
