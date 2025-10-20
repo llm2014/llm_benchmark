@@ -135,6 +135,154 @@ const TRANSLATIONS = {
     "zh-CN": "各语言平均成绩",
     "en-US": "Average score by language",
   },
+  "table.header.reportDate": {
+    "zh-CN": "报告日期",
+    "en-US": "Report Date",
+  },
+  "table.header.model": {
+    "zh-CN": "模型",
+    "en-US": "Model",
+  },
+  "table.header.rawScore": {
+    "zh-CN": "原始分数",
+    "en-US": "Raw Score",
+  },
+  "table.header.rawMedian": {
+    "zh-CN": "原始中位",
+    "en-US": "Raw Median",
+  },
+  "table.header.runtimeErrors": {
+    "zh-CN": "运行异常",
+    "en-US": "Runtime Errors",
+  },
+  "table.header.syntaxErrors": {
+    "zh-CN": "语法错误",
+    "en-US": "Syntax Errors",
+  },
+  "table.header.zeroRate": {
+    "zh-CN": "0分率",
+    "en-US": "Zero-score Rate",
+  },
+  "table.header.totalErrors": {
+    "zh-CN": "总异常",
+    "en-US": "Total Errors",
+  },
+  "table.header.maxScore": {
+    "zh-CN": "极限分数",
+    "en-US": "Max Score",
+  },
+  "table.header.medianScore": {
+    "zh-CN": "中位分数",
+    "en-US": "Median Score",
+  },
+  "table.header.medianGap": {
+    "zh-CN": "中位差距",
+    "en-US": "Median Gap",
+  },
+  "table.header.avgTimeSeconds": {
+    "zh-CN": "平均耗时(秒)",
+    "en-US": "Avg Time (s)",
+  },
+  "table.header.avgLines": {
+    "zh-CN": "平均代码行",
+    "en-US": "Avg Lines of Code",
+  },
+  "table.header.costCny": {
+    "zh-CN": "成本(元)",
+    "en-US": "Cost (CNY)",
+  },
+  "table.header.notes": {
+    "zh-CN": "备注",
+    "en-US": "Notes",
+  },
+  "table.header.usageCostCny": {
+    "zh-CN": "使用成本(元)",
+    "en-US": "Usage Cost (CNY)",
+  },
+  "table.header.errorsAfterFix": {
+    "zh-CN": "修复后异常",
+    "en-US": "Errors After Fix",
+  },
+  "table.header.adjustedMaxScore": {
+    "zh-CN": "修正极限",
+    "en-US": "Max Score After Fix",
+  },
+  "table.header.scoreDelta": {
+    "zh-CN": "分差",
+    "en-US": "Score Gap",
+  },
+  "table.header.releaseDate": {
+    "zh-CN": "发布时间",
+    "en-US": "Release Date",
+  },
+  "table.header.change": {
+    "zh-CN": "变更",
+    "en-US": "Changed",
+  },
+  "table.header.multiTurnScore": {
+    "zh-CN": "多轮总分",
+    "en-US": "Multi-turn Score",
+  },
+  "table.header.avgTokens": {
+    "zh-CN": "平均Token",
+    "en-US": "Avg Tokens",
+  },
+  "table.header.avgTimePerSecond": {
+    "zh-CN": "平均耗时/s",
+    "en-US": "Avg Time (sec.)",
+  },
+  "table.header.avgLength": {
+    "zh-CN": "平均长度",
+    "en-US": "Avg Length",
+  },
+  "table.header.avgLengthChars": {
+    "zh-CN": "平均长度(字)",
+    "en-US": "Avg Length (chars)",
+  },
+  "table.header.errorRate": {
+    "zh-CN": "异常率",
+    "en-US": "Error Rate",
+  },
+  "table.header.totalRounds": {
+    "zh-CN": "总轮数",
+    "en-US": "Total Rounds",
+  },
+  "table.header.cost": {
+    "zh-CN": "成本",
+    "en-US": "Cost",
+  },
+  "table.header.pricePerMillion": {
+    "zh-CN": "价格(元/百万)",
+    "en-US": "Price (CNY / 1M tokens)",
+  },
+  "table.header.finalUnavailable": {
+    "zh-CN": "最终不可用",
+    "en-US": "Final Unavailable",
+  },
+  "table.header.testCostCny": {
+    "zh-CN": "测试成本(元)",
+    "en-US": "Test Cost (CNY)",
+  },
+  "table.header.testTime": {
+    "zh-CN": "测试时间",
+    "en-US": "Test Time",
+  },
+  "table.header.percentScale": {
+    "zh-CN": "百分制",
+    "en-US": "Percent",
+  },
+  "table.header.changeSinceLast": {
+    "zh-CN": "较上次变更",
+    "en-US": "Changed",
+  },
+  "table.header.firstRoundScore": {
+    "zh-CN": "首轮总分",
+    "en-US": "First-round Score",
+  },
+  "table.header.usageCost": {
+    "zh-CN": "使用成本",
+    "en-US": "Usage Cost",
+  },
   "table.reasoningBadge": {
     "zh-CN": "推理",
     "en-US": "Reasoning",
@@ -164,12 +312,8 @@ const TRANSLATIONS = {
     "en-US": "Switch site language",
   },
   "language.switcher.toggle": {
-    "zh-CN": "切换为{{target}}",
+    "zh-CN": "切换为 {{target}}",
     "en-US": "Switch to {{target}}",
-  },
-  "footer.note": {
-    "zh-CN": "Vibe Coding by Codex with 199K Tokens",
-    "en-US": "Vibe Coding by Codex with 199K Tokens",
   },
 };
 

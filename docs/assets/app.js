@@ -15,6 +15,46 @@ const DATASET_TITLE_KEYS = {
 
 const DEFAULT_DATASET_TITLE_KEY = "dataset.title.default";
 
+const HEADER_TRANSLATIONS = {
+  报告日期: "table.header.reportDate",
+  模型: "table.header.model",
+  原始分数: "table.header.rawScore",
+  原始中位: "table.header.rawMedian",
+  运行异常: "table.header.runtimeErrors",
+  语法错误: "table.header.syntaxErrors",
+  "0分率": "table.header.zeroRate",
+  总异常: "table.header.totalErrors",
+  极限分数: "table.header.maxScore",
+  中位分数: "table.header.medianScore",
+  中位差距: "table.header.medianGap",
+  "平均耗时(秒)": "table.header.avgTimeSeconds",
+  平均代码行: "table.header.avgLines",
+  "成本(元)": "table.header.costCny",
+  备注: "table.header.notes",
+  "使用成本(元)": "table.header.usageCostCny",
+  修复后异常: "table.header.errorsAfterFix",
+  修正极限: "table.header.adjustedMaxScore",
+  分差: "table.header.scoreDelta",
+  发布时间: "table.header.releaseDate",
+  变更: "table.header.change",
+  多轮总分: "table.header.multiTurnScore",
+  平均Token: "table.header.avgTokens",
+  "平均耗时/s": "table.header.avgTimePerSecond",
+  平均长度: "table.header.avgLength",
+  "平均长度(字)": "table.header.avgLengthChars",
+  异常率: "table.header.errorRate",
+  总轮数: "table.header.totalRounds",
+  成本: "table.header.cost",
+  "价格(元/百万)": "table.header.pricePerMillion",
+  最终不可用: "table.header.finalUnavailable",
+  "测试成本(元)": "table.header.testCostCny",
+  测试时间: "table.header.testTime",
+  百分制: "table.header.percentScale",
+  较上次变更: "table.header.changeSinceLast",
+  首轮总分: "table.header.firstRoundScore",
+  使用成本: "table.header.usageCost",
+};
+
 const CATEGORY_ORDER = ["code", "logic", "vision"];
 
 const state = {
@@ -233,6 +273,14 @@ function buildCategoryOptions(preserveSelection = false) {
 
 function getCategoryLabel(category) {
   return t(`category.${category}`, undefined, category);
+}
+
+function getHeaderLabel(header) {
+  const key = HEADER_TRANSLATIONS[header];
+  if (!key) {
+    return header;
+  }
+  return t(key);
 }
 
 function bindEventHandlers() {
@@ -564,7 +612,7 @@ function renderTable() {
 
   state.headers.forEach((header, index) => {
     const th = document.createElement("th");
-    th.textContent = header;
+    th.textContent = getHeaderLabel(header);
     th.addEventListener("click", () => toggleSort(index));
 
     const isActive = state.sort.columnIndex === index;
