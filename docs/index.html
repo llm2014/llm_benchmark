@@ -16,6 +16,7 @@
         基于个人私有题目的大模型长期跟踪测评项目(<a href="https://github.com/llm2014/llm_benchmark/">GitHub</a>)
       </p>
     </header>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <main>
       <section class="controls">
         <div class="control">
@@ -43,9 +44,24 @@
           <div class="placeholder" role="status">请选择数据集开始浏览。</div>
         </div>
       </section>
+
+      <section class="chart-section" id="chartSection" style="display: none;">
+        <div class="chart-controls">
+          <div class="control">
+            <label for="yAxisSelect" id="yAxisLabel">纵轴指标</label>
+            <select id="yAxisSelect" aria-label="">
+              <option value="cost">测试成本</option>
+              <option value="time">平均耗时</option>
+            </select>
+          </div>
+        </div>
+        <div class="chart-container">
+          <canvas id="benchmarkChart"></canvas>
+        </div>
+      </section>
     </main>
     <footer class="page-footer">
-      <small>Vibe Coding by Codex with 280K Tokens</small>
+      <small>Vibe Coding by Codex with 294K Tokens</small>
     </footer>
 
     <script src="assets/app.js" type="module"></script>

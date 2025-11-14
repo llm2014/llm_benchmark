@@ -89,7 +89,13 @@ const elements = {
   pageSubtitle: document.getElementById("pageSubtitle"),
   languageToggle: document.getElementById("languageToggle"),
   footerNote: document.getElementById("footerNote"),
+  chartSection: document.getElementById("chartSection"),
+  chartCanvas: document.getElementById("benchmarkChart"),
+  yAxisSelect: document.getElementById("yAxisSelect"),
+  yAxisLabel: document.getElementById("yAxisLabel"),
 };
+
+let chartInstance = null;
 
 initializeLocaleUi();
 
@@ -174,6 +180,21 @@ function updateStaticCopy() {
   if (elements.searchInput) {
     elements.searchInput.setAttribute("aria-label", t("controls.search.aria"));
     elements.searchInput.placeholder = t("controls.search.placeholder");
+  }
+  if (elements.yAxisLabel) {
+    elements.yAxisLabel.textContent = t("chart.yAxis.label");
+  }
+  if (elements.yAxisSelect) {
+    elements.yAxisSelect.setAttribute("aria-label", t("chart.yAxis.aria"));
+    const currentValue = elements.yAxisSelect.value || "cost";
+    setSelectOptions(
+      elements.yAxisSelect,
+      [
+        { value: "cost", label: t("chart.yAxis.option.cost") },
+        { value: "time", label: t("chart.yAxis.option.time") },
+      ],
+      currentValue
+    );
   }
   if (elements.footerNote) {
     elements.footerNote.textContent = t("footer.note");
@@ -304,6 +325,12 @@ function bindEventHandlers() {
     state.searchQuery = (event.target.value || "").trim();
     applyFiltersAndRender();
   });
+
+  if (elements.yAxisSelect) {
+    elements.yAxisSelect.addEventListener("change", () => {
+      renderChart();
+    });
+  }
 }
 
 async function handleCategoryChange(category) {
@@ -541,6 +568,8 @@ function applyFiltersAndRender() {
   state.filteredRows = rows;
   renderTable();
   updateMeta();
+  updateChartVisibility();
+  renderChart();
 }
 
 function sortRows(rows, columnIndex, direction) {
@@ -716,4 +745,169 @@ function updateMeta(dataset = null) {
 function showPlaceholder(message) {
   const container = elements.tableContainer;
   container.innerHTML = `<div class="placeholder" role="status">${message}</div>`;
+}
+
+function updateChartVisibility() {
+  if (!elements.chartSection) return;
+
+  const isCodeOrReasoning = state.currentCategory === "code" || state.currentCategory === "logic";
+
+  if (isCodeOrReasoning && state.filteredRows.length > 0) {
+    elements.chartSection.style.display = "block";
+  } else {
+    elements.chartSection.style.display = "none";
+  }
+}
+
+function renderChart() {
+  if (!elements.chartCanvas || !elements.chartSection) return;
+
+  const isCodeOrReasoning = state.currentCategory === "code" || state.currentCategory === "logic";
+  if (!isCodeOrReasoning || state.filteredRows.length === 0) {
+    if (chartInstance) {
+      chartInstance.destroy();
+      chartInstance = null;
+    }
+    return;
+  }
+
+  // Use the raw header names from CSV (not translated)
+  const xAxisColumnName = state.currentCategory === "code" ? "多轮总分" : "极限分数";
+  const yAxisType = elements.yAxisSelect ? elements.yAxisSelect.value : "cost";
+  const yAxisColumnName = yAxisType === "cost" ? "测试成本(元)" : "平均耗时(秒)";
+
+  // Get translated labels for chart axes
+  const xAxisLabel = state.currentCategory === "code"
+    ? t("chart.axis.multiTurnScore")
+    : t("chart.axis.maxScore");
+  const yAxisLabel = yAxisType === "cost"
+    ? t("chart.axis.testCost")
+    : t("chart.axis.avgTime");
+
+  // Find column indices by searching for the key that translates to the desired header
+  let xAxisIndex = -1;
+  let yAxisIndex = -1;
+  let modelIndex = -1;
+
+  for (let i = 0; i < state.headers.length; i++) {
+    const header = state.headers[i];
+    if (header === xAxisColumnName) xAxisIndex = i;
+    if (header === yAxisColumnName) yAxisIndex = i;
+    if (header === "模型") modelIndex = i;
+  }
+
+  if (xAxisIndex === -1 || yAxisIndex === -1 || modelIndex === -1) {
+    if (chartInstance) {
+      chartInstance.destroy();
+      chartInstance = null;
+    }
+    return;
+  }
+
+  const chartData = state.filteredRows
+    .map((row) => {
+      const xValue = parseSortableNumber(row.cells[xAxisIndex]);
+      const yValue = parseSortableNumber(row.cells[yAxisIndex]);
+      const modelName = row.cells[modelIndex] || "Unknown";
+
+      if (xValue === null || yValue === null) return null;
+
+      return {
+        x: xValue,
+        y: yValue,
+        label: modelName,
+        isThink: row.isThink,
+      };
+    })
+    .filter((item) => item !== null);
+
+  if (chartData.length === 0) {
+    if (chartInstance) {
+      chartInstance.destroy();
+      chartInstance = null;
+    }
+    return;
+  }
+
+  const ctx = elements.chartCanvas.getContext("2d");
+
+  if (chartInstance) {
+    chartInstance.destroy();
+  }
+
+  chartInstance = new Chart(ctx, {
+    type: "scatter",
+    data: {
+      datasets: [
+        {
+          label: "模型性能",
+          data: chartData,
+          backgroundColor: (context) => {
+            const point = context.raw;
+            return point && point.isThink ? "rgba(239, 68, 68, 0.6)" : "rgba(99, 102, 241, 0.6)";
+          },
+          borderColor: (context) => {
+            const point = context.raw;
+            return point && point.isThink ? "rgba(220, 38, 38, 1)" : "rgba(99, 102, 241, 1)";
+          },
+          borderWidth: 2,
+          pointRadius: 6,
+          pointHoverRadius: 8,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false,
+        },
+        tooltip: {
+          callbacks: {
+            label: (context) => {
+              const point = context.raw;
+              return [
+                `${t("chart.tooltip.model")}: ${point.label}`,
+                `${xAxisLabel}: ${point.x}`,
+                `${yAxisLabel}: ${point.y}`,
+              ];
+            },
+          },
+        },
+      },
+      scales: {
+        x: {
+          title: {
+            display: true,
+            text: xAxisLabel,
+            font: {
+              size: 14,
+              weight: "600",
+            },
+          },
+          ticks: {
+            font: {
+              size: 12,
+            },
+          },
+        },
+        y: {
+          title: {
+            display: true,
+            text: yAxisLabel,
+            font: {
+              size: 14,
+              weight: "600",
+            },
+          },
+          ticks: {
+            font: {
+              size: 12,
+            },
+          },
+        },
+      },
+    },
+  });
 }

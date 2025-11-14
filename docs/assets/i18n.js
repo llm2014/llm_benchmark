@@ -315,6 +315,42 @@ const TRANSLATIONS = {
     "zh-CN": "切换为 {{target}}",
     "en-US": "Switch to {{target}}",
   },
+  "chart.yAxis.label": {
+    "zh-CN": "纵轴指标",
+    "en-US": "Y-Axis Metric",
+  },
+  "chart.yAxis.aria": {
+    "zh-CN": "选择纵轴指标",
+    "en-US": "Select Y-axis metric",
+  },
+  "chart.yAxis.option.cost": {
+    "zh-CN": "测试成本",
+    "en-US": "Test Cost",
+  },
+  "chart.yAxis.option.time": {
+    "zh-CN": "平均耗时",
+    "en-US": "Average Time",
+  },
+  "chart.axis.multiTurnScore": {
+    "zh-CN": "多轮总分",
+    "en-US": "Multi-turn Score",
+  },
+  "chart.axis.maxScore": {
+    "zh-CN": "极限分数",
+    "en-US": "Max Score",
+  },
+  "chart.axis.testCost": {
+    "zh-CN": "测试成本(元)",
+    "en-US": "Test Cost (CNY)",
+  },
+  "chart.axis.avgTime": {
+    "zh-CN": "平均耗时(秒)",
+    "en-US": "Average Time (seconds)",
+  },
+  "chart.tooltip.model": {
+    "zh-CN": "模型",
+    "en-US": "Model",
+  },
 };
 
 const listeners = new Set();
