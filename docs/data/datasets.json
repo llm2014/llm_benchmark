@@ -223,6 +223,13 @@
       "tableIndex": 0,
       "title": "月榜",
       "csv": "data/logic/2025-11.csv"
+    },
+    {
+      "category": "logic",
+      "reportDate": "2025-12",
+      "tableIndex": 0,
+      "title": "月榜",
+      "csv": "data/logic/2025-12.csv"
     }
   ]
 }
