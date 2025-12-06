@@ -57,6 +57,20 @@
       "csv": "data/code/2025-11-lang.csv"
     },
     {
+      "category": "code",
+      "reportDate": "2025-12",
+      "tableIndex": 0,
+      "title": "月榜",
+      "csv": "data/code/2025-12.csv"
+    },
+    {
+      "category": "code",
+      "reportDate": "2025-12",
+      "tableIndex": 1,
+      "title": "各语言平均成绩",
+      "csv": "data/code/2025-12-lang.csv"
+    },
+    {
       "category": "vision",
       "reportDate": "2025-05",
       "tableIndex": 0,
