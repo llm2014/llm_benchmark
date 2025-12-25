@@ -71,6 +71,20 @@
       "csv": "data/code/2025-12-lang.csv"
     },
     {
+      "category": "code",
+      "reportDate": "2026-01",
+      "tableIndex": 0,
+      "title": "月榜",
+      "csv": "data/code/2026-01.csv"
+    },
+    {
+      "category": "code",
+      "reportDate": "2026-01",
+      "tableIndex": 1,
+      "title": "各语言平均成绩",
+      "csv": "data/code/2026-01-lang.csv"
+    },
+    {
       "category": "vision",
       "reportDate": "2025-05",
       "tableIndex": 0,
@@ -244,6 +258,13 @@
       "tableIndex": 0,
       "title": "月榜",
       "csv": "data/logic/2025-12.csv"
+    },
+    {
+      "category": "logic",
+      "reportDate": "2026-01",
+      "tableIndex": 0,
+      "title": "月榜",
+      "csv": "data/logic/2026-01.csv"
     }
   ]
 }
