@@ -115,6 +115,10 @@ const TRANSLATIONS = {
     "zh-CN": "代码",
     "en-US": "Code",
   },
+  "category.code_v3": {
+    "zh-CN": "代码 v3",
+    "en-US": "Code v3",
+  },
   "category.logic": {
     "zh-CN": "推理",
     "en-US": "Logic",
