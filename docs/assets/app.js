@@ -55,7 +55,7 @@ const HEADER_TRANSLATIONS = {
   使用成本: "table.header.usageCost",
 };
 
-const CATEGORY_ORDER = ["code", "code_v3", "logic", "vision"];
+const CATEGORY_ORDER = ["logic", "code", "code_v3", "vision"];
 
 const state = {
   locale: getCurrentLocale(),
