@@ -4,7 +4,9 @@
 "gpt-5.2-codex(high)",7,"9","10",26,"1"
 "Opus 4.5",8,13,"13",34,"0"
 "Sonnet 4.5",13,20,"30",63,"1"
-"MiniMax M2.5","FAILED(8/12)","25","WIP","INVALID","1"
+"Seed-2.0-Code(high)","FAILED(8/12)","35","30","INVALID","1"
 "MiniMax M2.1","FAILED(2/12)","26","44","INVALID","1"
 "GLM-4.7","FAILED(2/12)","FAILED(3/9)","FAILED(5/11)","INVALID","1"
+"MiniMax M2.5","FAILED(8/12)","25","WIP","INVALID","1"
 "GLM-5","WIP","WIP","WIP","WIP","1"
+
