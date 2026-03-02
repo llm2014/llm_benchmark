@@ -100,7 +100,7 @@
     },
     {
       "category": "code_v3",
-      "reportDate": "2026-01",
+      "reportDate": "2026-03",
       "tableIndex": 0,
       "title": "月榜",
       "csv": "data/code_v3/2026-01.csv"
@@ -293,6 +293,13 @@
       "tableIndex": 0,
       "title": "月榜",
       "csv": "data/logic/2026-02.csv"
+    },
+    {
+      "category": "logic",
+      "reportDate": "2026-03",
+      "tableIndex": 0,
+      "title": "月榜",
+      "csv": "data/logic/2026-03.csv"
     }
   ]
 }
