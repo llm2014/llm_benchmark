@@ -10,4 +10,4 @@
 "Kimi K2.5(Think)","FAILED(2/12)","37","32","INVALID(>69)","0","OpenCode v1.2.6","1"
 "MiniMax M2.1","FAILED(2/12)","26","44","INVALID(>70)","1","Claude Code v2.0.76","1"
 "GLM-4.7","FAILED(2/12)","FAILED(3/9)","FAILED(5/11)","INVALID","0","Claude Code v2.1.39","1"
-"GPT-5.4(high)","9","Pending","Pending","Pending(>9)","1","Codex CLI (v0.111.0)","1"
+"GPT-5.4(high)","9","7","Pending","Pending(>16)","1","Codex CLI (v0.111.0)","1"
