@@ -300,6 +300,13 @@
       "tableIndex": 0,
       "title": "月榜",
       "csv": "data/logic/2026-03.csv"
+    },
+    {
+      "category": "logic",
+      "reportDate": "2026-04",
+      "tableIndex": 0,
+      "title": "月榜",
+      "csv": "data/logic/2026-04.csv"
     }
   ]
 }
