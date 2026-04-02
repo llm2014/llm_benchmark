@@ -6,6 +6,7 @@
 "Opus 4.5",8,13,"13",34,"4","Claude Code v2.0.64","0"
 "GLM-5.1","19","13","15","47","3","Claude Code v2.1.85","1"
 "Sonnet 4.5",13,20,"30",63,"0","Claude Code v2.0.61","1"
+"Qwen3.6-Plus","FAILED(5/12)","13","29","INVALID(>42)","0","Claude Code v2.1.86","1"
 "GLM-5","FAILED(7/12)","36","25","INVALID(>61)","0","OpenCode v1.2.1","1"
 "Seed-2.0-Code(high)","FAILED(7/12)","35","30","INVALID(>65)","1","Trae 3.3.31","1"
 "MiniMax M2.5","FAILED(7/12)","25","41","INVALID(>66)","0","Claude Code v2.1.39","1"
@@ -13,4 +14,3 @@
 "MiniMax M2.1","FAILED(2/12)","26","44","INVALID(>70)","1","Claude Code v2.0.76","1"
 "GLM-4.7","FAILED(2/12)","FAILED(3/9)","FAILED(5/11)","INVALID","0","Claude Code v2.1.39","1"
 "MiMo-V2-Pro","Skip","Skip","47",">47","0","OpenCode v1.2.27","1"
-"Qwen3.6-Plus","FAILED(5/12)","13","Pending","INVALID(>13)","0","Claude Code v2.1.86","1"
