@@ -56,6 +56,8 @@ const HEADER_TRANSLATIONS = {
 };
 
 const CATEGORY_ORDER = ["logic", "code", "code_v3", "vision"];
+const DEFAULT_INFERENCE_FILTER = "all";
+const VALID_INFERENCE_FILTERS = new Set(["all", "think", "non-think"]);
 
 const state = {
   locale: getCurrentLocale(),
@@ -67,7 +69,7 @@ const state = {
   rows: [],
   filteredRows: [],
   searchQuery: "",
-  inferenceFilter: "all",
+  inferenceFilter: DEFAULT_INFERENCE_FILTER,
   hasThinkColumn: false,
   sort: { columnIndex: null, direction: null },
 };
@@ -96,6 +98,7 @@ const elements = {
 };
 
 let chartInstance = null;
+let isApplyingHashState = false;
 
 initializeLocaleUi();
 
@@ -229,6 +232,118 @@ function setSelectOptions(select, options, selectedValue) {
   }
 }
 
+function normalizeInferenceFilter(value) {
+  return VALID_INFERENCE_FILTERS.has(value) ? value : DEFAULT_INFERENCE_FILTER;
+}
+
+function parseHashState(rawHash = window.location.hash) {
+  const hash = String(rawHash || "").replace(/^#/, "");
+  const params = new URLSearchParams(hash);
+
+  return {
+    hasParams: hash.length > 0,
+    category: (params.get("category") || "").trim(),
+    datasetKey: (params.get("dataset") || "").trim(),
+    inferenceFilter: normalizeInferenceFilter((params.get("inference") || "").trim()),
+    searchQuery: (params.get("search") || "").trim(),
+  };
+}
+
+function resolveCategoryFromHash(category, datasetKey) {
+  if (datasetKey) {
+    const dataset = state.manifest.find((entry) => buildDatasetKey(entry) === datasetKey);
+    if (dataset) return dataset.category;
+  }
+
+  if (!category) return null;
+  const exists = state.manifest.some((entry) => entry.category === category);
+  return exists ? category : null;
+}
+
+function isDatasetInCategory(datasetKey, category) {
+  if (!datasetKey || !category) return false;
+  return state.manifest.some(
+    (entry) => entry.category === category && buildDatasetKey(entry) === datasetKey
+  );
+}
+
+function buildHashFromState() {
+  const params = new URLSearchParams();
+  if (state.currentCategory) {
+    params.set("category", state.currentCategory);
+  }
+  if (state.currentDatasetKey) {
+    params.set("dataset", state.currentDatasetKey);
+  }
+  if (state.inferenceFilter && state.inferenceFilter !== DEFAULT_INFERENCE_FILTER) {
+    params.set("inference", state.inferenceFilter);
+  }
+  if (state.searchQuery) {
+    params.set("search", state.searchQuery);
+  }
+  return params.toString();
+}
+
+function syncHashFromState() {
+  if (isApplyingHashState) return;
+
+  const nextHash = buildHashFromState();
+  const currentHash = window.location.hash.replace(/^#/, "");
+  if (nextHash === currentHash) return;
+
+  const basePath = `${window.location.pathname}${window.location.search}`;
+  const nextUrl = nextHash ? `${basePath}#${nextHash}` : basePath;
+  window.history.replaceState(null, "", nextUrl);
+}
+
+async function applyStateFromHash(rawHash = window.location.hash) {
+  if (!state.manifest.length) return false;
+
+  const hashState = parseHashState(rawHash);
+  if (!hashState.hasParams) return false;
+
+  const targetCategory = resolveCategoryFromHash(hashState.category, hashState.datasetKey);
+  if (!targetCategory) return false;
+
+  const targetDatasetKey = isDatasetInCategory(hashState.datasetKey, targetCategory)
+    ? hashState.datasetKey
+    : null;
+
+  isApplyingHashState = true;
+  try {
+    if (state.currentCategory !== targetCategory) {
+      if (elements.categorySelect.value !== targetCategory) {
+        elements.categorySelect.value = targetCategory;
+      }
+      await handleCategoryChange(targetCategory, { preferredDatasetKey: targetDatasetKey });
+    } else if (!state.currentDatasetKey) {
+      await handleCategoryChange(targetCategory, { preferredDatasetKey: targetDatasetKey });
+    } else if (targetDatasetKey && targetDatasetKey !== state.currentDatasetKey) {
+      if (elements.datasetSelect.value !== targetDatasetKey) {
+        elements.datasetSelect.value = targetDatasetKey;
+      }
+      await loadDatasetByKey(targetDatasetKey);
+    }
+
+    const nextInference = state.hasThinkColumn
+      ? normalizeInferenceFilter(hashState.inferenceFilter)
+      : DEFAULT_INFERENCE_FILTER;
+    state.inferenceFilter = nextInference;
+    elements.inferenceFilter.value = nextInference;
+
+    const nextSearch = hashState.searchQuery;
+    state.searchQuery = nextSearch;
+    elements.searchInput.value = nextSearch;
+
+    applyFiltersAndRender();
+  } finally {
+    isApplyingHashState = false;
+  }
+
+  syncHashFromState();
+  return true;
+}
+
 async function init() {
   showPlaceholder(t("placeholders.loadingData"));
   const manifest = await fetchManifest();
@@ -241,10 +356,14 @@ async function init() {
   buildCategoryOptions();
   bindEventHandlers();
 
-  const firstCategory = elements.categorySelect.value;
-  if (firstCategory) {
-    await handleCategoryChange(firstCategory);
+  const appliedFromHash = await applyStateFromHash(window.location.hash);
+  if (!appliedFromHash) {
+    const firstCategory = elements.categorySelect.value;
+    if (firstCategory) {
+      await handleCategoryChange(firstCategory);
+    }
   }
+  syncHashFromState();
 }
 
 async function fetchManifest() {
@@ -308,22 +427,26 @@ function bindEventHandlers() {
   elements.categorySelect.addEventListener("change", async (event) => {
     const category = event.target.value;
     await handleCategoryChange(category);
+    syncHashFromState();
   });
 
   elements.datasetSelect.addEventListener("change", async (event) => {
     const key = event.target.value;
     if (!key) return;
     await loadDatasetByKey(key);
+    syncHashFromState();
   });
 
   elements.inferenceFilter.addEventListener("change", (event) => {
     state.inferenceFilter = event.target.value;
     applyFiltersAndRender();
+    syncHashFromState();
   });
 
   elements.searchInput.addEventListener("input", (event) => {
     state.searchQuery = (event.target.value || "").trim();
     applyFiltersAndRender();
+    syncHashFromState();
   });
 
   if (elements.yAxisSelect) {
@@ -331,18 +454,34 @@ function bindEventHandlers() {
       renderChart();
     });
   }
+
+  window.addEventListener("hashchange", () => {
+    applyStateFromHash(window.location.hash)
+      .then(async (appliedFromHash) => {
+        if (appliedFromHash) return;
+        const firstCategory = elements.categorySelect.options[0]?.value || null;
+        if (!firstCategory) return;
+        elements.categorySelect.value = firstCategory;
+        await handleCategoryChange(firstCategory);
+        syncHashFromState();
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  });
 }
 
-async function handleCategoryChange(category) {
+async function handleCategoryChange(category, options = {}) {
+  const { preferredDatasetKey = null } = options;
   state.currentCategory = category;
   state.currentDatasetKey = null;
   elements.datasetSelect.disabled = true;
   elements.searchInput.disabled = true;
   elements.searchInput.value = "";
   state.searchQuery = "";
-  state.inferenceFilter = "all";
+  state.inferenceFilter = DEFAULT_INFERENCE_FILTER;
   state.hasThinkColumn = false;
-  elements.inferenceFilter.value = "all";
+  elements.inferenceFilter.value = DEFAULT_INFERENCE_FILTER;
   elements.inferenceFilter.disabled = true;
   state.sort = { columnIndex: null, direction: null };
   state.headers = [];
@@ -367,9 +506,14 @@ async function handleCategoryChange(category) {
   );
 
   elements.datasetSelect.disabled = false;
-  const firstKey = elements.datasetSelect.value;
-  if (firstKey) {
-    await loadDatasetByKey(firstKey);
+  let targetKey = elements.datasetSelect.value;
+  if (preferredDatasetKey && datasets.some((dataset) => buildDatasetKey(dataset) === preferredDatasetKey)) {
+    targetKey = preferredDatasetKey;
+    elements.datasetSelect.value = preferredDatasetKey;
+  }
+
+  if (targetKey) {
+    await loadDatasetByKey(targetKey);
   }
 }
 
@@ -447,8 +591,8 @@ async function loadDatasetByKey(key) {
     elements.inferenceFilter.disabled = false;
     elements.inferenceFilter.value = state.inferenceFilter;
   } else {
-    state.inferenceFilter = "all";
-    elements.inferenceFilter.value = "all";
+    state.inferenceFilter = DEFAULT_INFERENCE_FILTER;
+    elements.inferenceFilter.value = DEFAULT_INFERENCE_FILTER;
     elements.inferenceFilter.disabled = true;
   }
 
