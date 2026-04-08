@@ -112,8 +112,8 @@ const TRANSLATIONS = {
     "en-US": "Unable to load CSV: {{path}}",
   },
   "category.code": {
-    "zh-CN": "代码",
-    "en-US": "Code",
+    "zh-CN": "代码(废弃)",
+    "en-US": "Code(Outdated)",
   },
   "category.code_v3": {
     "zh-CN": "代码 v3",
