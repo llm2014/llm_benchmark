@@ -8,7 +8,7 @@
 "Sonnet 4.5",13,20,"30","Pending",">63","0","Claude Code v2.0.61","1"
 "Qwen3.6-Plus","FAILED(5/12)","13","29","FAILED(3/9)","INVALID(>42)","0","Claude Code v2.1.86","1"
 "GLM-5","FAILED(7/12)","36","25","Skip","INVALID(>61)","0","OpenCode v1.2.1","1"
-"Seed-2.0-Code(high)","FAILED(7/12)","35","30","Pending","INVALID(>65)","1","Trae 3.3.31","1"
+"Seed-2.0-Code(high)","FAILED(7/12)","35","30","FAILED(3/9)","INVALID(>65)","1","Trae 3.3.31","1"
 "MiniMax M2.5","FAILED(7/12)","25","41","FAILED(2/9)","INVALID(>66)","0","Claude Code v2.1.39","1"
 "Kimi K2.5(Think)","FAILED(2/12)","37","32","FAILED(2/9)","INVALID(>69)","0","OpenCode v1.2.6","1"
 "MiniMax M2.1","FAILED(2/12)","26","44","Skip","INVALID(>70)","1","Claude Code v2.0.76","1"
