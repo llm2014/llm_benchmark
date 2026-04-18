@@ -74,37 +74,90 @@ const MOBILE_CARD_LAYOUTS = {
   },
   logic: {
     className: "mobile-card--logic",
-    fieldGroups: [
-      ["极限分数", "百分制", "原始分数"],
-      ["中位分数", "原始中位"],
-      ["变更", "较上次变更"],
-      ["测试成本(元)", "成本(元)", "使用成本(元)", "成本"],
-      ["平均耗时(秒)", "平均耗时/s"],
-      ["发布时间", "报告日期", "测试时间"],
+    suppressDetails: true,
+    rows: [
+      {
+        className: "mobile-card-row--hero",
+        columns: 3,
+        fields: [
+          ["极限分数", "百分制", "原始分数"],
+          ["中位分数", "原始中位"],
+          { candidates: ["中位差距"], tone: "muted" },
+        ],
+      },
+      {
+        className: "mobile-card-row--secondary",
+        columns: 3,
+        fields: [
+          ["测试成本(元)", "成本(元)", "使用成本(元)", "成本"],
+          ["Token", "平均Token"],
+          ["价格(元/百万)"],
+        ],
+      },
+      {
+        className: "mobile-card-row--tertiary",
+        columns: 2,
+        fields: [
+          ["平均耗时(秒)", "平均耗时/s"],
+          ["发布时间", "报告日期", "测试时间"],
+        ],
+      },
     ],
   },
   vision: {
     className: "mobile-card--vision",
-    fieldGroups: [
-      ["极限分数", "原始分数"],
-      ["中位分数", "原始中位"],
-      ["成本", "成本(元)", "测试成本(元)"],
-      ["平均耗时/s", "平均耗时(秒)"],
-      ["平均Token", "Token"],
-      ["发布时间", "报告日期"],
+    suppressDetails: true,
+    rows: [
+      {
+        className: "mobile-card-row--hero",
+        columns: 3,
+        fields: [
+          ["极限分数", "原始分数"],
+          ["中位分数", "原始中位"],
+          { candidates: ["中位差距"], tone: "muted" },
+        ],
+      },
+      {
+        className: "mobile-card-row--secondary",
+        columns: 3,
+        fields: [
+          ["成本", "成本(元)", "测试成本(元)"],
+          ["平均Token", "Token"],
+          ["价格(元/百万)"],
+        ],
+      },
+      {
+        className: "mobile-card-row--tertiary",
+        columns: 2,
+        fields: [
+          ["平均耗时/s", "平均耗时(秒)"],
+          ["发布时间", "报告日期", "测试时间"],
+        ],
+      },
     ],
   },
   code_v3: {
     className: "mobile-card--codev3",
-    fieldGroups: [
-      ["MacOS App(C)"],
-      ["Flutter App(D)"],
-      ["Web(E)"],
-      ["Game(F)"],
-      ["总扣分"],
-      ["Unprompted"],
-      ["IDE/CLI"],
+    suppressDetails: true,
+    rows: [
+      {
+        className: "mobile-card-row--codev3-primary",
+        columns: 3,
+        fields: [["MacOS App(C)"], ["Flutter App(D)"], ["Web(E)"]],
+      },
+      {
+        className: "mobile-card-row--codev3-primary",
+        columns: 3,
+        fillWithPlaceholders: true,
+        fields: [["Game(F)"]],
+      },
+      {
+        className: "mobile-card-row--codev3-secondary",
+        columns: 2,
+        fields: [["Unprompted"], ["总扣分"]],
+      },
     ],
+    footerNoteField: ["IDE/CLI"],
   },
   default: {
     className: "mobile-card--default",
@@ -914,7 +967,19 @@ function findModelColumnIndex(headers, rows, headerIndexMap) {
 }
 
 function resolveFieldByGroup(row, fieldGroup, headerIndexMap, usedIndices) {
-  const candidates = Array.isArray(fieldGroup) ? fieldGroup : [fieldGroup];
+  let candidates;
+  let tone = "default";
+
+  if (Array.isArray(fieldGroup)) {
+    candidates = fieldGroup;
+  } else if (typeof fieldGroup === "string") {
+    candidates = [fieldGroup];
+  } else if (fieldGroup && Array.isArray(fieldGroup.candidates)) {
+    candidates = fieldGroup.candidates;
+    tone = fieldGroup.tone || tone;
+  } else {
+    candidates = [];
+  }
 
   for (const field of candidates) {
     if (!headerIndexMap.has(field)) continue;
@@ -929,6 +994,7 @@ function resolveFieldByGroup(row, fieldGroup, headerIndexMap, usedIndices) {
     return {
       label: rawHeader ? getHeaderLabel(rawHeader) : t("table.mobile.unnamedField"),
       value,
+      tone,
     };
   }
 
@@ -955,6 +1021,9 @@ function collectRemainingFields(row, usedIndices) {
 function appendCardMetric(metricsContainer, metric, isPrimary = false) {
   const item = document.createElement("div");
   item.className = isPrimary ? "mobile-card-metric mobile-card-metric--primary" : "mobile-card-metric";
+  if (metric.tone === "muted") {
+    item.classList.add("mobile-card-metric--muted");
+  }
 
   const label = document.createElement("span");
   label.className = "mobile-card-metric-label";
@@ -967,6 +1036,88 @@ function appendCardMetric(metricsContainer, metric, isPrimary = false) {
   item.appendChild(label);
   item.appendChild(value);
   metricsContainer.appendChild(item);
+}
+
+function appendStructuredMetric(rowElement, metric) {
+  const item = document.createElement("div");
+  item.className = "mobile-card-row-metric";
+  if (metric.tone === "muted") {
+    item.classList.add("mobile-card-row-metric--muted");
+  }
+
+  const label = document.createElement("span");
+  label.className = "mobile-card-row-metric-label";
+  label.textContent = metric.label;
+
+  const value = document.createElement("strong");
+  value.className = "mobile-card-row-metric-value";
+  value.textContent = metric.value;
+
+  item.appendChild(label);
+  item.appendChild(value);
+  rowElement.appendChild(item);
+}
+
+function appendStructuredPlaceholder(rowElement) {
+  const item = document.createElement("div");
+  item.className = "mobile-card-row-placeholder";
+  item.setAttribute("aria-hidden", "true");
+  rowElement.appendChild(item);
+}
+
+function renderStructuredCardRows(card, row, layout, headerIndexMap, usedIndices) {
+  if (!Array.isArray(layout.rows) || !layout.rows.length) {
+    return false;
+  }
+
+  let rendered = false;
+
+  layout.rows.forEach((rowConfig) => {
+    const fields = Array.isArray(rowConfig?.fields) ? rowConfig.fields : [];
+    const rowMetrics = [];
+
+    fields.forEach((descriptor) => {
+      const resolved = resolveFieldByGroup(row, descriptor, headerIndexMap, usedIndices);
+      if (resolved) {
+        rowMetrics.push(resolved);
+      }
+    });
+
+    if (!rowMetrics.length) return;
+
+    rendered = true;
+    const rowElement = document.createElement("div");
+    rowElement.className = "mobile-card-row";
+    if (rowConfig.className) {
+      rowElement.classList.add(rowConfig.className);
+    }
+
+    const columns = Number(rowConfig.columns) || rowMetrics.length || 1;
+    const normalizedColumns = Math.max(1, columns);
+    rowElement.style.setProperty("--mobile-card-row-columns", String(normalizedColumns));
+
+    rowMetrics.forEach((metric) => appendStructuredMetric(rowElement, metric));
+    if (rowConfig.fillWithPlaceholders && rowMetrics.length < normalizedColumns) {
+      for (let i = rowMetrics.length; i < normalizedColumns; i += 1) {
+        appendStructuredPlaceholder(rowElement);
+      }
+    }
+    card.appendChild(rowElement);
+  });
+
+  return rendered;
+}
+
+function renderCardFooterNote(card, row, layout, headerIndexMap, usedIndices) {
+  if (!layout.footerNoteField) return;
+
+  const noteMetric = resolveFieldByGroup(row, layout.footerNoteField, headerIndexMap, usedIndices);
+  if (!noteMetric) return;
+
+  const note = document.createElement("p");
+  note.className = "mobile-card-note";
+  note.textContent = `${noteMetric.label}: ${noteMetric.value}`;
+  card.appendChild(note);
 }
 
 function createMobileCard(row, layout, headerIndexMap, modelColumnIndex) {
@@ -996,36 +1147,44 @@ function createMobileCard(row, layout, headerIndexMap, modelColumnIndex) {
 
   card.appendChild(header);
 
-  const metrics = [];
-  layout.fieldGroups.forEach((group) => {
-    const resolved = resolveFieldByGroup(row, group, headerIndexMap, usedIndices);
-    if (resolved) {
-      metrics.push(resolved);
-    }
-  });
+  const hasStructuredRows = renderStructuredCardRows(card, row, layout, headerIndexMap, usedIndices);
 
-  if (!metrics.length) {
-    state.headers.forEach((header, index) => {
-      if (metrics.length >= 4 || usedIndices.has(index)) return;
-      const value = normalizeCellValue(row.cells[index]);
-      if (!value) return;
-      usedIndices.add(index);
-      metrics.push({
-        label: header ? getHeaderLabel(header) : t("table.mobile.unnamedField"),
-        value,
-      });
+  if (!hasStructuredRows) {
+    const metrics = [];
+    const metricGroups = Array.isArray(layout.fieldGroups) ? layout.fieldGroups : [];
+
+    metricGroups.forEach((group) => {
+      const resolved = resolveFieldByGroup(row, group, headerIndexMap, usedIndices);
+      if (resolved) {
+        metrics.push(resolved);
+      }
     });
+
+    if (!metrics.length) {
+      state.headers.forEach((header, index) => {
+        if (metrics.length >= 4 || usedIndices.has(index)) return;
+        const value = normalizeCellValue(row.cells[index]);
+        if (!value) return;
+        usedIndices.add(index);
+        metrics.push({
+          label: header ? getHeaderLabel(header) : t("table.mobile.unnamedField"),
+          value,
+        });
+      });
+    }
+
+    if (metrics.length) {
+      const metricsContainer = document.createElement("div");
+      metricsContainer.className = "mobile-card-metrics";
+      metrics.forEach((metric, index) => appendCardMetric(metricsContainer, metric, index === 0));
+      card.appendChild(metricsContainer);
+    }
   }
 
-  if (metrics.length) {
-    const metricsContainer = document.createElement("div");
-    metricsContainer.className = "mobile-card-metrics";
-    metrics.forEach((metric, index) => appendCardMetric(metricsContainer, metric, index === 0));
-    card.appendChild(metricsContainer);
-  }
+  renderCardFooterNote(card, row, layout, headerIndexMap, usedIndices);
 
   const detailsFields = collectRemainingFields(row, usedIndices);
-  if (detailsFields.length) {
+  if (!layout.suppressDetails && detailsFields.length) {
     const details = document.createElement("details");
     details.className = "mobile-card-details";
 

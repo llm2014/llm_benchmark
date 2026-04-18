@@ -313,6 +313,106 @@ main {
   color: var(--color-text);
 }
 
+.mobile-card-metric--muted {
+  opacity: 0.76;
+}
+
+.mobile-card-row {
+  display: grid;
+  grid-template-columns: repeat(var(--mobile-card-row-columns, 3), minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.mobile-card-row-metric {
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: #f8fafc;
+  padding: 8px 10px;
+}
+
+.mobile-card-row-metric-label {
+  display: block;
+  font-size: 11px;
+  line-height: 1.2;
+  color: var(--color-muted);
+}
+
+.mobile-card-row-metric-value {
+  display: block;
+  margin-top: 3px;
+  font-size: 14px;
+  line-height: 1.25;
+  color: var(--color-text);
+  font-weight: 650;
+}
+
+.mobile-card-row--hero .mobile-card-row-metric {
+  background: #edf8f5;
+  border-color: #b9ddd5;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.mobile-card-row--hero .mobile-card-row-metric-label {
+  font-size: 12px;
+}
+
+.mobile-card-row--hero .mobile-card-row-metric-value {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.mobile-card-row--secondary .mobile-card-row-metric {
+  background: #f8fafb;
+  border-color: #d9e2e8;
+}
+
+.mobile-card-row--secondary .mobile-card-row-metric-label,
+.mobile-card-row--tertiary .mobile-card-row-metric-label {
+  color: #7a889f;
+}
+
+.mobile-card-row--secondary .mobile-card-row-metric-value,
+.mobile-card-row--tertiary .mobile-card-row-metric-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.mobile-card-row-metric--muted {
+  opacity: 0.68;
+}
+
+.mobile-card-row-placeholder {
+  border: 1px dashed #cdd6e5;
+  border-radius: 10px;
+  background: rgba(148, 163, 184, 0.08);
+  min-height: 56px;
+}
+
+.mobile-card-row--codev3-primary .mobile-card-row-metric {
+  background: #eef2ff;
+  border-color: #c7d2fe;
+}
+
+.mobile-card-row--codev3-primary .mobile-card-row-metric-value {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.mobile-card-row--codev3-secondary .mobile-card-row-metric {
+  background: #f8faff;
+  border-color: #d9e2ff;
+}
+
+.mobile-card-note {
+  margin: 10px 2px 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #6b7280;
+}
+
 .mobile-card-details {
   margin-top: 12px;
   padding-top: 10px;
