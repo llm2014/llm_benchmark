@@ -225,6 +225,131 @@ main {
   line-height: 1.4;
 }
 
+.table-container.mobile-cards {
+  padding: 12px;
+  overflow: visible;
+}
+
+.mobile-card-list {
+  display: grid;
+  gap: 12px;
+}
+
+.mobile-card {
+  border: 1px solid var(--color-border);
+  border-left: 4px solid #6b7280;
+  border-radius: 12px;
+  background: var(--color-panel);
+  padding: 14px;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+}
+
+.mobile-card--code {
+  border-left-color: #335dff;
+  background: linear-gradient(180deg, #f5f8ff 0%, #ffffff 45%);
+}
+
+.mobile-card--logic {
+  border-left-color: #0f766e;
+  background: linear-gradient(180deg, #f2fbf8 0%, #ffffff 45%);
+}
+
+.mobile-card--vision {
+  border-left-color: #c2410c;
+  background: linear-gradient(180deg, #fff8f1 0%, #ffffff 45%);
+}
+
+.mobile-card--codev3 {
+  border-left-color: #4f46e5;
+  background: linear-gradient(180deg, #f5f3ff 0%, #ffffff 45%);
+}
+
+.mobile-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.mobile-card-title {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.35;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.mobile-card-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.mobile-card-metric {
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: #f8faff;
+  padding: 10px;
+}
+
+.mobile-card-metric--primary {
+  grid-column: 1 / -1;
+  background: #eef2ff;
+  border-color: #c7d2fe;
+}
+
+.mobile-card-metric-label {
+  display: block;
+  font-size: 12px;
+  color: var(--color-muted);
+}
+
+.mobile-card-metric-value {
+  display: block;
+  margin-top: 4px;
+  font-size: 16px;
+  line-height: 1.25;
+  color: var(--color-text);
+}
+
+.mobile-card-details {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--color-border);
+}
+
+.mobile-card-details summary {
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.mobile-card-detail-list {
+  margin-top: 8px;
+  display: grid;
+  gap: 6px;
+}
+
+.mobile-card-detail-row {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 8px;
+  align-items: start;
+}
+
+.mobile-card-detail-label {
+  font-size: 12px;
+  color: var(--color-muted);
+}
+
+.mobile-card-detail-value {
+  font-size: 13px;
+  color: var(--color-text);
+  overflow-wrap: anywhere;
+}
+
 .placeholder {
   padding: 48px 24px;
   text-align: center;
@@ -289,12 +414,8 @@ main {
     width: 100%;
   }
 
-  .table-container {
-    overflow-x: auto;
-  }
-
-  .table-container table {
-    min-width: 720px;
+  .table-container.mobile-cards {
+    padding: 10px;
   }
 
   .chart-container {

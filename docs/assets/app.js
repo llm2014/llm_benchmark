@@ -58,6 +58,64 @@ const HEADER_TRANSLATIONS = {
 const CATEGORY_ORDER = ["logic", "code", "code_v3", "vision"];
 const DEFAULT_INFERENCE_FILTER = "all";
 const VALID_INFERENCE_FILTERS = new Set(["all", "think", "non-think"]);
+const MOBILE_BREAKPOINT_PX = 768;
+const MODEL_HEADER_CANDIDATES = ["模型", "Model", "Language"];
+
+const MOBILE_CARD_LAYOUTS = {
+  code: {
+    className: "mobile-card--code",
+    fieldGroups: [
+      ["多轮总分", "极限分数", "修正极限"],
+      ["首轮总分", "中位分数", "原始分数"],
+      ["测试成本(元)", "成本(元)", "使用成本(元)", "成本"],
+      ["平均耗时(秒)", "平均耗时/s"],
+      ["发布时间", "报告日期", "测试时间"],
+    ],
+  },
+  logic: {
+    className: "mobile-card--logic",
+    fieldGroups: [
+      ["极限分数", "百分制", "原始分数"],
+      ["中位分数", "原始中位"],
+      ["变更", "较上次变更"],
+      ["测试成本(元)", "成本(元)", "使用成本(元)", "成本"],
+      ["平均耗时(秒)", "平均耗时/s"],
+      ["发布时间", "报告日期", "测试时间"],
+    ],
+  },
+  vision: {
+    className: "mobile-card--vision",
+    fieldGroups: [
+      ["极限分数", "原始分数"],
+      ["中位分数", "原始中位"],
+      ["成本", "成本(元)", "测试成本(元)"],
+      ["平均耗时/s", "平均耗时(秒)"],
+      ["平均Token", "Token"],
+      ["发布时间", "报告日期"],
+    ],
+  },
+  code_v3: {
+    className: "mobile-card--codev3",
+    fieldGroups: [
+      ["MacOS App(C)"],
+      ["Flutter App(D)"],
+      ["Web(E)"],
+      ["Game(F)"],
+      ["总扣分"],
+      ["Unprompted"],
+      ["IDE/CLI"],
+    ],
+  },
+  default: {
+    className: "mobile-card--default",
+    fieldGroups: [
+      ["极限分数", "多轮总分", "原始分数"],
+      ["测试成本(元)", "成本(元)", "使用成本(元)", "成本"],
+      ["平均耗时(秒)", "平均耗时/s"],
+      ["发布时间", "报告日期", "测试时间"],
+    ],
+  },
+};
 
 const state = {
   locale: getCurrentLocale(),
@@ -65,6 +123,7 @@ const state = {
   manifest: [],
   currentCategory: null,
   currentDatasetKey: null,
+  currentDatasetDirectory: null,
   headers: [],
   rows: [],
   filteredRows: [],
@@ -469,12 +528,21 @@ function bindEventHandlers() {
         console.error(error);
       });
   });
+
+  let wasMobileViewport = isMobileViewport();
+  window.addEventListener("resize", () => {
+    const isMobile = isMobileViewport();
+    if (isMobile === wasMobileViewport) return;
+    wasMobileViewport = isMobile;
+    renderTable();
+  });
 }
 
 async function handleCategoryChange(category, options = {}) {
   const { preferredDatasetKey = null } = options;
   state.currentCategory = category;
   state.currentDatasetKey = null;
+  state.currentDatasetDirectory = null;
   elements.datasetSelect.disabled = true;
   elements.searchInput.disabled = true;
   elements.searchInput.value = "";
@@ -579,6 +647,8 @@ async function loadDatasetByKey(key) {
     return;
   }
 
+  state.currentDatasetDirectory = getDatasetDirectoryFromPath(dataset.csv);
+
   showPlaceholder(t("placeholders.loadingTable"));
 
   const { headers, rows } = await fetchCsvDataset(dataset.csv);
@@ -618,6 +688,16 @@ async function loadDatasetByKey(key) {
 
 function buildDatasetKey(dataset) {
   return `${dataset.category}|${dataset.reportDate}|${dataset.tableIndex}`;
+}
+
+function getDatasetDirectoryFromPath(path) {
+  if (typeof path !== "string" || !path) return "default";
+  const normalized = path.replace(/^\.\//, "");
+  const segments = normalized.split("/");
+  if (segments.length >= 2 && segments[0] === "data") {
+    return segments[1];
+  }
+  return "default";
 }
 
 async function fetchCsvDataset(path) {
@@ -765,9 +845,240 @@ function isThinkRow(value) {
   return normalized === "1" || normalized === "true";
 }
 
+function isMobileViewport() {
+  return window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT_PX}px)`).matches;
+}
+
+function resolveMobileCardLayout() {
+  const directory = state.currentDatasetDirectory || "default";
+  return MOBILE_CARD_LAYOUTS[directory] || MOBILE_CARD_LAYOUTS.default;
+}
+
+function buildHeaderIndexMap(headers) {
+  const indexMap = new Map();
+  headers.forEach((header, index) => {
+    if (!indexMap.has(header)) {
+      indexMap.set(header, index);
+    }
+  });
+  return indexMap;
+}
+
+function normalizeCellValue(value) {
+  const normalized = String(value ?? "").trim();
+  return normalized.length ? normalized : null;
+}
+
+function findModelColumnIndex(headers, rows, headerIndexMap) {
+  for (const candidate of MODEL_HEADER_CANDIDATES) {
+    if (headerIndexMap.has(candidate)) {
+      return headerIndexMap.get(candidate);
+    }
+  }
+
+  let bestIndex = headers.length ? 0 : -1;
+  let bestScore = Number.NEGATIVE_INFINITY;
+  const sampleRows = rows.slice(0, 10);
+
+  headers.forEach((_, index) => {
+    let nonEmpty = 0;
+    let textLike = 0;
+    let numericLike = 0;
+    let totalLength = 0;
+
+    sampleRows.forEach((row) => {
+      const value = normalizeCellValue(row.cells[index]);
+      if (!value) return;
+      nonEmpty += 1;
+      totalLength += value.length;
+
+      if (parseSortableNumber(value) !== null) {
+        numericLike += 1;
+      }
+      if (/[A-Za-z\u4e00-\u9fff]/.test(value)) {
+        textLike += 1;
+      }
+    });
+
+    if (!nonEmpty) return;
+
+    const averageLength = totalLength / nonEmpty;
+    const score = textLike * 2 - numericLike + averageLength / 10;
+    if (score > bestScore) {
+      bestScore = score;
+      bestIndex = index;
+    }
+  });
+
+  return bestIndex;
+}
+
+function resolveFieldByGroup(row, fieldGroup, headerIndexMap, usedIndices) {
+  const candidates = Array.isArray(fieldGroup) ? fieldGroup : [fieldGroup];
+
+  for (const field of candidates) {
+    if (!headerIndexMap.has(field)) continue;
+    const index = headerIndexMap.get(field);
+    if (usedIndices.has(index)) continue;
+
+    const value = normalizeCellValue(row.cells[index]);
+    if (!value) continue;
+
+    usedIndices.add(index);
+    const rawHeader = state.headers[index];
+    return {
+      label: rawHeader ? getHeaderLabel(rawHeader) : t("table.mobile.unnamedField"),
+      value,
+    };
+  }
+
+  return null;
+}
+
+function collectRemainingFields(row, usedIndices) {
+  const fields = [];
+
+  state.headers.forEach((header, index) => {
+    if (usedIndices.has(index)) return;
+    const value = normalizeCellValue(row.cells[index]);
+    if (!value) return;
+
+    fields.push({
+      label: header ? getHeaderLabel(header) : t("table.mobile.unnamedField"),
+      value,
+    });
+  });
+
+  return fields;
+}
+
+function appendCardMetric(metricsContainer, metric, isPrimary = false) {
+  const item = document.createElement("div");
+  item.className = isPrimary ? "mobile-card-metric mobile-card-metric--primary" : "mobile-card-metric";
+
+  const label = document.createElement("span");
+  label.className = "mobile-card-metric-label";
+  label.textContent = metric.label;
+
+  const value = document.createElement("strong");
+  value.className = "mobile-card-metric-value";
+  value.textContent = metric.value;
+
+  item.appendChild(label);
+  item.appendChild(value);
+  metricsContainer.appendChild(item);
+}
+
+function createMobileCard(row, layout, headerIndexMap, modelColumnIndex) {
+  const card = document.createElement("article");
+  card.className = `mobile-card ${layout.className}`;
+
+  const usedIndices = new Set();
+  const modelValue = modelColumnIndex >= 0 ? normalizeCellValue(row.cells[modelColumnIndex]) : null;
+  if (modelColumnIndex >= 0) {
+    usedIndices.add(modelColumnIndex);
+  }
+
+  const header = document.createElement("header");
+  header.className = "mobile-card-header";
+
+  const title = document.createElement("h3");
+  title.className = "mobile-card-title";
+  title.textContent = modelValue || t("table.mobile.unknownModel");
+  header.appendChild(title);
+
+  if (row.isThink) {
+    const badge = document.createElement("span");
+    badge.className = "think-badge";
+    badge.textContent = t("table.reasoningBadge");
+    header.appendChild(badge);
+  }
+
+  card.appendChild(header);
+
+  const metrics = [];
+  layout.fieldGroups.forEach((group) => {
+    const resolved = resolveFieldByGroup(row, group, headerIndexMap, usedIndices);
+    if (resolved) {
+      metrics.push(resolved);
+    }
+  });
+
+  if (!metrics.length) {
+    state.headers.forEach((header, index) => {
+      if (metrics.length >= 4 || usedIndices.has(index)) return;
+      const value = normalizeCellValue(row.cells[index]);
+      if (!value) return;
+      usedIndices.add(index);
+      metrics.push({
+        label: header ? getHeaderLabel(header) : t("table.mobile.unnamedField"),
+        value,
+      });
+    });
+  }
+
+  if (metrics.length) {
+    const metricsContainer = document.createElement("div");
+    metricsContainer.className = "mobile-card-metrics";
+    metrics.forEach((metric, index) => appendCardMetric(metricsContainer, metric, index === 0));
+    card.appendChild(metricsContainer);
+  }
+
+  const detailsFields = collectRemainingFields(row, usedIndices);
+  if (detailsFields.length) {
+    const details = document.createElement("details");
+    details.className = "mobile-card-details";
+
+    const summary = document.createElement("summary");
+    summary.textContent = t("table.mobile.moreFields");
+    details.appendChild(summary);
+
+    const list = document.createElement("div");
+    list.className = "mobile-card-detail-list";
+
+    detailsFields.forEach((field) => {
+      const rowNode = document.createElement("div");
+      rowNode.className = "mobile-card-detail-row";
+
+      const label = document.createElement("span");
+      label.className = "mobile-card-detail-label";
+      label.textContent = field.label;
+
+      const value = document.createElement("span");
+      value.className = "mobile-card-detail-value";
+      value.textContent = field.value;
+
+      rowNode.appendChild(label);
+      rowNode.appendChild(value);
+      list.appendChild(rowNode);
+    });
+
+    details.appendChild(list);
+    card.appendChild(details);
+  }
+
+  return card;
+}
+
+function renderMobileCards(container) {
+  const list = document.createElement("div");
+  list.className = "mobile-card-list";
+
+  const layout = resolveMobileCardLayout();
+  const headerIndexMap = buildHeaderIndexMap(state.headers);
+  const modelColumnIndex = findModelColumnIndex(state.headers, state.filteredRows, headerIndexMap);
+
+  state.filteredRows.forEach((row) => {
+    list.appendChild(createMobileCard(row, layout, headerIndexMap, modelColumnIndex));
+  });
+
+  container.appendChild(list);
+}
+
 function renderTable() {
   const container = elements.tableContainer;
   container.innerHTML = "";
+  container.classList.remove("mobile-cards");
 
   if (!state.headers.length) {
     showPlaceholder(t("placeholders.selectDataset"));
@@ -778,6 +1089,15 @@ function renderTable() {
     showPlaceholder(t("placeholders.noMatches"));
     return;
   }
+
+  if (isMobileViewport()) {
+    container.classList.add("mobile-cards");
+    renderMobileCards(container);
+    return;
+  }
+
+  const headerIndexMap = buildHeaderIndexMap(state.headers);
+  const modelColumnIndex = findModelColumnIndex(state.headers, state.filteredRows, headerIndexMap);
 
   const table = document.createElement("table");
   const thead = document.createElement("thead");
@@ -813,7 +1133,7 @@ function renderTable() {
       const displayValue = cell || "—";
       td.appendChild(document.createTextNode(displayValue));
 
-      if (columnIndex === 0 && row.isThink) {
+      if (columnIndex === modelColumnIndex && row.isThink) {
         td.classList.add("think-model");
         const badge = document.createElement("span");
         badge.className = "think-badge";
@@ -888,6 +1208,7 @@ function updateMeta(dataset = null) {
 
 function showPlaceholder(message) {
   const container = elements.tableContainer;
+  container.classList.remove("mobile-cards");
   container.innerHTML = `<div class="placeholder" role="status">${message}</div>`;
 }
 

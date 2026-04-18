@@ -291,6 +291,18 @@ const TRANSLATIONS = {
     "zh-CN": "推理",
     "en-US": "Reasoning",
   },
+  "table.mobile.moreFields": {
+    "zh-CN": "更多字段",
+    "en-US": "More fields",
+  },
+  "table.mobile.unnamedField": {
+    "zh-CN": "未命名字段",
+    "en-US": "Unnamed field",
+  },
+  "table.mobile.unknownModel": {
+    "zh-CN": "未命名模型",
+    "en-US": "Unnamed model",
+  },
   "meta.category": {
     "zh-CN": "<strong>类别：</strong>{{label}}",
     "en-US": "<strong>Category:</strong>{{label}}",
