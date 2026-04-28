@@ -1,4 +1,5 @@
 "Model","MacOS App(C)","Flutter App(D)","Web(E)","Game(F)","总扣分","Unprompted","IDE/CLI","Think"
+"GPT-5.5(high)","7","6","2","Pending",">15","1","Codex App","1"
 "Opus 4.6","9","Skip","8","11",">28","3","Claude Code","0"
 "GPT-5.3-Codex(high)","8","7","9","13","37","0","Codex App","1"
 "GPT-5.4(high)","9","7","8","14","38","2","Codex CLI","1"
@@ -22,5 +23,3 @@
 "Kimi K2.6","43","15","Pending","Pending",">58","0","Kimi Code","1"
 "Tencent Hy3 Preview","Pending","21","25","Pending",">46","0","Claude Code","1"
 "MiMo-V2.5-Pro","Pending","Pending","35","Pending",">35","0","Claude Code","1"
-
-"GPT-5.5(high)","7","Pending","2","Pending",">9","1","Codex App","1"
