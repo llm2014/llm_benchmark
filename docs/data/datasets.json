@@ -106,6 +106,13 @@
       "csv": "data/code_v3/2026-01.csv"
     },
     {
+      "category": "code_v3",
+      "reportDate": "2026-05",
+      "tableIndex": 0,
+      "title": "月榜",
+      "csv": "data/code_v3/2026-05.csv"
+    },
+    {
       "category": "vision",
       "reportDate": "2025-05",
       "tableIndex": 0,
