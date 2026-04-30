@@ -1,7 +1,7 @@
 "Model","MacOS App(C)","Flutter App(D)","Web(E)","Game(F)","总扣分","Unprompted","IDE/CLI","Think"
 "GPT-5.5 (high)","7","6","2","12","27","1","Codex App","1"
-"Claude Opus 4.6","9","Pending","12","15",">36","3","Claude Code","0"
 "GPT-5.4 (high)","9","10","8","18","45","1","Codex CLI","1"
+"Claude Opus 4.6","9","11","12","15","47","3","Claude Code","0"
 "Claude Opus 4.5","9","14","18","Pending",">41","4","Claude Code","0"
 "DeepSeek V4 Pro (max)","16","8","21","36","81","0","Claude Code","1"
 "GLM-5.1","20","14","15","60","109","3","Claude Code","1"
