@@ -922,6 +922,16 @@ function normalizeCellValue(value) {
   return normalized.length ? normalized : null;
 }
 
+function getCodeV3StatusClass(value) {
+  if (state.currentCategory !== "code_v3") return null;
+  const normalized = String(value ?? "").trim().toLowerCase();
+  if (!normalized) return null;
+  if (normalized === "skip") return "codev3-status codev3-status--skip";
+  if (normalized.startsWith("failed")) return "codev3-status codev3-status--failed";
+  if (normalized.startsWith("pending")) return "codev3-status codev3-status--pending";
+  return null;
+}
+
 function findModelColumnIndex(headers, rows, headerIndexMap) {
   for (const candidate of MODEL_HEADER_CANDIDATES) {
     if (headerIndexMap.has(candidate)) {
@@ -995,6 +1005,7 @@ function resolveFieldByGroup(row, fieldGroup, headerIndexMap, usedIndices) {
       label: rawHeader ? getHeaderLabel(rawHeader) : t("table.mobile.unnamedField"),
       value,
       tone,
+      statusClass: getCodeV3StatusClass(value),
     };
   }
 
@@ -1012,6 +1023,7 @@ function collectRemainingFields(row, usedIndices) {
     fields.push({
       label: header ? getHeaderLabel(header) : t("table.mobile.unnamedField"),
       value,
+      statusClass: getCodeV3StatusClass(value),
     });
   });
 
@@ -1031,6 +1043,9 @@ function appendCardMetric(metricsContainer, metric, isPrimary = false) {
 
   const value = document.createElement("strong");
   value.className = "mobile-card-metric-value";
+  if (metric.statusClass) {
+    value.classList.add(...metric.statusClass.split(" "));
+  }
   value.textContent = metric.value;
 
   item.appendChild(label);
@@ -1051,6 +1066,9 @@ function appendStructuredMetric(rowElement, metric) {
 
   const value = document.createElement("strong");
   value.className = "mobile-card-row-metric-value";
+  if (metric.statusClass) {
+    value.classList.add(...metric.statusClass.split(" "));
+  }
   value.textContent = metric.value;
 
   item.appendChild(label);
@@ -1290,6 +1308,10 @@ function renderTable() {
     row.cells.forEach((cell, columnIndex) => {
       const td = document.createElement("td");
       const displayValue = cell || "—";
+      const statusClass = getCodeV3StatusClass(cell);
+      if (statusClass) {
+        td.classList.add(...statusClass.split(" "));
+      }
       td.appendChild(document.createTextNode(displayValue));
 
       if (columnIndex === modelColumnIndex && row.isThink) {

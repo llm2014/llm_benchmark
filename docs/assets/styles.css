@@ -406,6 +406,22 @@ main {
   border-color: #d9e2ff;
 }
 
+.codev3-status {
+  font-weight: 650;
+}
+
+.codev3-status--pending {
+  color: #6b7280;
+}
+
+.codev3-status--failed {
+  color: #7f1d1d;
+}
+
+.codev3-status--skip {
+  color: #9ca3af;
+}
+
 .mobile-card-note {
   margin: 10px 2px 0;
   font-size: 12px;
