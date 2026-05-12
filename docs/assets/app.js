@@ -143,13 +143,13 @@ const MOBILE_CARD_LAYOUTS = {
       {
         className: "mobile-card-row--codev3-primary",
         columns: 3,
-        fields: [["MacOS App(C)"], ["Flutter App(D)"], ["Web(E)"]],
+        fields: [["MacOS App(C)"], ["Flutter App(D)", "Flutter(D)"], ["Web(E)"]],
       },
       {
         className: "mobile-card-row--codev3-primary",
         columns: 3,
         fillWithPlaceholders: true,
-        fields: [["Game(F)"]],
+        fields: [["Game(F)"], ["Rust App(G)"]],
       },
       {
         className: "mobile-card-row--codev3-secondary",
