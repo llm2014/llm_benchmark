@@ -1,6 +1,6 @@
 "Model","MacOS App(C)","Flutter(D)","Web(E)","Game(F)","Rust App(G)","Unprompted","IDE/CLI","Think"
 "GPT-5.5 (high)","7","6","2","12","47","1","Codex App","1"
-"GPT-5.4 (high)","9","10","8","18","Pending","1","Codex CLI","1"
+"GPT-5.4 (high)","9","10","8","18","58","1","Codex CLI","1"
 "Claude Opus 4.6","9","11","12","15","66","4","Claude Code","0"
 "Claude Opus 4.5","9","14","18","Skip","Skip","4","Claude Code","0"
 "DeepSeek V4 Pro (max)","16","8","21","36","Pending","0","Claude Code","1"
