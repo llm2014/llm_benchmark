@@ -3,6 +3,7 @@
 "GPT-5.4 (high)","9","10","8","18","58","1","Codex CLI","1"
 "Claude Opus 4.6","9","11","12","15","66","4","Claude Code","0"
 "Claude Opus 4.5","9","14","18","Skip","Skip","4","Claude Code","0"
+"Qwen3.7-Max","Pending","14","Pending","Pending","Pending","0","Claude Code","1"
 "Gemini 3.5 Flash","Pending","15","Pending","Pending","Pending","0","Gemini CLI","1"
 "DeepSeek V4 Pro (max)","16","8","21","36","Failed(0/9)","0","Claude Code","1"
 "GLM-5.1","20","14","15","60","Failed(2/9)","3","Claude Code","1"
