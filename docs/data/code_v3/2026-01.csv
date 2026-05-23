@@ -1,4 +1,4 @@
-"Model","MacOS App(C)","Flutter App(D)","Web(E)","Game(F)","总扣分","Unprompted","IDE/CLI","Think"
+"Model","MacOS App","Flutter","Web","Game","总扣分","Unprompted","IDE/CLI","Think"
 "GPT-5.5(high)","7","6","2","10","25","1","Codex App","1"
 "Opus 4.6","9","Skip","8","11",">28","3","Claude Code","0"
 "GPT-5.3-Codex(high)","8","7","9","13","37","0","Codex App","1"
