@@ -422,6 +422,26 @@ main {
   color: #9ca3af;
 }
 
+.codev3-grade {
+  font-weight: 700;
+}
+
+.codev3-grade--a {
+  color: #3f7f4f;
+}
+
+.codev3-grade--b {
+  color: #a16207;
+}
+
+.codev3-grade--c {
+  color: #b45353;
+}
+
+.codev3-grade--d {
+  color: #7f1d1d;
+}
+
 .mobile-card-note {
   margin: 10px 2px 0;
   font-size: 12px;

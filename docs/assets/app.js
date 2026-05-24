@@ -932,6 +932,33 @@ function getCodeV3StatusClass(value) {
   return null;
 }
 
+function parseCodeV3RankGrade(value) {
+  if (state.currentCategory !== "code_v3") return null;
+  const normalized = String(value ?? "").trim();
+  if (!normalized) return null;
+  const match = normalized.match(/^(.+?)\/([ABCD])([+-]?)$/i);
+  if (!match) return null;
+  return {
+    rank: match[1].trim(),
+    grade: `${match[2].toUpperCase()}${match[3] || ""}`,
+    gradeBase: match[2].toUpperCase(),
+  };
+}
+
+function appendCodeV3ValueContent(target, value) {
+  const parsed = parseCodeV3RankGrade(value);
+  if (!parsed) {
+    target.textContent = value;
+    return;
+  }
+
+  target.appendChild(document.createTextNode(`${parsed.rank}/`));
+  const grade = document.createElement("span");
+  grade.className = `codev3-grade codev3-grade--${parsed.gradeBase.toLowerCase()}`;
+  grade.textContent = parsed.grade;
+  target.appendChild(grade);
+}
+
 function findModelColumnIndex(headers, rows, headerIndexMap) {
   for (const candidate of MODEL_HEADER_CANDIDATES) {
     if (headerIndexMap.has(candidate)) {
@@ -1046,7 +1073,7 @@ function appendCardMetric(metricsContainer, metric, isPrimary = false) {
   if (metric.statusClass) {
     value.classList.add(...metric.statusClass.split(" "));
   }
-  value.textContent = metric.value;
+  appendCodeV3ValueContent(value, metric.value);
 
   item.appendChild(label);
   item.appendChild(value);
@@ -1069,7 +1096,7 @@ function appendStructuredMetric(rowElement, metric) {
   if (metric.statusClass) {
     value.classList.add(...metric.statusClass.split(" "));
   }
-  value.textContent = metric.value;
+  appendCodeV3ValueContent(value, metric.value);
 
   item.appendChild(label);
   item.appendChild(value);
@@ -1312,7 +1339,7 @@ function renderTable() {
       if (statusClass) {
         td.classList.add(...statusClass.split(" "));
       }
-      td.appendChild(document.createTextNode(displayValue));
+      appendCodeV3ValueContent(td, displayValue);
 
       if (columnIndex === modelColumnIndex && row.isThink) {
         td.classList.add("think-model");
