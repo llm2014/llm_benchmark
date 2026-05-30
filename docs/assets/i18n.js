@@ -331,6 +331,26 @@ const TRANSLATIONS = {
     "zh-CN": "切换为 {{target}}",
     "en-US": "Switch to {{target}}",
   },
+  "theme.switcher.aria": {
+    "zh-CN": "切换站点主题",
+    "en-US": "Switch site theme",
+  },
+  "theme.switcher.toggle": {
+    "zh-CN": "主题：{{mode}}",
+    "en-US": "Theme: {{mode}}",
+  },
+  "theme.mode.system": {
+    "zh-CN": "跟随系统",
+    "en-US": "System",
+  },
+  "theme.mode.light": {
+    "zh-CN": "浅色",
+    "en-US": "Light",
+  },
+  "theme.mode.dark": {
+    "zh-CN": "深色",
+    "en-US": "Dark",
+  },
   "chart.yAxis.label": {
     "zh-CN": "纵轴指标",
     "en-US": "Y-Axis Metric",
@@ -366,6 +386,10 @@ const TRANSLATIONS = {
   "chart.tooltip.model": {
     "zh-CN": "模型",
     "en-US": "Model",
+  },
+  "chart.dataset.performance": {
+    "zh-CN": "模型性能",
+    "en-US": "Model Performance",
   },
 };
 

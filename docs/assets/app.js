@@ -60,6 +60,12 @@ const DEFAULT_INFERENCE_FILTER = "all";
 const VALID_INFERENCE_FILTERS = new Set(["all", "think", "non-think"]);
 const MOBILE_BREAKPOINT_PX = 768;
 const MODEL_HEADER_CANDIDATES = ["模型", "Model", "Language"];
+const THEME_STORAGE_KEY = "llm-dashboard-theme";
+const THEME_MODES = ["system", "light", "dark"];
+const prefersDarkQuery =
+  typeof window !== "undefined" && typeof window.matchMedia === "function"
+    ? window.matchMedia("(prefers-color-scheme: dark)")
+    : null;
 
 const MOBILE_CARD_LAYOUTS = {
   code: {
@@ -184,6 +190,7 @@ const state = {
   inferenceFilter: DEFAULT_INFERENCE_FILTER,
   hasThinkColumn: false,
   sort: { columnIndex: null, direction: null },
+  themeMode: readStoredThemeMode(),
 };
 
 const csvCache = new Map();
@@ -201,6 +208,7 @@ const elements = {
   searchLabel: document.getElementById("searchLabel"),
   pageTitle: document.getElementById("pageTitle"),
   pageSubtitle: document.getElementById("pageSubtitle"),
+  themeToggle: document.getElementById("themeToggle"),
   languageToggle: document.getElementById("languageToggle"),
   footerNote: document.getElementById("footerNote"),
   chartSection: document.getElementById("chartSection"),
@@ -213,6 +221,7 @@ let chartInstance = null;
 let isApplyingHashState = false;
 
 initializeLocaleUi();
+initializeThemeUi();
 
 init().catch((error) => {
   console.error(error);
@@ -251,6 +260,31 @@ function initializeLocaleUi() {
     updateLanguageToggle();
     updateMeta();
   });
+}
+
+function initializeThemeUi() {
+  applyThemeMode(state.themeMode, { persist: false });
+  updateThemeToggle();
+
+  if (elements.themeToggle) {
+    elements.themeToggle.addEventListener("click", () => {
+      const nextMode = getNextThemeMode(state.themeMode);
+      applyThemeMode(nextMode);
+      updateThemeToggle();
+      renderChart();
+    });
+  }
+
+  const handleSystemThemeChange = () => {
+    if (state.themeMode !== "system") return;
+    renderChart();
+  };
+
+  if (prefersDarkQuery && typeof prefersDarkQuery.addEventListener === "function") {
+    prefersDarkQuery.addEventListener("change", handleSystemThemeChange);
+  } else if (prefersDarkQuery && typeof prefersDarkQuery.addListener === "function") {
+    prefersDarkQuery.addListener(handleSystemThemeChange);
+  }
 }
 
 function updateStaticCopy() {
@@ -314,6 +348,7 @@ function updateStaticCopy() {
   if (elements.footerNote) {
     elements.footerNote.textContent = t("footer.note");
   }
+  updateThemeToggle();
 }
 
 function updateLanguageToggle() {
@@ -331,6 +366,52 @@ function getNextLocale() {
   }
   const nextIndex = (currentIndex + 1) % SUPPORTED_LOCALES.length;
   return SUPPORTED_LOCALES[nextIndex];
+}
+
+function readStoredThemeMode() {
+  try {
+    const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
+    return normalizeThemeMode(stored);
+  } catch (error) {
+    console.warn("Unable to read stored theme:", error);
+    return "system";
+  }
+}
+
+function normalizeThemeMode(mode) {
+  return THEME_MODES.includes(mode) ? mode : "system";
+}
+
+function getNextThemeMode(currentMode) {
+  const normalized = normalizeThemeMode(currentMode);
+  const currentIndex = THEME_MODES.indexOf(normalized);
+  const nextIndex = (currentIndex + 1) % THEME_MODES.length;
+  return THEME_MODES[nextIndex];
+}
+
+function applyThemeMode(mode, { persist = true } = {}) {
+  const normalized = normalizeThemeMode(mode);
+  state.themeMode = normalized;
+
+  if (normalized === "system") {
+    document.documentElement.removeAttribute("data-theme");
+  } else {
+    document.documentElement.setAttribute("data-theme", normalized);
+  }
+
+  if (!persist) return;
+  try {
+    window.localStorage.setItem(THEME_STORAGE_KEY, normalized);
+  } catch (error) {
+    console.warn("Unable to store theme mode:", error);
+  }
+}
+
+function updateThemeToggle() {
+  if (!elements.themeToggle) return;
+  const modeLabel = t(`theme.mode.${state.themeMode}`);
+  elements.themeToggle.textContent = t("theme.switcher.toggle", { mode: modeLabel });
+  elements.themeToggle.setAttribute("aria-label", t("theme.switcher.aria"));
 }
 
 function setSelectOptions(select, options, selectedValue) {
@@ -1420,6 +1501,12 @@ function showPlaceholder(message) {
   container.innerHTML = `<div class="placeholder" role="status">${message}</div>`;
 }
 
+function getCssVariable(name, fallback = "") {
+  if (typeof window === "undefined") return fallback;
+  const value = window.getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return value || fallback;
+}
+
 function updateChartVisibility() {
   if (!elements.chartSection) return;
 
@@ -1503,6 +1590,13 @@ function renderChart() {
   }
 
   const ctx = elements.chartCanvas.getContext("2d");
+  const chartTextColor = getCssVariable("--color-text", "#1f2937");
+  const chartGridColor = getCssVariable("--color-border", "#dbe1eb");
+  const chartPanelColor = getCssVariable("--color-panel", "#ffffff");
+  const chartThinkBg = getCssVariable("--color-chart-think-bg", "rgba(239, 68, 68, 0.6)");
+  const chartThinkBorder = getCssVariable("--color-chart-think-border", "rgba(220, 38, 38, 1)");
+  const chartDefaultBg = getCssVariable("--color-chart-default-bg", "rgba(99, 102, 241, 0.6)");
+  const chartDefaultBorder = getCssVariable("--color-chart-default-border", "rgba(99, 102, 241, 1)");
 
   if (chartInstance) {
     chartInstance.destroy();
@@ -1513,15 +1607,15 @@ function renderChart() {
     data: {
       datasets: [
         {
-          label: "模型性能",
+          label: t("chart.dataset.performance"),
           data: chartData,
           backgroundColor: (context) => {
             const point = context.raw;
-            return point && point.isThink ? "rgba(239, 68, 68, 0.6)" : "rgba(99, 102, 241, 0.6)";
+            return point && point.isThink ? chartThinkBg : chartDefaultBg;
           },
           borderColor: (context) => {
             const point = context.raw;
-            return point && point.isThink ? "rgba(220, 38, 38, 1)" : "rgba(99, 102, 241, 1)";
+            return point && point.isThink ? chartThinkBorder : chartDefaultBorder;
           },
           borderWidth: 2,
           pointRadius: 6,
@@ -1537,6 +1631,11 @@ function renderChart() {
           display: false,
         },
         tooltip: {
+          backgroundColor: chartPanelColor,
+          titleColor: chartTextColor,
+          bodyColor: chartTextColor,
+          borderColor: chartGridColor,
+          borderWidth: 1,
           callbacks: {
             label: (context) => {
               const point = context.raw;
@@ -1554,12 +1653,17 @@ function renderChart() {
           title: {
             display: true,
             text: xAxisLabel,
+            color: chartTextColor,
             font: {
               size: 14,
               weight: "600",
             },
           },
+          grid: {
+            color: chartGridColor,
+          },
           ticks: {
+            color: chartTextColor,
             font: {
               size: 12,
             },
@@ -1569,12 +1673,17 @@ function renderChart() {
           title: {
             display: true,
             text: yAxisLabel,
+            color: chartTextColor,
             font: {
               size: 14,
               weight: "600",
             },
           },
+          grid: {
+            color: chartGridColor,
+          },
           ticks: {
+            color: chartTextColor,
             font: {
               size: 12,
             },
