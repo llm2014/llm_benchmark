@@ -56,9 +56,5 @@
 ## 更新机制
 * 新模型测试后，总榜实时更新
 * 每月底做一次成绩归档
-* 每个模型的详细评测首发在知乎个人号: [知乎主页](https://www.zhihu.com/people/toyama)，和微信公众号：**大模型观测员**
-
-![qrcode_for_gh_ced94128890d_258](https://github.com/user-attachments/assets/c624c1db-7821-4f45-98da-5fac0bc34f4d)
-
 
 
