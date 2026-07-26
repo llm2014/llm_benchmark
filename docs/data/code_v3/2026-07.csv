@@ -1,6 +1,7 @@
 "Model","MacOS App(C)","Flutter(D)","Web(E)","Game(F)","Rust App(G)","Simple Model(H)","iOS+Server(I)","Unprompted","IDE/CLI","Think"
 "Fable-5 (high)","Pass","Pass","Pass","Pass","Pending","2/A+","3/A+","1","Claude Code","1"
 "GPT-5.6-Sol (max)","Pass","Pass","Pass","Pass","15/B+","4/A","8/A","1","Codex App","1"
+"Claude Opus 5 (max)","Pass","Pass","8/B+","Pass","15/B+","4/A","1/A+","2","Claude Code","1"
 "Kimi-K3 (max)","7/A","Pass","12/B","15/B","18/B","6/A","5/A","1","Claude Code","1"
 "GPT-5.5 (high)","7/A","6/A","2/A+","12/A","47/C","Skip","Skip","1","Codex App","1"
 "Claude Opus 4.8 (high)","Pass","Pass","10/B+","7/A","20/B","10/B","Pending","2","Claude Code","1"
