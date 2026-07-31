@@ -69,7 +69,7 @@ const CHINA_MODEL_PATTERNS = [
   /\b(?:baichuan|chatglm|deepseek|doubao|ernie|erine|glm|hunyuan|kat|kimi|ling|longcat|minimax|mimo|openpangu|pangu|qwen|qwn|qvq|qwq|ring|seed|sensenova|step|tencent|yi)(?=$|[^a-z0-9]|[0-9])/i,
 ];
 const US_MODEL_PATTERNS = [
-  /\b(?:anthropic|chatgpt|claude|fable|gemini|gemm3|gemma|gpt|grok|haiku|llama|o1|o3|o4|openai|opus|sonnet)(?=$|[^a-z0-9]|[0-9])/i,
+  /\b(?:anthropic|chatgpt|claude|fable|gemini|gemm3|gemma|gpt|grok|haiku|llama|muse|o1|o3|o4|openai|opus|sonnet)(?=$|[^a-z0-9]|[0-9])/i,
 ];
 const CODE_V3_AUXILIARY_HEADERS = new Set(["unprompted", "ide/cli", "think", "总扣分"]);
 const THEME_STORAGE_KEY = "llm-dashboard-theme";
@@ -78,6 +78,202 @@ const prefersDarkQuery =
   typeof window !== "undefined" && typeof window.matchMedia === "function"
     ? window.matchMedia("(prefers-color-scheme: dark)")
     : null;
+
+// 暂时在类别下拉中隐藏的分类（数据仍在 manifest 中，仅不展示）
+const HIDDEN_CATEGORIES = new Set(["code"]);
+
+// 各榜单类别的数值列配置：趋势视图与象限图共用。
+// code_v3 为等级制（Pass/A+…），不在此列。
+// scoreFallbacks 供趋势视图使用：评分体系迭代过，早期月份用旧列名，
+// 排名只要求当月分数单调可比，跨月不做绝对比较。
+const CATEGORY_CHART_CONFIG = {
+  logic: {
+    score: "极限分数",
+    cost: "测试成本(元)",
+    time: "平均耗时(秒)",
+    scoreFallbacks: ["极限分数", "百分制", "原始分数"],
+  },
+  code: {
+    score: "多轮总分",
+    cost: "测试成本(元)",
+    time: "平均耗时(秒)",
+    scoreFallbacks: ["多轮总分"],
+  },
+  vision: {
+    score: "极限分数",
+    cost: "成本",
+    time: "平均耗时/s",
+    scoreFallbacks: ["极限分数", "原始分数"],
+  },
+};
+const TRENDS_SUPPORTED = new Set(
+  Object.keys(CATEGORY_CHART_CONFIG).filter((category) => !HIDDEN_CATEGORIES.has(category))
+);
+// 趋势视图只取相对最新数据集的最近 18 期（动态计算，随数据更新滚动）
+const TRENDS_MAX_MONTHS = 18;
+const TRENDS_RECENT_MONTHS = 6;
+const TRENDS_DEFAULT_SELECTED = 6;
+const SERIES_PALETTE_LIGHT = [
+  "#1f4e79", "#9e3b32", "#3a6b4f", "#8a6d1f",
+  "#6b4f8a", "#2f6b6b", "#a2543a", "#5a5f6b",
+];
+const SERIES_PALETTE_DARK = [
+  "#93b8dc", "#d9907f", "#8fbf9f", "#c9a94f",
+  "#b39ddb", "#7fb3b3", "#cf8a6f", "#9aa0ab",
+];
+const VALID_VIEWS = new Set(["board", "trends"]);
+
+function median(values) {
+  if (!values.length) return 0;
+  const sorted = values.slice().sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+}
+
+// 货币本地化：数据层始终是人民币，仅展示层在英文界面按固定汇率换算。
+const CNY_PER_USD = 6.9;
+
+function formatUsd(usd) {
+  const decimals = Math.abs(usd) >= 1 ? 2 : 3;
+  return `$${usd.toFixed(decimals)}`;
+}
+
+function formatCurrencyForLocale(value) {
+  if (state.locale !== "en-US") return value;
+  const match = String(value).match(/^[¥￥]\s*(-?[\d,]+(?:\.\d+)?)$/);
+  if (!match) return value;
+  const cny = Number(match[1].replace(/,/g, ""));
+  if (Number.isNaN(cny)) return value;
+  return formatUsd(cny / CNY_PER_USD);
+}
+
+// 纯数字计数字段展示时加千分位（原始数据不变，排序/搜索不受影响）
+const THOUSANDS_SEPARATOR_HEADERS = new Set(["Token", "平均Token"]);
+
+function formatCellForDisplay(header, value) {
+  const formatted = formatCurrencyForLocale(value);
+  if (header && THOUSANDS_SEPARATOR_HEADERS.has(header) && /^\d+$/.test(formatted)) {
+    return Number(formatted).toLocaleString("en-US");
+  }
+  return formatted;
+}
+
+// Chart.js 自定义插件：绘制象限底色、中位分割线与区域标签。
+const quadrantPlugin = {
+  id: "quadrants",  beforeDatasetsDraw(chart, args, opts) {
+    if (!opts || typeof opts.medianX !== "number" || typeof opts.medianY !== "number") return;
+    const { ctx, chartArea, scales } = chart;
+    if (!chartArea) return;
+    const midX = scales.x.getPixelForValue(opts.medianX);
+    const midY = scales.y.getPixelForValue(opts.medianY);
+    const { top, bottom, left, right } = chartArea;
+    ctx.save();
+    if (opts.sweetBg) {
+      ctx.fillStyle = opts.sweetBg;
+      ctx.fillRect(midX, midY, right - midX, bottom - midY);
+    }
+    if (opts.lineColor) {
+      ctx.strokeStyle = opts.lineColor;
+      ctx.lineWidth = 1;
+      ctx.setLineDash([5, 4]);
+      ctx.beginPath();
+      ctx.moveTo(midX, top);
+      ctx.lineTo(midX, bottom);
+      ctx.moveTo(left, midY);
+      ctx.lineTo(right, midY);
+      ctx.stroke();
+    }
+    ctx.restore();
+  },
+  afterDatasetsDraw(chart, args, opts) {
+    if (!opts || !opts.labels) return;
+    const { ctx, chartArea } = chart;
+    if (!chartArea) return;
+    const { top, bottom, left, right } = chartArea;
+    const pad = 8;
+    ctx.save();
+    ctx.font = `12px ${getComputedStyle(document.body).fontFamily}`;
+    ctx.fillStyle = opts.labelColor || "#999";
+    if (opts.labels.tr) {
+      ctx.textAlign = "right";
+      ctx.textBaseline = "top";
+      ctx.fillText(opts.labels.tr, right - pad, top + pad);
+    }
+    if (opts.labels.br) {
+      ctx.textAlign = "right";
+      ctx.textBaseline = "bottom";
+      ctx.fillText(opts.labels.br, right - pad, bottom - pad);
+    }
+    if (opts.labels.tl) {
+      ctx.textAlign = "left";
+      ctx.textBaseline = "top";
+      ctx.fillText(opts.labels.tl, left + pad, top + pad);
+    }
+    if (opts.labels.bl) {
+      ctx.textAlign = "left";
+      ctx.textBaseline = "bottom";
+      ctx.fillText(opts.labels.bl, left + pad, bottom - pad);
+    }
+    ctx.restore();
+  },
+};
+
+// Chart.js 自定义插件：在散点旁直接标注模型名。
+// 贪心防重叠：按 右→左→上→下 顺序尝试，全部冲突才放弃该标签；
+// 数据顺序即优先级（排名靠前的模型优先获得标注位）。
+const pointLabelsPlugin = {
+  id: "pointLabels",
+  afterDatasetsDraw(chart, args, opts) {
+    if (!opts || !opts.display) return;
+    const { ctx, chartArea } = chart;
+    if (!chartArea) return;
+    const meta = chart.getDatasetMeta(0);
+    const dataset = chart.data.datasets[0];
+    if (!meta || !dataset) return;
+
+    const fontSize = opts.fontSize || 11;
+    const padX = 2;
+    const boxH = fontSize + 4;
+    const offset = 7;
+    const placed = [];
+
+    const intersects = (a, b) =>
+      a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+    const inside = (box) =>
+      box.x >= chartArea.left &&
+      box.x + box.w <= chartArea.right &&
+      box.y >= chartArea.top &&
+      box.y + box.h <= chartArea.bottom;
+
+    ctx.save();
+    ctx.font = `${fontSize}px ${getComputedStyle(document.body).fontFamily}`;
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+
+    dataset.data.forEach((point, index) => {
+      const element = meta.data[index];
+      if (!element || !point || !point.label) return;
+      const boxW = ctx.measureText(point.label).width + padX * 2;
+      const candidates = [
+        { x: element.x + offset, y: element.y - boxH / 2 },
+        { x: element.x - offset - boxW, y: element.y - boxH / 2 },
+        { x: element.x - boxW / 2, y: element.y - offset - boxH },
+        { x: element.x - boxW / 2, y: element.y + offset },
+      ];
+      for (const candidate of candidates) {
+        const box = { x: candidate.x, y: candidate.y, w: boxW, h: boxH };
+        if (!inside(box)) continue;
+        if (placed.some((other) => intersects(box, other))) continue;
+        ctx.fillStyle = point.isThink ? opts.thinkColor : opts.defaultColor;
+        ctx.fillText(point.label, candidate.x + padX, candidate.y + boxH / 2);
+        placed.push(box);
+        return;
+      }
+    });
+
+    ctx.restore();
+  },
+};
 
 const MOBILE_CARD_LAYOUTS = {
   code: {
@@ -194,6 +390,16 @@ const state = {
   hasModelColumn: false,
   sort: { columnIndex: null, direction: null },
   themeMode: readStoredThemeMode(),
+  view: "board",
+  trends: {
+    category: null,
+    mode: "percentile",
+    months: [],
+    models: [],
+    selected: new Set(),
+    loadedCategory: null,
+    loading: false,
+  },
 };
 
 const csvCache = new Map();
@@ -218,11 +424,26 @@ const elements = {
   footerNote: document.getElementById("footerNote"),
   chartSection: document.getElementById("chartSection"),
   chartCanvas: document.getElementById("benchmarkChart"),
+  chartCaption: document.getElementById("chartCaption"),
   yAxisSelect: document.getElementById("yAxisSelect"),
   yAxisLabel: document.getElementById("yAxisLabel"),
+  viewTabs: document.getElementById("viewTabs"),
+  viewTabBoard: document.getElementById("viewTabBoard"),
+  viewTabTrends: document.getElementById("viewTabTrends"),
+  boardView: document.getElementById("boardView"),
+  trendsSection: document.getElementById("trendsSection"),
+  trendsCategorySelect: document.getElementById("trendsCategorySelect"),
+  trendsCategoryLabel: document.getElementById("trendsCategoryLabel"),
+  trendsModeSelect: document.getElementById("trendsModeSelect"),
+  trendsModeLabel: document.getElementById("trendsModeLabel"),
+  modelPicker: document.getElementById("modelPicker"),
+  trendsCanvas: document.getElementById("trendsChart"),
+  trendsCaption: document.getElementById("trendsCaption"),
+  trendsNote: document.getElementById("trendsNote"),
 };
 
 let chartInstance = null;
+let trendsChartInstance = null;
 let isApplyingHashState = false;
 
 initializeLocaleUi();
@@ -264,6 +485,9 @@ function initializeLocaleUi() {
     applyFiltersAndRender();
     updateLanguageToggle();
     updateMeta();
+    if (state.view === "trends") {
+      renderTrends();
+    }
   });
 }
 
@@ -277,12 +501,14 @@ function initializeThemeUi() {
       applyThemeMode(nextMode);
       updateThemeToggle();
       renderChart();
+      renderTrendsChart();
     });
   }
 
   const handleSystemThemeChange = () => {
     if (state.themeMode !== "system") return;
     renderChart();
+    renderTrendsChart();
   };
 
   if (prefersDarkQuery && typeof prefersDarkQuery.addEventListener === "function") {
@@ -369,6 +595,39 @@ function updateStaticCopy() {
   if (elements.footerNote) {
     elements.footerNote.textContent = t("footer.note");
   }
+  if (elements.viewTabs) {
+    elements.viewTabs.setAttribute("aria-label", t("view.tabs.aria"));
+  }
+  if (elements.viewTabBoard) {
+    elements.viewTabBoard.textContent = t("view.board");
+  }
+  if (elements.viewTabTrends) {
+    elements.viewTabTrends.textContent = t("view.trends");
+  }
+  if (elements.trendsCategoryLabel) {
+    elements.trendsCategoryLabel.textContent = t("trends.category.label");
+  }
+  if (elements.trendsCategorySelect) {
+    elements.trendsCategorySelect.setAttribute("aria-label", t("trends.category.aria"));
+  }
+  if (elements.trendsModeLabel) {
+    elements.trendsModeLabel.textContent = t("trends.mode.label");
+  }
+  if (elements.trendsModeSelect) {
+    elements.trendsModeSelect.setAttribute("aria-label", t("trends.mode.aria"));
+    setSelectOptions(
+      elements.trendsModeSelect,
+      [
+        { value: "percentile", label: t("trends.mode.percentile") },
+        { value: "rank", label: t("trends.mode.rank") },
+      ],
+      state.trends.mode
+    );
+  }
+  if (elements.modelPicker) {
+    elements.modelPicker.setAttribute("aria-label", t("trends.picker.aria"));
+  }
+  buildTrendsCategoryOptions();
   updateThemeToggle();
 }
 
@@ -460,6 +719,8 @@ function parseHashState(rawHash = window.location.hash) {
 
   return {
     hasParams: hash.length > 0,
+    view: (params.get("view") || "").trim(),
+    trendsCategory: (params.get("trendcat") || "").trim(),
     category: (params.get("category") || "").trim(),
     datasetKey: (params.get("dataset") || "").trim(),
     inferenceFilter: normalizeInferenceFilter((params.get("inference") || "").trim()),
@@ -471,10 +732,10 @@ function parseHashState(rawHash = window.location.hash) {
 function resolveCategoryFromHash(category, datasetKey) {
   if (datasetKey) {
     const dataset = state.manifest.find((entry) => buildDatasetKey(entry) === datasetKey);
-    if (dataset) return dataset.category;
+    if (dataset && !HIDDEN_CATEGORIES.has(dataset.category)) return dataset.category;
   }
 
-  if (!category) return null;
+  if (!category || HIDDEN_CATEGORIES.has(category)) return null;
   const exists = state.manifest.some((entry) => entry.category === category);
   return exists ? category : null;
 }
@@ -488,6 +749,13 @@ function isDatasetInCategory(datasetKey, category) {
 
 function buildHashFromState() {
   const params = new URLSearchParams();
+  if (state.view === "trends") {
+    params.set("view", "trends");
+    if (state.trends.category) {
+      params.set("trendcat", state.trends.category);
+    }
+    return params.toString();
+  }
   if (state.currentCategory) {
     params.set("category", state.currentCategory);
   }
@@ -522,7 +790,28 @@ async function applyStateFromHash(rawHash = window.location.hash) {
   if (!state.manifest.length) return false;
 
   const hashState = parseHashState(rawHash);
-  if (!hashState.hasParams) return false;
+  if (!hashState.hasParams) {
+    if (state.view !== "board") {
+      setView("board", { sync: false });
+    }
+    return false;
+  }
+
+  if (hashState.view === "trends") {
+    const trendCategory = hashState.trendsCategory;
+    if (
+      trendCategory &&
+      TRENDS_SUPPORTED.has(trendCategory) &&
+      state.manifest.some((entry) => entry.category === trendCategory)
+    ) {
+      if (state.trends.category !== trendCategory) {
+        state.trends.category = trendCategory;
+        state.trends.loadedCategory = null;
+      }
+    }
+    setView("trends", { sync: false });
+    return true;
+  }
 
   const targetCategory = resolveCategoryFromHash(hashState.category, hashState.datasetKey);
   if (!targetCategory) return false;
@@ -568,6 +857,9 @@ async function applyStateFromHash(rawHash = window.location.hash) {
     isApplyingHashState = false;
   }
 
+  if (state.view !== "board") {
+    setView("board", { sync: false });
+  }
   syncHashFromState();
   return true;
 }
@@ -582,6 +874,7 @@ async function init() {
 
   state.manifest = manifest;
   buildCategoryOptions();
+  buildTrendsCategoryOptions();
   bindEventHandlers();
 
   const appliedFromHash = await applyStateFromHash(window.location.hash);
@@ -609,6 +902,9 @@ function buildCategoryOptions(preserveSelection = false) {
   const categories = state.manifest
     .map((entry) => entry.category)
     .filter((category) => {
+      if (HIDDEN_CATEGORIES.has(category)) {
+        return false;
+      }
       if (seen.has(category)) {
         return false;
       }
@@ -686,6 +982,33 @@ function bindEventHandlers() {
   if (elements.yAxisSelect) {
     elements.yAxisSelect.addEventListener("change", () => {
       renderChart();
+    });
+  }
+
+  if (elements.viewTabBoard) {
+    elements.viewTabBoard.addEventListener("click", () => setView("board"));
+  }
+  if (elements.viewTabTrends) {
+    elements.viewTabTrends.addEventListener("click", () => setView("trends"));
+  }
+
+  if (elements.trendsCategorySelect) {
+    elements.trendsCategorySelect.addEventListener("change", (event) => {
+      const category = event.target.value;
+      if (!TRENDS_SUPPORTED.has(category)) return;
+      state.trends.category = category;
+      state.trends.loadedCategory = null;
+      state.trends.selected = new Set();
+      ensureTrendsData().then(renderTrends);
+      syncHashFromState();
+    });
+  }
+
+  if (elements.trendsModeSelect) {
+    elements.trendsModeSelect.addEventListener("change", (event) => {
+      state.trends.mode = event.target.value === "rank" ? "rank" : "percentile";
+      renderTrendsChart();
+      updateTrendsCaption();
     });
   }
 
@@ -871,6 +1194,12 @@ async function loadDatasetByKey(key) {
       modelCountry: classifyModelCountry(modelName),
     };
   });
+
+  // 数据集的默认序为“中位分数”降序（无该列则不排序）
+  const medianScoreIndex = displayHeaders.indexOf("中位分数");
+  if (medianScoreIndex !== -1) {
+    state.sort = { columnIndex: medianScoreIndex, direction: "desc" };
+  }
 
   applyFiltersAndRender();
 
@@ -1059,6 +1388,15 @@ function isThinkRow(value) {
   return normalized === "1" || normalized === "true";
 }
 
+// 模型家族：命名的首个词（短横线或空格分隔），如
+// "GPT-5.5 (xhigh)" → gpt，"Claude Opus 5" → claude，"Kimi-K3 (max)" → kimi
+function getModelFamily(name) {
+  const normalized = String(name || "").trim();
+  if (!normalized) return "";
+  const match = normalized.match(/^[^\s-]+/);
+  return match ? match[0].toLowerCase() : "";
+}
+
 function isMobileViewport() {
   return window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT_PX}px)`).matches;
 }
@@ -1211,7 +1549,7 @@ function resolveFieldByGroup(row, fieldGroup, headerIndexMap, usedIndices) {
     const rawHeader = state.headers[index];
     return {
       label: rawHeader ? getHeaderLabel(rawHeader) : t("table.mobile.unnamedField"),
-      value,
+      value: formatCellForDisplay(rawHeader, value),
       tone,
       statusClass: getCodeV3StatusClass(value),
     };
@@ -1230,7 +1568,7 @@ function collectRemainingFields(row, usedIndices) {
 
     fields.push({
       label: header ? getHeaderLabel(header) : t("table.mobile.unnamedField"),
-      value,
+      value: formatCellForDisplay(header, value),
       statusClass: getCodeV3StatusClass(value),
     });
   });
@@ -1299,7 +1637,7 @@ function buildMetricFromIndex(row, index, usedIndices) {
   const rawHeader = state.headers[index];
   return {
     label: rawHeader ? getHeaderLabel(rawHeader) : t("table.mobile.unnamedField"),
-    value,
+    value: formatCellForDisplay(rawHeader, value),
     statusClass: getCodeV3StatusClass(value),
   };
 }
@@ -1540,6 +1878,9 @@ function renderTable() {
   const headerIndexMap = buildHeaderIndexMap(state.headers);
   const modelColumnIndex = findModelColumnIndex(state.headers, state.filteredRows, headerIndexMap);
   const isCodeV3Table = state.currentCategory === "code_v3";
+  // 成本列（logic/code 为“测试成本(元)”，vision 为“成本”）：用于 hover 局部对比
+  const costHeader = CATEGORY_CHART_CONFIG[state.currentCategory]?.cost ?? null;
+  const costColumnIndex = costHeader ? state.headers.indexOf(costHeader) : -1;
 
   const table = document.createElement("table");
   if (isCodeV3Table) {
@@ -1559,6 +1900,7 @@ function renderTable() {
 
     const isActive = state.sort.columnIndex === index;
     if (isActive && state.sort.direction) {
+      th.classList.add("sorted");
       const indicator = document.createElement("span");
       indicator.className = "sort-indicator";
       indicator.textContent = state.sort.direction === "asc" ? "↑" : "↓";
@@ -1577,6 +1919,10 @@ function renderTable() {
   const tbody = document.createElement("tbody");
   state.filteredRows.forEach((row) => {
     const tr = document.createElement("tr");
+    const family = modelColumnIndex >= 0 ? getModelFamily(row.cells[modelColumnIndex]) : "";
+    if (family) {
+      tr.dataset.family = family;
+    }
     row.cells.forEach((cell, columnIndex) => {
       const td = document.createElement("td");
       if (isCodeV3Table) {
@@ -1584,7 +1930,17 @@ function renderTable() {
           columnIndex === modelColumnIndex ? "codev3-model-column" : "codev3-fixed-column"
         );
       }
-      const displayValue = cell || "—";
+      if (columnIndex === modelColumnIndex) {
+        td.classList.add("model-cell");
+      }
+      if (columnIndex === costColumnIndex) {
+        td.classList.add("cost-cell");
+        const costNumber = parseSortableNumber(cell);
+        if (costNumber !== null) {
+          td.dataset.cost = String(costNumber);
+        }
+      }
+      const displayValue = cell ? formatCellForDisplay(state.headers[columnIndex], cell) : "—";
       const statusClass = getCodeV3StatusClass(cell);
       if (statusClass) {
         td.classList.add(...statusClass.split(" "));
@@ -1606,6 +1962,67 @@ function renderTable() {
     });
     tbody.appendChild(tr);
   });
+
+  // 家族高亮：hover 某行时，点亮榜上所有同家族模型（橙色圆点，见 CSS）
+  let litFamily = null;
+  const clearLitFamily = () => {
+    if (litFamily === null) return;
+    tbody.querySelectorAll("tr.family-lit").forEach((el) => el.classList.remove("family-lit"));
+    litFamily = null;
+  };
+  tbody.addEventListener("mouseover", (event) => {
+    const tr = event.target.closest("tr");
+    const family = tr && tr.dataset.family ? tr.dataset.family : null;
+    if (family === litFamily) return;
+    clearLitFamily();
+    if (family === null) return;
+    litFamily = family;
+    tbody
+      .querySelectorAll(`tr[data-family="${CSS.escape(family)}"]`)
+      .forEach((el) => el.classList.add("family-lit"));
+  });
+  tbody.addEventListener("mouseleave", clearLitFamily);
+
+  // 成本局部对比：hover 某成本数字时，以上下 ±5 行为窗口，
+  // 高于基准的标红、低于基准的标蓝，基准本身加粗；离开后整列恢复灰色
+  let costBaselineRow = -1;
+  const clearCostCompare = () => {
+    if (costBaselineRow === -1) return;
+    tbody.classList.remove("cost-compare-active");
+    tbody
+      .querySelectorAll(".cost-baseline, .cost-above, .cost-below")
+      .forEach((el) => el.classList.remove("cost-baseline", "cost-above", "cost-below"));
+    costBaselineRow = -1;
+  };
+  tbody.addEventListener("mouseover", (event) => {
+    const cell = event.target.closest("td.cost-cell");
+    if (!cell || cell.dataset.cost === undefined) {
+      clearCostCompare();
+      return;
+    }
+    const rowIndex = Array.prototype.indexOf.call(tbody.children, cell.parentElement);
+    if (rowIndex === -1 || rowIndex === costBaselineRow) return;
+    clearCostCompare();
+    costBaselineRow = rowIndex;
+    const baseline = Number(cell.dataset.cost);
+    tbody.classList.add("cost-compare-active");
+    cell.classList.add("cost-baseline");
+    const rows = tbody.children;
+    const from = Math.max(0, rowIndex - 5);
+    const to = Math.min(rows.length - 1, rowIndex + 5);
+    for (let i = from; i <= to; i += 1) {
+      if (i === rowIndex) continue;
+      const target = rows[i].querySelector("td.cost-cell");
+      if (!target || target.dataset.cost === undefined) continue;
+      const value = Number(target.dataset.cost);
+      if (value > baseline) {
+        target.classList.add("cost-above");
+      } else if (value < baseline) {
+        target.classList.add("cost-below");
+      }
+    }
+  });
+  tbody.addEventListener("mouseleave", clearCostCompare);
 
   table.appendChild(tbody);
   container.appendChild(table);
@@ -1671,6 +2088,372 @@ function showPlaceholder(message) {
   container.innerHTML = `<div class="placeholder" role="status">${message}</div>`;
 }
 
+/* ---------------- 视图切换 ---------------- */
+
+function setView(view, { sync = true } = {}) {
+  const nextView = VALID_VIEWS.has(view) ? view : "board";
+  state.view = nextView;
+
+  if (elements.viewTabBoard) {
+    elements.viewTabBoard.classList.toggle("active", nextView === "board");
+  }
+  if (elements.viewTabTrends) {
+    elements.viewTabTrends.classList.toggle("active", nextView === "trends");
+  }
+  if (elements.boardView) {
+    elements.boardView.hidden = nextView !== "board";
+  }
+  if (elements.trendsSection) {
+    elements.trendsSection.hidden = nextView !== "trends";
+  }
+
+  if (nextView === "trends") {
+    state.trends.category = resolveInitialTrendsCategory();
+    if (elements.trendsCategorySelect) {
+      elements.trendsCategorySelect.value = state.trends.category || "";
+    }
+    ensureTrendsData().then(renderTrends);
+  } else {
+    if (!state.currentDatasetKey && elements.categorySelect.value) {
+      handleCategoryChange(elements.categorySelect.value);
+    } else {
+      updateChartVisibility();
+      renderChart();
+    }
+  }
+
+  if (sync) {
+    syncHashFromState();
+  }
+}
+
+function resolveInitialTrendsCategory() {
+  if (state.trends.category && TRENDS_SUPPORTED.has(state.trends.category)) {
+    return state.trends.category;
+  }
+  if (TRENDS_SUPPORTED.has(state.currentCategory)) {
+    return state.currentCategory;
+  }
+  // 按固定的类别顺序取第一个有数据的，而不是依赖 manifest 排列顺序
+  const available = new Set(state.manifest.map((entry) => entry.category));
+  const preferred = CATEGORY_ORDER.find(
+    (category) => TRENDS_SUPPORTED.has(category) && available.has(category)
+  );
+  return preferred || "logic";
+}
+
+function buildTrendsCategoryOptions() {
+  if (!elements.trendsCategorySelect || !state.manifest.length) return;
+  const seen = new Set();
+  const categories = state.manifest
+    .map((entry) => entry.category)
+    .filter((category) => {
+      if (!TRENDS_SUPPORTED.has(category) || seen.has(category)) return false;
+      seen.add(category);
+      return true;
+    });
+  categories.sort((a, b) => CATEGORY_ORDER.indexOf(a) - CATEGORY_ORDER.indexOf(b));
+  setSelectOptions(
+    elements.trendsCategorySelect,
+    categories.map((category) => ({ value: category, label: getCategoryLabel(category) })),
+    state.trends.category || resolveInitialTrendsCategory()
+  );
+}
+
+/* ---------------- 趋势视图 ---------------- */
+
+function findChartModelIndex(headers) {
+  const direct = headers.indexOf("模型");
+  if (direct !== -1) return direct;
+  // vision 早期文件模型列表头为空，位于“报告日期”之后。
+  if (headers[0] === "报告日期" && headers.length > 1) return 1;
+  return -1;
+}
+
+async function ensureTrendsData() {
+  const category = state.trends.category;
+  if (!category || !TRENDS_SUPPORTED.has(category)) {
+    state.trends.months = [];
+    state.trends.models = [];
+    return;
+  }
+  if (state.trends.loadedCategory === category && state.trends.months.length) {
+    return;
+  }
+
+  state.trends.loading = true;
+  renderTrendsStatus();
+
+  const config = CATEGORY_CHART_CONFIG[category];
+  const entries = state.manifest
+    .filter((entry) => entry.category === category && (entry.title === "月榜" || !entry.title))
+    .sort((a, b) => (a.reportDate < b.reportDate ? -1 : a.reportDate > b.reportDate ? 1 : 0))
+    .slice(-TRENDS_MAX_MONTHS);
+
+  const months = await Promise.all(
+    entries.map(async (entry) => {
+      try {
+        const { headers, rows } = await fetchCsvDataset(entry.csv);
+        const scoreIndex = config.scoreFallbacks.reduce(
+          (found, candidate) => (found !== -1 ? found : headers.indexOf(candidate)),
+          -1
+        );
+        const modelIndex = findChartModelIndex(headers);
+        if (scoreIndex === -1 || modelIndex === -1) return null;
+
+        const scored = [];
+        rows.forEach((cells) => {
+          const name = String(cells[modelIndex] || "").trim();
+          const score = parseSortableNumber(cells[scoreIndex]);
+          if (!name || score === null) return;
+          scored.push({ name, score });
+        });
+        if (!scored.length) return null;
+
+        scored.sort((a, b) => b.score - a.score);
+        const n = scored.length;
+        const ranks = new Map();
+        scored.forEach((item, index) => {
+          if (ranks.has(item.name)) return;
+          ranks.set(item.name, {
+            rank: index + 1,
+            percentile: n > 1 ? ((n - index - 1) / (n - 1)) * 100 : 100,
+            score: item.score,
+            cohortSize: n,
+          });
+        });
+        return { key: entry.reportDate, label: entry.reportDate, ranks };
+      } catch (error) {
+        console.warn("Trends: skipping", entry.csv, error);
+        return null;
+      }
+    })
+  );
+
+  state.trends.months = months.filter(Boolean);
+  state.trends.loadedCategory = category;
+  state.trends.loading = false;
+  buildTrendsModelList();
+}
+
+function buildTrendsModelList() {
+  const months = state.trends.months;
+  const latestByModel = new Map();
+  months.forEach((month, monthIndex) => {
+    month.ranks.forEach((value, name) => {
+      const prev = latestByModel.get(name);
+      if (!prev || monthIndex >= prev.monthIndex) {
+        latestByModel.set(name, { monthIndex, percentile: value.percentile });
+      }
+    });
+  });
+
+  const cutoff = Math.max(0, months.length - TRENDS_RECENT_MONTHS);
+  const models = [...latestByModel.entries()]
+    .filter(([, value]) => value.monthIndex >= cutoff)
+    .map(([name, value]) => ({ name, percentile: value.percentile }))
+    .sort((a, b) => b.percentile - a.percentile);
+
+  state.trends.models = models;
+  const validNames = new Set(models.map((model) => model.name));
+  state.trends.selected = new Set([...state.trends.selected].filter((name) => validNames.has(name)));
+  if (!state.trends.selected.size) {
+    models.slice(0, TRENDS_DEFAULT_SELECTED).forEach((model) => state.trends.selected.add(model.name));
+  }
+}
+
+function renderTrends() {
+  if (state.view !== "trends" || !elements.trendsSection) return;
+  renderTrendsStatus();
+  if (state.trends.loading) return;
+
+  const hasData = state.trends.months.length > 0;
+  if (elements.modelPicker) {
+    elements.modelPicker.style.display = hasData ? "" : "none";
+  }
+  const chartWrap = elements.trendsCanvas ? elements.trendsCanvas.parentElement : null;
+  if (chartWrap) {
+    chartWrap.style.display = hasData && state.trends.selected.size ? "" : "none";
+  }
+
+  if (!hasData) {
+    if (trendsChartInstance) {
+      trendsChartInstance.destroy();
+      trendsChartInstance = null;
+    }
+    if (elements.trendsCaption) {
+      elements.trendsCaption.textContent = "";
+    }
+    return;
+  }
+
+  renderModelPicker();
+  renderTrendsChart();
+  updateTrendsCaption();
+}
+
+function renderTrendsStatus() {
+  if (!elements.trendsNote) return;
+  const category = state.trends.category;
+  if (state.trends.loading) {
+    elements.trendsNote.textContent = t("trends.loading");
+  } else if (!category || !TRENDS_SUPPORTED.has(category)) {
+    elements.trendsNote.textContent = t("trends.unsupported");
+  } else if (!state.trends.months.length) {
+    elements.trendsNote.textContent = t("trends.empty");
+  } else {
+    elements.trendsNote.textContent = t("trends.note");
+  }
+}
+
+function renderModelPicker() {
+  const picker = elements.modelPicker;
+  if (!picker) return;
+  picker.innerHTML = "";
+  state.trends.models.forEach((model) => {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "chip" + (state.trends.selected.has(model.name) ? " selected" : "");
+    chip.textContent = model.name;
+    chip.addEventListener("click", () => {
+      if (state.trends.selected.has(model.name)) {
+        state.trends.selected.delete(model.name);
+      } else {
+        state.trends.selected.add(model.name);
+      }
+      chip.classList.toggle("selected");
+      renderTrendsChart();
+      const chartWrap = elements.trendsCanvas ? elements.trendsCanvas.parentElement : null;
+      if (chartWrap) {
+        chartWrap.style.display = state.trends.selected.size ? "" : "none";
+      }
+    });
+    picker.appendChild(chip);
+  });
+}
+
+function updateTrendsCaption() {
+  if (!elements.trendsCaption) return;
+  elements.trendsCaption.textContent = state.trends.months.length
+    ? t(`trends.caption.${state.trends.mode}`)
+    : "";
+}
+
+function isDarkThemeActive() {
+  if (state.themeMode === "dark") return true;
+  if (state.themeMode === "light") return false;
+  return prefersDarkQuery ? prefersDarkQuery.matches : false;
+}
+
+function renderTrendsChart() {
+  if (!elements.trendsCanvas || state.view !== "trends") return;
+  if (state.trends.loading || !state.trends.months.length) return;
+
+  const months = state.trends.months;
+  const selected = [...state.trends.selected];
+  if (!selected.length) {
+    if (trendsChartInstance) {
+      trendsChartInstance.destroy();
+      trendsChartInstance = null;
+    }
+    return;
+  }
+
+  const mode = state.trends.mode;
+  const palette = isDarkThemeActive() ? SERIES_PALETTE_DARK : SERIES_PALETTE_LIGHT;
+  const colorIndex = new Map(state.trends.models.map((model, index) => [model.name, index]));
+  const labels = months.map((month) => month.label);
+
+  const datasets = selected.map((name) => {
+    const color = palette[(colorIndex.get(name) ?? 0) % palette.length];
+    return {
+      label: name,
+      data: months.map((month) => {
+        const record = month.ranks.get(name);
+        if (!record) return null;
+        return mode === "rank" ? record.rank : Math.round(record.percentile * 10) / 10;
+      }),
+      borderColor: color,
+      backgroundColor: color,
+      borderWidth: 2,
+      pointRadius: 3,
+      pointHoverRadius: 5,
+      spanGaps: true,
+      tension: 0.25,
+    };
+  });
+
+  const textColor = getCssVariable("--color-text", "#212428");
+  const gridColor = getCssVariable("--color-border", "#e3e1d9");
+  const panelColor = getCssVariable("--color-panel", "#ffffff");
+
+  if (trendsChartInstance) {
+    trendsChartInstance.destroy();
+  }
+
+  trendsChartInstance = new Chart(elements.trendsCanvas.getContext("2d"), {
+    type: "line",
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: "nearest", intersect: false },
+      plugins: {
+        legend: {
+          display: true,
+          position: "bottom",
+          labels: { color: textColor, boxWidth: 12, boxHeight: 2, font: { size: 12 } },
+        },
+        tooltip: {
+          backgroundColor: panelColor,
+          titleColor: textColor,
+          bodyColor: textColor,
+          borderColor: gridColor,
+          borderWidth: 1,
+          callbacks: {
+            label: (context) => {
+              const record = months[context.dataIndex].ranks.get(context.dataset.label);
+              if (!record) return context.dataset.label;
+              const rankText = `#${record.rank}/${record.cohortSize}`;
+              const scoreText = `${t("trends.tooltip.score")}: ${record.score}`;
+              return mode === "rank"
+                ? `${context.dataset.label}: ${rankText} (${scoreText})`
+                : `${context.dataset.label}: ${record.percentile.toFixed(1)}% (${rankText})`;
+            },
+          },
+        },
+      },
+      scales: {
+        x: {
+          grid: { color: gridColor },
+          ticks: { color: textColor, font: { size: 11 }, maxRotation: 45, autoSkip: true },
+        },
+        y:
+          mode === "rank"
+            ? {
+                reverse: true,
+                min: 1,
+                grid: { color: gridColor },
+                ticks: { color: textColor, font: { size: 11 }, precision: 0 },
+                title: { display: true, text: t("trends.mode.rank"), color: textColor, font: { size: 12 } },
+              }
+            : {
+                min: 0,
+                max: 100,
+                grid: { color: gridColor },
+                ticks: { color: textColor, font: { size: 11 }, callback: (value) => `${value}%` },
+                title: {
+                  display: true,
+                  text: t("trends.mode.percentile"),
+                  color: textColor,
+                  font: { size: 12 },
+                },
+              },
+      },
+    },
+  });
+}
+
 function getCssVariable(name, fallback = "") {
   if (typeof window === "undefined") return fallback;
   const value = window.getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -1680,56 +2463,54 @@ function getCssVariable(name, fallback = "") {
 function updateChartVisibility() {
   if (!elements.chartSection) return;
 
-  const isCodeOrReasoning = state.currentCategory === "code" || state.currentCategory === "logic";
+  const show =
+    state.view === "board" &&
+    !!CATEGORY_CHART_CONFIG[state.currentCategory] &&
+    state.filteredRows.length > 0;
 
-  if (isCodeOrReasoning && state.filteredRows.length > 0) {
-    elements.chartSection.style.display = "block";
-  } else {
-    elements.chartSection.style.display = "none";
-  }
+  elements.chartSection.style.display = show ? "block" : "none";
 }
 
 function renderChart() {
   if (!elements.chartCanvas || !elements.chartSection) return;
 
-  const isCodeOrReasoning = state.currentCategory === "code" || state.currentCategory === "logic";
-  if (!isCodeOrReasoning || state.filteredRows.length === 0) {
+  const config = CATEGORY_CHART_CONFIG[state.currentCategory];
+  if (state.view !== "board" || !config || state.filteredRows.length === 0) {
     if (chartInstance) {
       chartInstance.destroy();
       chartInstance = null;
     }
+    if (elements.chartCaption) {
+      elements.chartCaption.textContent = "";
+    }
     return;
   }
 
-  // Use the raw header names from CSV (not translated)
-  const xAxisColumnName = state.currentCategory === "code" ? "多轮总分" : "极限分数";
+  // 使用 CSV 原始列名定位（非翻译后名称）
   const yAxisType = elements.yAxisSelect ? elements.yAxisSelect.value : "cost";
-  const yAxisColumnName = yAxisType === "cost" ? "测试成本(元)" : "平均耗时(秒)";
+  const yAxisColumnName = yAxisType === "cost" ? config.cost : config.time;
 
-  // Get translated labels for chart axes
-  const xAxisLabel = state.currentCategory === "code"
-    ? t("chart.axis.multiTurnScore")
-    : t("chart.axis.maxScore");
-  const yAxisLabel = yAxisType === "cost"
-    ? t("chart.axis.testCost")
-    : t("chart.axis.avgTime");
+  const xAxisLabel =
+    state.currentCategory === "code" ? t("chart.axis.multiTurnScore") : t("chart.axis.maxScore");
+  const yAxisLabel = yAxisType === "cost" ? t("chart.axis.cost") : t("chart.axis.avgTime");
 
-  // Find column indices by searching for the key that translates to the desired header
   let xAxisIndex = -1;
   let yAxisIndex = -1;
-  let modelIndex = -1;
 
   for (let i = 0; i < state.headers.length; i++) {
     const header = state.headers[i];
-    if (header === xAxisColumnName) xAxisIndex = i;
+    if (header === config.score) xAxisIndex = i;
     if (header === yAxisColumnName) yAxisIndex = i;
-    if (header === "模型") modelIndex = i;
   }
+  const modelIndex = findChartModelIndex(state.headers);
 
   if (xAxisIndex === -1 || yAxisIndex === -1 || modelIndex === -1) {
     if (chartInstance) {
       chartInstance.destroy();
       chartInstance = null;
+    }
+    if (elements.chartCaption) {
+      elements.chartCaption.textContent = "";
     }
     return;
   }
@@ -1737,10 +2518,13 @@ function renderChart() {
   const chartData = state.filteredRows
     .map((row) => {
       const xValue = parseSortableNumber(row.cells[xAxisIndex]);
-      const yValue = parseSortableNumber(row.cells[yAxisIndex]);
+      let yValue = parseSortableNumber(row.cells[yAxisIndex]);
       const modelName = row.cells[modelIndex] || "Unknown";
 
       if (xValue === null || yValue === null) return null;
+      if (yAxisType === "cost" && state.locale === "en-US") {
+        yValue = yValue / CNY_PER_USD;
+      }
 
       return {
         x: xValue,
@@ -1756,17 +2540,29 @@ function renderChart() {
       chartInstance.destroy();
       chartInstance = null;
     }
+    if (elements.chartCaption) {
+      elements.chartCaption.textContent = "";
+    }
     return;
   }
 
+  // 数值跨度超过一个数量级时启用对数轴（成本常横跨 ¥2–¥207）
+  const yValues = chartData.map((point) => point.y);
+  const minY = Math.min(...yValues);
+  const maxY = Math.max(...yValues);
+  const useLogScale = minY > 0 && maxY / minY >= 15;
+
+  const medianX = median(chartData.map((point) => point.x));
+  const medianY = median(yValues);
+
   const ctx = elements.chartCanvas.getContext("2d");
-  const chartTextColor = getCssVariable("--color-text", "#1f2937");
-  const chartGridColor = getCssVariable("--color-border", "#dbe1eb");
+  const chartTextColor = getCssVariable("--color-text", "#212428");
+  const chartGridColor = getCssVariable("--color-border", "#e3e1d9");
   const chartPanelColor = getCssVariable("--color-panel", "#ffffff");
-  const chartThinkBg = getCssVariable("--color-chart-think-bg", "rgba(239, 68, 68, 0.6)");
-  const chartThinkBorder = getCssVariable("--color-chart-think-border", "rgba(220, 38, 38, 1)");
-  const chartDefaultBg = getCssVariable("--color-chart-default-bg", "rgba(99, 102, 241, 0.6)");
-  const chartDefaultBorder = getCssVariable("--color-chart-default-border", "rgba(99, 102, 241, 1)");
+  const chartThinkBg = getCssVariable("--color-chart-think-bg", "rgba(158, 59, 50, 0.62)");
+  const chartThinkBorder = getCssVariable("--color-chart-think-border", "rgba(158, 59, 50, 1)");
+  const chartDefaultBg = getCssVariable("--color-chart-default-bg", "rgba(31, 78, 121, 0.58)");
+  const chartDefaultBorder = getCssVariable("--color-chart-default-border", "rgba(31, 78, 121, 1)");
 
   if (chartInstance) {
     chartInstance.destroy();
@@ -1787,9 +2583,9 @@ function renderChart() {
             const point = context.raw;
             return point && point.isThink ? chartThinkBorder : chartDefaultBorder;
           },
-          borderWidth: 2,
-          pointRadius: 6,
-          pointHoverRadius: 8,
+          borderWidth: 1.5,
+          pointRadius: 5,
+          pointHoverRadius: 7,
         },
       ],
     },
@@ -1809,13 +2605,38 @@ function renderChart() {
           callbacks: {
             label: (context) => {
               const point = context.raw;
+              const yText =
+                yAxisType === "cost"
+                  ? state.locale === "en-US"
+                    ? formatUsd(point.y)
+                    : `¥${point.y}`
+                  : `${point.y}`;
               return [
                 `${t("chart.tooltip.model")}: ${point.label}`,
                 `${xAxisLabel}: ${point.x}`,
-                `${yAxisLabel}: ${point.y}`,
+                `${yAxisLabel}: ${yText}`,
               ];
             },
           },
+        },
+        quadrants: {
+          medianX,
+          medianY,
+          sweetBg: getCssVariable("--color-chart-quadrant-sweet", "rgba(58, 107, 79, 0.05)"),
+          lineColor: getCssVariable("--color-chart-median-line", "rgba(111, 108, 101, 0.75)"),
+          labelColor: getCssVariable("--color-chart-quadrant-label", "rgba(111, 108, 101, 0.9)"),
+          labels: {
+            tr: t(`chart.quad.${yAxisType}.tr`),
+            br: t(`chart.quad.${yAxisType}.br`),
+            tl: t(`chart.quad.${yAxisType}.tl`),
+            bl: t(`chart.quad.${yAxisType}.bl`),
+          },
+        },
+        pointLabels: {
+          display: true,
+          fontSize: 11,
+          thinkColor: chartThinkBorder,
+          defaultColor: chartDefaultBorder,
         },
       },
       scales: {
@@ -1825,7 +2646,7 @@ function renderChart() {
             text: xAxisLabel,
             color: chartTextColor,
             font: {
-              size: 14,
+              size: 13,
               weight: "600",
             },
           },
@@ -1835,17 +2656,18 @@ function renderChart() {
           ticks: {
             color: chartTextColor,
             font: {
-              size: 12,
+              size: 11,
             },
           },
         },
         y: {
+          type: useLogScale ? "logarithmic" : "linear",
           title: {
             display: true,
             text: yAxisLabel,
             color: chartTextColor,
             font: {
-              size: 14,
+              size: 13,
               weight: "600",
             },
           },
@@ -1855,11 +2677,16 @@ function renderChart() {
           ticks: {
             color: chartTextColor,
             font: {
-              size: 12,
+              size: 11,
             },
           },
         },
       },
     },
+    plugins: [quadrantPlugin, pointLabelsPlugin],
   });
+
+  if (elements.chartCaption) {
+    elements.chartCaption.textContent = t(`chart.caption.${yAxisType}`);
+  }
 }

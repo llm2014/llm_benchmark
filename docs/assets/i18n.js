@@ -217,7 +217,7 @@ const TRANSLATIONS = {
   },
   "table.header.costCny": {
     "zh-CN": "成本(元)",
-    "en-US": "Cost (CNY)",
+    "en-US": "Cost (USD)",
   },
   "table.header.notes": {
     "zh-CN": "备注",
@@ -225,7 +225,7 @@ const TRANSLATIONS = {
   },
   "table.header.usageCostCny": {
     "zh-CN": "使用成本(元)",
-    "en-US": "Usage Cost (CNY)",
+    "en-US": "Usage Cost (USD)",
   },
   "table.header.errorsAfterFix": {
     "zh-CN": "修复后异常",
@@ -281,7 +281,7 @@ const TRANSLATIONS = {
   },
   "table.header.pricePerMillion": {
     "zh-CN": "价格(元/百万)",
-    "en-US": "Price (CNY / 1M tokens)",
+    "en-US": "Price (USD / 1M tokens)",
   },
   "table.header.finalUnavailable": {
     "zh-CN": "最终不可用",
@@ -289,7 +289,7 @@ const TRANSLATIONS = {
   },
   "table.header.testCostCny": {
     "zh-CN": "测试成本(元)",
-    "en-US": "Test Cost (CNY)",
+    "en-US": "Test Cost (USD)",
   },
   "table.header.testTime": {
     "zh-CN": "测试时间",
@@ -384,8 +384,8 @@ const TRANSLATIONS = {
     "en-US": "Select Y-axis metric",
   },
   "chart.yAxis.option.cost": {
-    "zh-CN": "测试成本",
-    "en-US": "Test Cost",
+    "zh-CN": "成本",
+    "en-US": "Cost",
   },
   "chart.yAxis.option.time": {
     "zh-CN": "平均耗时",
@@ -399,10 +399,6 @@ const TRANSLATIONS = {
     "zh-CN": "极限分数",
     "en-US": "Max Score",
   },
-  "chart.axis.testCost": {
-    "zh-CN": "测试成本(元)",
-    "en-US": "Test Cost (CNY)",
-  },
   "chart.axis.avgTime": {
     "zh-CN": "平均耗时(秒)",
     "en-US": "Average Time (seconds)",
@@ -414,6 +410,121 @@ const TRANSLATIONS = {
   "chart.dataset.performance": {
     "zh-CN": "模型性能",
     "en-US": "Model Performance",
+  },
+  "chart.axis.cost": {
+    "zh-CN": "成本(元)",
+    "en-US": "Cost (USD)",
+  },
+  "chart.caption.cost": {
+    "zh-CN": "图 1. 性能 × 成本象限分布（虚线为当月中位数）",
+    "en-US":
+      "Fig. 1. Performance vs. cost quadrants (dashed lines mark medians; CNY converted to USD at 6.9)",
+  },
+  "chart.caption.time": {
+    "zh-CN": "图 1. 性能 × 耗时象限分布（虚线为当月中位数）",
+    "en-US": "Fig. 1. Performance vs. latency quadrants (dashed lines mark medians)",
+  },
+  "chart.quad.cost.tr": {
+    "zh-CN": "高价旗舰",
+    "en-US": "Premium",
+  },
+  "chart.quad.cost.br": {
+    "zh-CN": "性价比区",
+    "en-US": "Best value",
+  },
+  "chart.quad.cost.tl": {
+    "zh-CN": "性价失衡",
+    "en-US": "Poor value",
+  },
+  "chart.quad.cost.bl": {
+    "zh-CN": "经济入门",
+    "en-US": "Budget",
+  },
+  "chart.quad.time.tr": {
+    "zh-CN": "高性能 · 高耗时",
+    "en-US": "Strong, slow",
+  },
+  "chart.quad.time.br": {
+    "zh-CN": "高性能 · 低耗时",
+    "en-US": "Strong, fast",
+  },
+  "chart.quad.time.tl": {
+    "zh-CN": "低性能 · 高耗时",
+    "en-US": "Weak, slow",
+  },
+  "chart.quad.time.bl": {
+    "zh-CN": "低性能 · 低耗时",
+    "en-US": "Light, fast",
+  },
+  "view.board": {
+    "zh-CN": "榜单",
+    "en-US": "Leaderboard",
+  },
+  "view.trends": {
+    "zh-CN": "趋势",
+    "en-US": "Trends",
+  },
+  "view.tabs.aria": {
+    "zh-CN": "切换视图",
+    "en-US": "Switch view",
+  },
+  "trends.category.label": {
+    "zh-CN": "数据类别",
+    "en-US": "Category",
+  },
+  "trends.category.aria": {
+    "zh-CN": "选择趋势视图的数据类别",
+    "en-US": "Select category for trends",
+  },
+  "trends.mode.label": {
+    "zh-CN": "排名方式",
+    "en-US": "Ranking",
+  },
+  "trends.mode.aria": {
+    "zh-CN": "选择排名方式",
+    "en-US": "Select ranking mode",
+  },
+  "trends.mode.percentile": {
+    "zh-CN": "当月百分位",
+    "en-US": "Monthly percentile",
+  },
+  "trends.mode.rank": {
+    "zh-CN": "当月名次",
+    "en-US": "Monthly rank",
+  },
+  "trends.loading": {
+    "zh-CN": "正在汇总历史数据…",
+    "en-US": "Aggregating historical data…",
+  },
+  "trends.unsupported": {
+    "zh-CN": "该类别为等级制结果，暂不支持跨月排名趋势。",
+    "en-US": "This category reports letter grades; ranking trends are not available.",
+  },
+  "trends.empty": {
+    "zh-CN": "暂无可用的历史数据。",
+    "en-US": "No historical data available.",
+  },
+  "trends.note": {
+    "zh-CN":
+      "说明：评测题目逐月更换，绝对分数不可跨月直接比较；本图展示各模型在当月参评集合中的相对位置（点击上方标签可增删模型）。",
+    "en-US":
+      "Note: benchmark questions rotate monthly, so raw scores are not comparable across months. This chart shows each model's relative position within that month's cohort (toggle models via the tags above).",
+  },
+  "trends.caption.percentile": {
+    "zh-CN": "图 2. 当月百分位走势（100 = 当月最佳）",
+    "en-US": "Fig. 2. Monthly percentile trend (100 = best of the month)",
+  },
+  "trends.caption.rank": {
+    "zh-CN": "图 2. 当月名次走势（1 = 当月最佳）",
+    "en-US": "Fig. 2. Monthly rank trend (1 = best of the month)",
+  },
+  "trends.picker.aria": {
+    "zh-CN": "选择要对比的模型",
+    "en-US": "Select models to compare",
+  },
+  "trends.tooltip.score": {
+    "zh-CN": "当月得分",
+    "en-US": "Score",
   },
 };
 

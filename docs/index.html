@@ -19,54 +19,81 @@
     </header>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <main>
-      <section class="controls">
-        <div class="control">
-          <label for="categorySelect" id="categoryLabel">数据类别</label>
-          <select id="categorySelect" aria-label=""></select>
-        </div>
-        <div class="control">
-          <label for="datasetSelect" id="datasetLabel">数据集</label>
-          <select id="datasetSelect" aria-label="" disabled></select>
-        </div>
-        <div class="control">
-          <label for="inferenceFilter" id="inferenceLabel">模型模式</label>
-          <select id="inferenceFilter" aria-label="" disabled></select>
-        </div>
-        <div class="control">
-          <label for="countryFilter" id="countryLabel">模型国家</label>
-          <select id="countryFilter" aria-label="" disabled></select>
-        </div>
-        <div class="control search-control">
-          <label for="searchInput" id="searchLabel">搜索</label>
-          <input id="searchInput" type="search" placeholder="" aria-label="" disabled />
-        </div>
-      </section>
+      <nav class="view-tabs" id="viewTabs" aria-label="">
+        <button id="viewTabBoard" type="button" class="view-tab active"></button>
+        <button id="viewTabTrends" type="button" class="view-tab"></button>
+      </nav>
 
-      <section class="dataset-meta" id="datasetMeta"></section>
-
-      <section class="table-wrapper">
-        <div id="tableContainer" class="table-container">
-          <div class="placeholder" role="status">请选择数据集开始浏览。</div>
-        </div>
-      </section>
-
-      <section class="chart-section" id="chartSection" style="display: none;">
-        <div class="chart-controls">
+      <div id="boardView">
+        <section class="controls">
           <div class="control">
-            <label for="yAxisSelect" id="yAxisLabel">纵轴指标</label>
-            <select id="yAxisSelect" aria-label="">
-              <option value="cost">测试成本</option>
-              <option value="time">平均耗时</option>
-            </select>
+            <label for="categorySelect" id="categoryLabel">数据类别</label>
+            <select id="categorySelect" aria-label=""></select>
+          </div>
+          <div class="control">
+            <label for="datasetSelect" id="datasetLabel">数据集</label>
+            <select id="datasetSelect" aria-label="" disabled></select>
+          </div>
+          <div class="control">
+            <label for="inferenceFilter" id="inferenceLabel">模型模式</label>
+            <select id="inferenceFilter" aria-label="" disabled></select>
+          </div>
+          <div class="control">
+            <label for="countryFilter" id="countryLabel">模型国家</label>
+            <select id="countryFilter" aria-label="" disabled></select>
+          </div>
+          <div class="control search-control">
+            <label for="searchInput" id="searchLabel">搜索</label>
+            <input id="searchInput" type="search" placeholder="" aria-label="" disabled />
+          </div>
+        </section>
+
+        <section class="dataset-meta" id="datasetMeta"></section>
+
+        <section class="table-wrapper">
+          <div id="tableContainer" class="table-container">
+            <div class="placeholder" role="status">请选择数据集开始浏览。</div>
+          </div>
+        </section>
+
+        <section class="chart-section" id="chartSection" style="display: none;">
+          <div class="chart-controls">
+            <div class="control">
+              <label for="yAxisSelect" id="yAxisLabel">纵轴指标</label>
+              <select id="yAxisSelect" aria-label="">
+                <option value="cost">测试成本</option>
+                <option value="time">平均耗时</option>
+              </select>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="benchmarkChart"></canvas>
+          </div>
+          <p class="chart-caption" id="chartCaption"></p>
+        </section>
+      </div>
+
+      <section class="trends-section" id="trendsSection" hidden>
+        <div class="trends-toolbar">
+          <div class="control">
+            <label for="trendsCategorySelect" id="trendsCategoryLabel"></label>
+            <select id="trendsCategorySelect" aria-label=""></select>
+          </div>
+          <div class="control">
+            <label for="trendsModeSelect" id="trendsModeLabel"></label>
+            <select id="trendsModeSelect" aria-label=""></select>
           </div>
         </div>
-        <div class="chart-container">
-          <canvas id="benchmarkChart"></canvas>
+        <div class="chip-picker" id="modelPicker" role="group" aria-label=""></div>
+        <div class="trends-chart-container">
+          <canvas id="trendsChart"></canvas>
         </div>
+        <p class="chart-caption" id="trendsCaption"></p>
+        <p class="trends-note" id="trendsNote"></p>
       </section>
     </main>
     <footer class="page-footer">
-      <small>Vibe Coding by Codex with 305K Tokens</small>
+      <small>Vibe Coding by Codex -> Kimi K3</small>
     </footer>
 
     <section class="crawler-hint" data-crawler-hint="true">
