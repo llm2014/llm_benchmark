@@ -558,7 +558,7 @@ main {
 
 /* 家族高亮：hover 某模型时，同家族模型名前点亮橙色圆点。
    圆点绝对定位在单元格左内边距内，不参与布局，避免列宽跳动 */
-.table-container .model-cell {
+.table-container:not(.table-container--codev3) .model-cell {
   position: relative;
 }
 
