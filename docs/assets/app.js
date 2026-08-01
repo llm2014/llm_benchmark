@@ -411,6 +411,7 @@ const elements = {
   countryFilter: document.getElementById("countryFilter"),
   searchInput: document.getElementById("searchInput"),
   tableContainer: document.getElementById("tableContainer"),
+  tableNote: document.getElementById("tableNote"),
   datasetMeta: document.getElementById("datasetMeta"),
   categoryLabel: document.getElementById("categoryLabel"),
   datasetLabel: document.getElementById("datasetLabel"),
@@ -1451,6 +1452,23 @@ function getCodeV3StatusClass(value) {
   return null;
 }
 
+function getCodeV3GradeCellClass(value) {
+  if (state.currentCategory !== "code_v3") return null;
+  const parsed = parseCodeV3RankGrade(value);
+  if (!parsed) return null;
+  return `codev3-cell--${parsed.gradeBase.toLowerCase()}`;
+}
+
+function getCodeV3CellBackgroundClass(value) {
+  if (state.currentCategory !== "code_v3") return null;
+  const normalized = String(value ?? "").trim().toLowerCase();
+  if (!normalized) return null;
+  if (normalized === "pass") return "codev3-cell--pass";
+  if (normalized.startsWith("failed")) return "codev3-cell--failed";
+  if (normalized.startsWith("pending")) return "codev3-cell--pending";
+  return null;
+}
+
 function parseCodeV3RankGrade(value) {
   if (state.currentCategory !== "code_v3") return null;
   const normalized = String(value ?? "").trim();
@@ -1604,6 +1622,11 @@ function appendStructuredMetric(rowElement, metric) {
   item.className = "mobile-card-row-metric";
   if (metric.tone === "muted") {
     item.classList.add("mobile-card-row-metric--muted");
+  }
+  const cellClass =
+    getCodeV3GradeCellClass(metric.value) || getCodeV3CellBackgroundClass(metric.value);
+  if (cellClass) {
+    item.classList.add(cellClass);
   }
 
   const label = document.createElement("span");
@@ -1858,6 +1881,7 @@ function renderTable() {
   container.innerHTML = "";
   container.classList.remove("mobile-cards");
   container.classList.remove("table-container--codev3");
+  renderTableNote();
 
   if (!state.headers.length) {
     showPlaceholder(t("placeholders.selectDataset"));
@@ -1945,6 +1969,14 @@ function renderTable() {
       if (statusClass) {
         td.classList.add(...statusClass.split(" "));
       }
+      const gradeCellClass = getCodeV3GradeCellClass(cell);
+      if (gradeCellClass) {
+        td.classList.add(gradeCellClass);
+      }
+      const cellBackgroundClass = getCodeV3CellBackgroundClass(cell);
+      if (cellBackgroundClass) {
+        td.classList.add(cellBackgroundClass);
+      }
       appendCodeV3ValueContent(td, displayValue);
 
       if (columnIndex === modelColumnIndex && row.isThink) {
@@ -2028,6 +2060,63 @@ function renderTable() {
   container.appendChild(table);
 }
 
+function renderTableNote() {
+  const note = elements.tableNote;
+  if (!note) return;
+
+  const isCodeV3 = state.currentCategory === "code_v3" && state.headers.length > 0;
+  const hasNewMode = isCodeV3 && state.headers.some((header) => /\(H\)|\(I\)/.test(header));
+  const hasGradeValues =
+    isCodeV3 &&
+    state.rows.some((row) =>
+      row.cells.some((cell) => /^.+?\/[ABCD][+-]?$/i.test(String(cell ?? "").trim()))
+    );
+
+  if (!hasNewMode && !hasGradeValues) {
+    note.hidden = true;
+    note.innerHTML = "";
+    return;
+  }
+
+  note.hidden = false;
+
+  const gradeItems = [
+    ["a", t("codev3Note.gradeA")],
+    ["b", t("codev3Note.gradeB")],
+    ["c", t("codev3Note.gradeC")],
+    ["d", t("codev3Note.gradeD")],
+    ["failed", t("codev3Note.failed")],
+    ["pass", t("codev3Note.pass")],
+    ["pending", t("codev3Note.pending")],
+  ];
+  const gradeList = gradeItems
+    .map(
+      ([tier, text]) =>
+        `<li><span class="grade-chip grade-chip--${tier}">${
+          tier.length === 1 ? tier.toUpperCase() : tier[0].toUpperCase() + tier.slice(1)
+        }</span><span>${text}</span></li>`
+    )
+    .join("");
+
+  const monthly = hasNewMode
+    ? [
+        `<h3>${t("codev3Note.monthlyTitle")}</h3>`,
+        `<p>${t("codev3Note.monthlyP1")}</p>`,
+        `<p>${t("codev3Note.monthlyP2")}</p>`,
+        `<p>${t("codev3Note.monthlyP3")}</p>`,
+        `<p>${t("codev3Note.monthlyP4")}</p>`,
+        `<p>${t("codev3Note.monthlyP5")}</p>`,
+      ].join("")
+    : "";
+
+  note.innerHTML = [
+    `<h3>${t("codev3Note.title")}</h3>`,
+    `<ul class="grade-list">${gradeList}</ul>`,
+    `<p>${t("codev3Note.halfGrade")}</p>`,
+    monthly,
+  ].join("");
+}
+
 function toggleSort(columnIndex) {
   if (state.sort.columnIndex === columnIndex) {
     if (state.sort.direction === "asc") {
@@ -2072,11 +2161,17 @@ function updateMeta(dataset = null) {
       ? t("meta.records.withTotal", { count: filtered, total })
       : t("meta.records.single", { count: filtered });
 
+  const codev3FormatNote =
+    dataset.category === "code_v3"
+      ? `<span class="meta-note">${t("meta.codev3CellFormat")}</span>`
+      : "";
+
   meta.innerHTML = `
     <span>${t("meta.category", { label: categoryLabel })}</span>
     <span>${t("meta.dataset", { label: datasetLabel })}</span>
     <span>${recordsLabel}</span>
     <span>${t("meta.datasetCount", { count: reportCount })}</span>
+    ${codev3FormatNote}
   `;
   meta.classList.add("active");
 }

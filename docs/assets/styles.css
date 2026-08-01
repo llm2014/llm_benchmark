@@ -22,8 +22,8 @@
   --color-disabled-bg: #efede7;
   --color-table-head: #ffffff;
   --color-row-even: #ffffff;
-  --color-row-hover: rgba(31, 78, 121, 0.055);
-  --color-row-hover-solid: #f3f5f8;
+  --color-row-hover: rgba(31, 78, 121, 0.1);
+  --color-row-hover-solid: #e8edf4;
   --color-badge-bg: transparent;
   --color-button-focus: rgba(31, 78, 121, 0.16);
   --color-control-focus: rgba(31, 78, 121, 0.14);
@@ -56,12 +56,19 @@
   --color-card-codev3-secondary-bg: #f8f7f3;
   --color-card-codev3-secondary-border: #e0ddd2;
 
-  --color-grade-a: #2f6b46;
-  --color-grade-b: #8a6d1f;
-  --color-grade-c: #a2543a;
-  --color-grade-d: #8f3126;
+  --color-grade-a: #0d2819;
+  --color-grade-b: #96740b;
+  --color-grade-c: #c25a1d;
+  --color-grade-d: #b83a24;
+  --color-grade-bg-a: rgba(12, 122, 64, 0.58);
+  --color-grade-bg-b: rgba(195, 145, 0, 0.38);
+  --color-grade-bg-c: rgba(235, 130, 30, 0.26);
+  --color-grade-bg-d: rgba(225, 85, 55, 0.24);
+  --color-status-bg-pass: rgba(27, 142, 76, 0.15);
+  --color-status-bg-failed: rgba(230, 105, 95, 0.2);
+  --color-status-bg-pending: rgba(111, 108, 101, 0.13);
   --color-status-pending: #6f6c65;
-  --color-status-failed: #8f3126;
+  --color-status-failed: #c62828;
   --color-status-skip: #a09c90;
   --color-family-dot: #d97c2b;
 
@@ -83,8 +90,8 @@
   --color-disabled-bg: #2a2924;
   --color-table-head: #201f1b;
   --color-row-even: #201f1b;
-  --color-row-hover: rgba(147, 184, 220, 0.08);
-  --color-row-hover-solid: #292b2a;
+  --color-row-hover: rgba(147, 184, 220, 0.14);
+  --color-row-hover-solid: #333a42;
   --color-badge-bg: transparent;
   --color-button-focus: rgba(147, 184, 220, 0.22);
   --color-control-focus: rgba(147, 184, 220, 0.18);
@@ -117,12 +124,19 @@
   --color-card-codev3-secondary-bg: #26251f;
   --color-card-codev3-secondary-border: #403e35;
 
-  --color-grade-a: #7fb98f;
-  --color-grade-b: #c9a94f;
-  --color-grade-c: #cf8a6f;
-  --color-grade-d: #d97f70;
+  --color-grade-a: #e8f6ee;
+  --color-grade-b: #e6bf4a;
+  --color-grade-c: #f29a52;
+  --color-grade-d: #f28e72;
+  --color-grade-bg-a: rgba(100, 222, 148, 0.46);
+  --color-grade-bg-b: rgba(255, 215, 95, 0.36);
+  --color-grade-bg-c: rgba(255, 165, 85, 0.28);
+  --color-grade-bg-d: rgba(255, 125, 105, 0.26);
+  --color-status-bg-pass: rgba(100, 222, 148, 0.16);
+  --color-status-bg-failed: rgba(255, 145, 135, 0.2);
+  --color-status-bg-pending: rgba(160, 156, 144, 0.2);
   --color-status-pending: #a09c90;
-  --color-status-failed: #d97f70;
+  --color-status-failed: #ff7a6e;
   --color-status-skip: #6f6c65;
   --color-family-dot: #e89a52;
 
@@ -148,8 +162,8 @@
     --color-disabled-bg: #2a2924;
     --color-table-head: #201f1b;
     --color-row-even: #201f1b;
-    --color-row-hover: rgba(147, 184, 220, 0.08);
-    --color-row-hover-solid: #292b2a;
+    --color-row-hover: rgba(147, 184, 220, 0.14);
+    --color-row-hover-solid: #333a42;
     --color-badge-bg: transparent;
     --color-button-focus: rgba(147, 184, 220, 0.22);
     --color-control-focus: rgba(147, 184, 220, 0.18);
@@ -180,12 +194,19 @@
     --color-card-codev3-primary-border: #4a473c;
     --color-card-codev3-secondary-bg: #26251f;
     --color-card-codev3-secondary-border: #403e35;
-    --color-grade-a: #7fb98f;
-    --color-grade-b: #c9a94f;
-    --color-grade-c: #cf8a6f;
-    --color-grade-d: #d97f70;
+    --color-grade-a: #e8f6ee;
+    --color-grade-b: #e6bf4a;
+    --color-grade-c: #f29a52;
+    --color-grade-d: #f28e72;
+    --color-grade-bg-a: rgba(100, 222, 148, 0.46);
+    --color-grade-bg-b: rgba(255, 215, 95, 0.36);
+    --color-grade-bg-c: rgba(255, 165, 85, 0.28);
+    --color-grade-bg-d: rgba(255, 125, 105, 0.26);
+    --color-status-bg-pass: rgba(100, 222, 148, 0.16);
+    --color-status-bg-failed: rgba(255, 145, 135, 0.2);
+    --color-status-bg-pending: rgba(160, 156, 144, 0.2);
     --color-status-pending: #a09c90;
-    --color-status-failed: #d97f70;
+    --color-status-failed: #ff7a6e;
     --color-status-skip: #6f6c65;
     --color-family-dot: #e89a52;
     --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.3);
@@ -410,7 +431,9 @@ main {
 }
 
 .dataset-meta.active {
-  display: block;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
 }
 
 .dataset-meta strong {
@@ -420,6 +443,13 @@ main {
 
 .dataset-meta span {
   margin-right: 18px;
+  color: var(--color-muted);
+}
+
+/* 右侧对齐的格式说明（代码 v3 数据集信息条最右侧） */
+.dataset-meta .meta-note {
+  margin-right: 0;
+  margin-left: auto;
   color: var(--color-muted);
 }
 
@@ -512,6 +542,18 @@ main {
 .table-container--codev3 th,
 .table-container--codev3 td {
   white-space: nowrap;
+}
+
+/* 档位色块单元格之间留出间隙（透明边框 + 背景裁剪，色块不粘连） */
+.table-container--codev3 th,
+.table-container--codev3 td {
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+/* 冻结列背景必须覆盖到边框区，否则横向滚动时下层内容会从间隙透出 */
+.table-container--codev3 .codev3-model-column {
+  background-clip: border-box;
 }
 
 .table-container--codev3 .codev3-model-column {
@@ -826,6 +868,157 @@ main {
 
 .codev3-grade--d {
   color: var(--color-grade-d);
+}
+
+/* 档位单元格整格底色 */
+.codev3-cell--a {
+  background-color: var(--color-grade-bg-a);
+}
+
+.codev3-cell--b {
+  background-color: var(--color-grade-bg-b);
+}
+
+.codev3-cell--c {
+  background-color: var(--color-grade-bg-c);
+}
+
+.codev3-cell--d {
+  background-color: var(--color-grade-bg-d);
+}
+
+.codev3-cell--pass {
+  background-color: var(--color-status-bg-pass);
+}
+
+.codev3-cell--failed {
+  background-color: var(--color-status-bg-failed);
+}
+
+.codev3-cell--pending {
+  background-color: var(--color-status-bg-pending);
+}
+
+/* 移动端指标块整块底色（覆盖卡片自带底色） */
+.mobile-card-row-metric.codev3-cell--a {
+  background-color: var(--color-grade-bg-a);
+}
+
+.mobile-card-row-metric.codev3-cell--b {
+  background-color: var(--color-grade-bg-b);
+}
+
+.mobile-card-row-metric.codev3-cell--c {
+  background-color: var(--color-grade-bg-c);
+}
+
+.mobile-card-row-metric.codev3-cell--d {
+  background-color: var(--color-grade-bg-d);
+}
+
+.mobile-card-row-metric.codev3-cell--pass {
+  background-color: var(--color-status-bg-pass);
+}
+
+.mobile-card-row-metric.codev3-cell--failed {
+  background-color: var(--color-status-bg-failed);
+}
+
+.mobile-card-row-metric.codev3-cell--pending {
+  background-color: var(--color-status-bg-pending);
+}
+
+/* ---------------- 表格底部说明（档位说明） ---------------- */
+
+.table-note {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-panel);
+}
+
+.table-note h3 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--color-text);
+}
+
+.table-note h3:not(:first-child) {
+  margin-top: 18px;
+}
+
+.table-note ul.grade-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.table-note li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 6px 0;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--color-muted);
+}
+
+.table-note p {
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--color-muted);
+}
+
+.table-note .grade-chip {
+  flex: none;
+  display: inline-block;
+  min-width: 26px;
+  margin-top: 2px;
+  padding: 0 5px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.table-note .grade-chip--a {
+  color: var(--color-grade-a);
+  background-color: var(--color-grade-bg-a);
+}
+
+.table-note .grade-chip--b {
+  color: var(--color-grade-b);
+  background-color: var(--color-grade-bg-b);
+}
+
+.table-note .grade-chip--c {
+  color: var(--color-grade-c);
+  background-color: var(--color-grade-bg-c);
+}
+
+.table-note .grade-chip--d {
+  color: var(--color-grade-d);
+  background-color: var(--color-grade-bg-d);
+}
+
+.table-note .grade-chip--failed {
+  color: var(--color-status-failed);
+  background-color: var(--color-status-bg-failed);
+}
+
+.table-note .grade-chip--pass {
+  color: var(--color-grade-a);
+  background-color: var(--color-status-bg-pass);
+}
+
+.table-note .grade-chip--pending {
+  color: var(--color-status-pending);
+  background-color: var(--color-status-bg-pending);
 }
 
 .mobile-card-note {
