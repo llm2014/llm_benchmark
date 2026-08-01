@@ -2086,12 +2086,14 @@ function renderTableNote() {
     ["c", t("codev3Note.gradeC")],
     ["d", t("codev3Note.gradeD")],
     ["failed", t("codev3Note.failed")],
+    ["pass", t("codev3Note.pass")],
+    ["pending", t("codev3Note.pending")],
   ];
   const gradeList = gradeItems
     .map(
       ([tier, text]) =>
         `<li><span class="grade-chip grade-chip--${tier}">${
-          tier === "failed" ? "Failed" : tier.toUpperCase()
+          tier.length === 1 ? tier.toUpperCase() : tier[0].toUpperCase() + tier.slice(1)
         }</span><span>${text}</span></li>`
     )
     .join("");
@@ -2159,11 +2161,17 @@ function updateMeta(dataset = null) {
       ? t("meta.records.withTotal", { count: filtered, total })
       : t("meta.records.single", { count: filtered });
 
+  const codev3FormatNote =
+    dataset.category === "code_v3"
+      ? `<span class="meta-note">${t("meta.codev3CellFormat")}</span>`
+      : "";
+
   meta.innerHTML = `
     <span>${t("meta.category", { label: categoryLabel })}</span>
     <span>${t("meta.dataset", { label: datasetLabel })}</span>
     <span>${recordsLabel}</span>
     <span>${t("meta.datasetCount", { count: reportCount })}</span>
+    ${codev3FormatNote}
   `;
   meta.classList.add("active");
 }

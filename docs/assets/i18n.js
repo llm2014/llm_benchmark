@@ -552,14 +552,22 @@ const TRANSLATIONS = {
     "zh-CN": "知识或方法论不够，即便有人帮助，也无法完成任务。",
     "en-US": "— lacks the knowledge or methodology to complete the task even with help.",
   },
+  "codev3Note.pass": {
+    "zh-CN": "：推测模型可顺利完成测试。",
+    "en-US": ": expected to complete the test successfully.",
+  },
+  "codev3Note.pending": {
+    "zh-CN": "：正在测试中。",
+    "en-US": ": testing in progress.",
+  },
   "codev3Note.halfGrade": {
     "zh-CN": "同档位中，只有少数轮次出现问题，大部分情况表现良好时，会升半档，用 B+、C+ 来表示。",
     "en-US":
       "Within the same grade, when only a few rounds have issues and the model performs well most of the time, it is upgraded by a half grade, denoted as B+ or C+.",
   },
   "codev3Note.monthlyTitle": {
-    "zh-CN": "本月方法说明",
-    "en-US": "This Month's Methodology",
+    "zh-CN": "2026-07 月榜方法说明",
+    "en-US": "2026-07 Monthly Methodology",
   },
   "codev3Note.monthlyP1": {
     "zh-CN":
@@ -589,6 +597,10 @@ const TRANSLATIONS = {
     "zh-CN": "现有的 C 和 D 项目对头部模型已饱和，下月起将不再使用。其中 C 项目也会升级为 2 轮版本。D 项目已被 I 项目取代。",
     "en-US":
       "The current C and D projects have saturated for top models and will be retired starting next month. C will be upgraded to a 2-round version, and D has been replaced by I.",
+  },
+  "meta.codev3CellFormat": {
+    "zh-CN": "1/A 代表扣分数/档位",
+    "en-US": "1/A means deduction points / grade",
   },
 };
 
