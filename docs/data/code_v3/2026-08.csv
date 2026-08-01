@@ -5,7 +5,7 @@
 "Kimi-K3 (max)","7/A","Pass","12/B","15/B","18/B","6/A","5/A","1","Claude Code","1"
 "Grok 4.5 (high)","12/B+","Skip","7/A","Pending","Pending","16/B","7/B+","1","Grok Build","1"
 "GLM-5.2(max)","16/B","6/A","8/A","8/A","43/C","14/B","15/C+",0,"Claude Code",1
-"DeepSeek V4 Flash 0731 (max)","Skip","Skip","8/A","Pending","44/D+","17/B","24/D+","2","Claude Code",1
+"DeepSeek V4 Flash 0731 (max)","Skip","Skip","8/A","9/A","44/D+","17/B","24/D+","2","Claude Code",1
 "Claude Sonnet 5 (high)","Pass","Pass","18/B","14/B+","Pending","22/C","16/C+","1","Claude Code","1"
 "Tencent Hy3 (high)","11/B","12/B","12/B","13/B","Failed(5/9)","10/B","20/C+",0,"Claude Code",1
 "GPT-5.6-Luna (max)","Skip","Skip","Skip","Skip","Skip","27/C","21/C","0","Codex App","1"
