@@ -14,10 +14,8 @@ const TRANSLATIONS = {
     "en-US": "LLM Benchmark Dashboard",
   },
   "header.subtitle": {
-    "zh-CN":
-      '大模型智力长期追踪榜单（<a href="https://github.com/llm2014/llm_benchmark/">GitHub</a>）',
-    "en-US":
-      'Long-term evaluation of large language models on private benchmarks (<a href="https://github.com/llm2014/llm_benchmark/">GitHub</a>)',
+    "zh-CN": "大模型智力长期追踪榜单",
+    "en-US": "Long-term evaluation of large language models on private benchmarks",
   },
   "controls.category.label": {
     "zh-CN": "数据类别",

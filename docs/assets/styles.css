@@ -279,12 +279,15 @@ a:hover {
 .header-actions {
   position: absolute;
   top: 20px;
-  right: 24px;
+  right: 96px;
   display: flex;
   gap: 8px;
 }
 
 .header-action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 5px 12px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
@@ -306,6 +309,68 @@ a:hover {
   outline: none;
   border-color: var(--color-accent);
   box-shadow: 0 0 0 3px var(--color-button-focus);
+}
+
+.github-corner {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  right: 0;
+  width: 80px;
+  height: 80px;
+  color: var(--color-panel);
+  line-height: 0;
+}
+
+.github-corner svg {
+  width: 100%;
+  height: 100%;
+}
+
+.github-corner-bg {
+  fill: var(--color-accent);
+  transition: fill 0.15s ease;
+}
+
+.octo-arm,
+.octo-body {
+  fill: currentColor;
+}
+
+.octo-arm {
+  transform-origin: 130px 106px;
+}
+
+.github-corner:hover .github-corner-bg {
+  fill: var(--color-accent-hover);
+}
+
+.github-corner:hover {
+  color: var(--color-panel);
+}
+
+.github-corner:hover .octo-arm {
+  animation: octocat-wave 560ms ease-in-out;
+}
+
+.github-corner:focus-visible {
+  outline: 3px solid var(--color-text);
+  outline-offset: -4px;
+}
+
+@keyframes octocat-wave {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  20%,
+  60% {
+    transform: rotate(-25deg);
+  }
+  40%,
+  80% {
+    transform: rotate(10deg);
+  }
 }
 
 main {
@@ -1288,6 +1353,10 @@ main {
   *::after {
     transition: none !important;
   }
+
+  .github-corner:hover .octo-arm {
+    animation: none;
+  }
 }
 
 @media (max-width: 768px) {
@@ -1297,9 +1366,19 @@ main {
 
   .header-actions {
     left: 24px;
-    right: 24px;
+    right: 72px;
     justify-content: flex-end;
     flex-wrap: wrap;
+  }
+
+  .github-corner {
+    width: 64px;
+    height: 64px;
+  }
+
+  .header-action-button {
+    padding: 4px 9px;
+    font-size: 12px;
   }
 
   .controls {
