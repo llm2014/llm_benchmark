@@ -140,8 +140,8 @@ const TRANSLATIONS = {
     "en-US": "Code(Outdated)",
   },
   "category.code_v3": {
-    "zh-CN": "代码 v3",
-    "en-US": "Code v3",
+    "zh-CN": "Agentic",
+    "en-US": "Agentic",
   },
   "category.logic": {
     "zh-CN": "推理",
@@ -379,6 +379,10 @@ const TRANSLATIONS = {
     "zh-CN": "纵轴指标",
     "en-US": "Y-Axis Metric",
   },
+  "chart.xAxis.label": {
+    "zh-CN": "横轴指标",
+    "en-US": "X-Axis Metric",
+  },
   "chart.yAxis.aria": {
     "zh-CN": "选择纵轴指标",
     "en-US": "Select Y-axis metric",
@@ -457,7 +461,7 @@ const TRANSLATIONS = {
     "en-US": "Light, fast",
   },
   "view.board": {
-    "zh-CN": "榜单",
+    "zh-CN": "致知",
     "en-US": "Leaderboard",
   },
   "view.trends": {
