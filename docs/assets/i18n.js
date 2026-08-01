@@ -197,15 +197,15 @@ const TRANSLATIONS = {
   },
   "table.header.maxScore": {
     "zh-CN": "极限分数",
-    "en-US": "Max Score",
+    "en-US": "Max",
   },
   "table.header.medianScore": {
     "zh-CN": "中位分数",
-    "en-US": "Median Score",
+    "en-US": "Median",
   },
   "table.header.medianGap": {
     "zh-CN": "中位差距",
-    "en-US": "Median Gap",
+    "en-US": "Gap",
   },
   "table.header.avgTimeSeconds": {
     "zh-CN": "平均耗时(秒)",
@@ -281,7 +281,7 @@ const TRANSLATIONS = {
   },
   "table.header.pricePerMillion": {
     "zh-CN": "价格(元/百万)",
-    "en-US": "Price (USD / 1M tokens)",
+    "en-US": "Price ($ / 1M)",
   },
   "table.header.finalUnavailable": {
     "zh-CN": "最终不可用",
@@ -289,7 +289,7 @@ const TRANSLATIONS = {
   },
   "table.header.testCostCny": {
     "zh-CN": "测试成本(元)",
-    "en-US": "Test Cost (USD)",
+    "en-US": "Test Cost ($)",
   },
   "table.header.testTime": {
     "zh-CN": "测试时间",
