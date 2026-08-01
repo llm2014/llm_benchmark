@@ -92,6 +92,8 @@ const CATEGORY_CHART_CONFIG = {
     cost: "测试成本(元)",
     time: "平均耗时(秒)",
     scoreFallbacks: ["极限分数", "百分制", "原始分数"],
+    // 推理类别交换横纵坐标：横轴 = 指标（成本/耗时），纵轴 = 分数
+    swapAxes: true,
   },
   code: {
     score: "多轮总分",
@@ -104,6 +106,8 @@ const CATEGORY_CHART_CONFIG = {
     cost: "成本",
     time: "平均耗时/s",
     scoreFallbacks: ["极限分数", "原始分数"],
+    // 与推理类别一致：横轴 = 指标（成本/耗时），纵轴 = 分数
+    swapAxes: true,
   },
 };
 const TRENDS_SUPPORTED = new Set(
@@ -377,6 +381,7 @@ const state = {
   locale: getCurrentLocale(),
   collator: createCollator(getCurrentLocale()),
   manifest: [],
+  categoryOptions: [],
   currentCategory: null,
   currentDatasetKey: null,
   currentDatasetDirectory: null,
@@ -405,7 +410,7 @@ const state = {
 const csvCache = new Map();
 
 const elements = {
-  categorySelect: document.getElementById("categorySelect"),
+  categoryNav: document.getElementById("viewTabsCategories"),
   datasetSelect: document.getElementById("datasetSelect"),
   inferenceFilter: document.getElementById("inferenceFilter"),
   countryFilter: document.getElementById("countryFilter"),
@@ -413,7 +418,6 @@ const elements = {
   tableContainer: document.getElementById("tableContainer"),
   tableNote: document.getElementById("tableNote"),
   datasetMeta: document.getElementById("datasetMeta"),
-  categoryLabel: document.getElementById("categoryLabel"),
   datasetLabel: document.getElementById("datasetLabel"),
   inferenceLabel: document.getElementById("inferenceLabel"),
   countryLabel: document.getElementById("countryLabel"),
@@ -479,7 +483,7 @@ function initializeLocaleUi() {
     state.locale = locale;
     state.collator = createCollator(locale);
     updateStaticCopy();
-    buildCategoryOptions(true);
+    renderCategoryNav({ preserveSelection: true });
     if (state.currentCategory) {
       refreshDatasetOptions();
     }
@@ -528,8 +532,8 @@ function updateStaticCopy() {
     elements.pageSubtitle.innerHTML = t("header.subtitle");
   }
 
-  if (elements.categoryLabel) {
-    elements.categoryLabel.textContent = t("controls.category.label");
+  if (elements.categoryNav) {
+    elements.categoryNav.setAttribute("aria-label", t("controls.category.aria"));
   }
   if (elements.datasetLabel) {
     elements.datasetLabel.textContent = t("controls.dataset.label");
@@ -542,9 +546,6 @@ function updateStaticCopy() {
   }
   if (elements.searchLabel) {
     elements.searchLabel.textContent = t("controls.search.label");
-  }
-  if (elements.categorySelect) {
-    elements.categorySelect.setAttribute("aria-label", t("controls.category.aria"));
   }
   if (elements.datasetSelect) {
     elements.datasetSelect.setAttribute("aria-label", t("controls.dataset.aria"));
@@ -579,7 +580,7 @@ function updateStaticCopy() {
     elements.searchInput.placeholder = t("controls.search.placeholder");
   }
   if (elements.yAxisLabel) {
-    elements.yAxisLabel.textContent = t("chart.yAxis.label");
+    updateMetricAxisLabel();
   }
   if (elements.yAxisSelect) {
     elements.yAxisSelect.setAttribute("aria-label", t("chart.yAxis.aria"));
@@ -630,6 +631,15 @@ function updateStaticCopy() {
   }
   buildTrendsCategoryOptions();
   updateThemeToggle();
+}
+
+function updateMetricAxisLabel() {
+  if (!elements.yAxisLabel) return;
+  const swapped =
+    state.currentCategory && CATEGORY_CHART_CONFIG[state.currentCategory]?.swapAxes;
+  elements.yAxisLabel.textContent = swapped
+    ? t("chart.xAxis.label")
+    : t("chart.yAxis.label");
 }
 
 function updateLanguageToggle() {
@@ -824,9 +834,7 @@ async function applyStateFromHash(rawHash = window.location.hash) {
   isApplyingHashState = true;
   try {
     if (state.currentCategory !== targetCategory) {
-      if (elements.categorySelect.value !== targetCategory) {
-        elements.categorySelect.value = targetCategory;
-      }
+      setActiveCategory(targetCategory);
       await handleCategoryChange(targetCategory, { preferredDatasetKey: targetDatasetKey });
     } else if (!state.currentDatasetKey) {
       await handleCategoryChange(targetCategory, { preferredDatasetKey: targetDatasetKey });
@@ -874,13 +882,13 @@ async function init() {
   }
 
   state.manifest = manifest;
-  buildCategoryOptions();
+  renderCategoryNav();
   buildTrendsCategoryOptions();
   bindEventHandlers();
 
   const appliedFromHash = await applyStateFromHash(window.location.hash);
   if (!appliedFromHash) {
-    const firstCategory = elements.categorySelect.value;
+    const firstCategory = state.categoryOptions[0] || null;
     if (firstCategory) {
       await handleCategoryChange(firstCategory);
     }
@@ -897,8 +905,11 @@ async function fetchManifest() {
   return Array.isArray(payload.datasets) ? payload.datasets : [];
 }
 
-function buildCategoryOptions(preserveSelection = false) {
-  if (!elements.categorySelect) return;
+function renderCategoryNav({ preserveSelection = false } = {}) {
+  const container = elements.categoryNav;
+  if (!container) return;
+  container.innerHTML = "";
+
   const seen = new Set();
   const categories = state.manifest
     .map((entry) => entry.category)
@@ -924,16 +935,32 @@ function buildCategoryOptions(preserveSelection = false) {
     return indexA - indexB;
   });
 
-  const selected = preserveSelection ? state.currentCategory : undefined;
-  setSelectOptions(
-    elements.categorySelect,
-    categories.map((category) => ({
-      value: category,
-      label: getCategoryLabel(category),
-    })),
-    selected
-  );
-  state.currentCategory = elements.categorySelect.value || null;
+  state.categoryOptions = categories;
+
+  categories.forEach((category) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "category-item";
+    button.dataset.category = category;
+    button.textContent = getCategoryLabel(category);
+    button.setAttribute("aria-pressed", "false");
+    container.appendChild(button);
+  });
+
+  const previous = preserveSelection ? state.currentCategory : null;
+  state.currentCategory =
+    previous && categories.includes(previous) ? previous : categories[0] || null;
+  setActiveCategory(state.currentCategory);
+}
+
+function setActiveCategory(category) {
+  const container = elements.categoryNav;
+  if (!container) return;
+  container.querySelectorAll(".category-item").forEach((button) => {
+    const active = button.dataset.category === category;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", active ? "true" : "false");
+  });
 }
 
 function getCategoryLabel(category) {
@@ -949,11 +976,23 @@ function getHeaderLabel(header) {
 }
 
 function bindEventHandlers() {
-  elements.categorySelect.addEventListener("change", async (event) => {
-    const category = event.target.value;
-    await handleCategoryChange(category);
-    syncHashFromState();
-  });
+  if (elements.categoryNav) {
+    elements.categoryNav.addEventListener("click", async (event) => {
+      const button = event.target.closest(".category-item");
+      if (!button) return;
+      const category = button.dataset.category;
+      if (!category) return;
+      // 仅当已在榜单视图且点击的是当前类别时才忽略；趋势视图下点击
+      // 当前类别也应切回榜单视图
+      if (state.view === "board" && category === state.currentCategory) return;
+      if (state.view !== "board") {
+        setView("board", { sync: false });
+      }
+      setActiveCategory(category);
+      await handleCategoryChange(category);
+      syncHashFromState();
+    });
+  }
 
   elements.datasetSelect.addEventListener("change", async (event) => {
     const key = event.target.value;
@@ -987,7 +1026,16 @@ function bindEventHandlers() {
   }
 
   if (elements.viewTabBoard) {
-    elements.viewTabBoard.addEventListener("click", () => setView("board"));
+    elements.viewTabBoard.addEventListener("click", () => {
+      setView("board");
+      // 点击「致知」默认跳转第一个类别
+      const firstCategory = state.categoryOptions[0] || null;
+      if (firstCategory && firstCategory !== state.currentCategory) {
+        setActiveCategory(firstCategory);
+        handleCategoryChange(firstCategory);
+        syncHashFromState();
+      }
+    });
   }
   if (elements.viewTabTrends) {
     elements.viewTabTrends.addEventListener("click", () => setView("trends"));
@@ -1017,9 +1065,8 @@ function bindEventHandlers() {
     applyStateFromHash(window.location.hash)
       .then(async (appliedFromHash) => {
         if (appliedFromHash) return;
-        const firstCategory = elements.categorySelect.options[0]?.value || null;
+        const firstCategory = state.categoryOptions[0] || null;
         if (!firstCategory) return;
-        elements.categorySelect.value = firstCategory;
         await handleCategoryChange(firstCategory);
         syncHashFromState();
       })
@@ -1040,6 +1087,7 @@ function bindEventHandlers() {
 async function handleCategoryChange(category, options = {}) {
   const { preferredDatasetKey = null } = options;
   state.currentCategory = category;
+  updateMetricAxisLabel();
   state.currentDatasetKey = null;
   state.currentDatasetDirectory = null;
   elements.datasetSelect.disabled = true;
@@ -2189,9 +2237,7 @@ function setView(view, { sync = true } = {}) {
   const nextView = VALID_VIEWS.has(view) ? view : "board";
   state.view = nextView;
 
-  if (elements.viewTabBoard) {
-    elements.viewTabBoard.classList.toggle("active", nextView === "board");
-  }
+  // 榜单作为容器视图不显示选中态（选中体现在类别标签上）
   if (elements.viewTabTrends) {
     elements.viewTabTrends.classList.toggle("active", nextView === "trends");
   }
@@ -2201,6 +2247,10 @@ function setView(view, { sync = true } = {}) {
   if (elements.trendsSection) {
     elements.trendsSection.hidden = nextView !== "trends";
   }
+  // 趋势视图下类别不显示选中态（回到榜单时恢复当前类别的选中态）
+  if (elements.categoryNav) {
+    setActiveCategory(nextView === "board" ? state.currentCategory : null);
+  }
 
   if (nextView === "trends") {
     state.trends.category = resolveInitialTrendsCategory();
@@ -2209,8 +2259,8 @@ function setView(view, { sync = true } = {}) {
     }
     ensureTrendsData().then(renderTrends);
   } else {
-    if (!state.currentDatasetKey && elements.categorySelect.value) {
-      handleCategoryChange(elements.categorySelect.value);
+    if (!state.currentDatasetKey && state.currentCategory) {
+      handleCategoryChange(state.currentCategory);
     } else {
       updateChartVisibility();
       renderChart();
@@ -2584,22 +2634,24 @@ function renderChart() {
   // 使用 CSV 原始列名定位（非翻译后名称）
   const yAxisType = elements.yAxisSelect ? elements.yAxisSelect.value : "cost";
   const yAxisColumnName = yAxisType === "cost" ? config.cost : config.time;
+  // 推理类别交换横纵坐标：横轴 = 指标（成本/耗时），纵轴 = 分数
+  const swapped = !!config.swapAxes;
 
-  const xAxisLabel =
+  const scoreLabel =
     state.currentCategory === "code" ? t("chart.axis.multiTurnScore") : t("chart.axis.maxScore");
-  const yAxisLabel = yAxisType === "cost" ? t("chart.axis.cost") : t("chart.axis.avgTime");
+  const metricLabel = yAxisType === "cost" ? t("chart.axis.cost") : t("chart.axis.avgTime");
 
-  let xAxisIndex = -1;
-  let yAxisIndex = -1;
+  let scoreIndex = -1;
+  let metricIndex = -1;
 
   for (let i = 0; i < state.headers.length; i++) {
     const header = state.headers[i];
-    if (header === config.score) xAxisIndex = i;
-    if (header === yAxisColumnName) yAxisIndex = i;
+    if (header === config.score) scoreIndex = i;
+    if (header === yAxisColumnName) metricIndex = i;
   }
   const modelIndex = findChartModelIndex(state.headers);
 
-  if (xAxisIndex === -1 || yAxisIndex === -1 || modelIndex === -1) {
+  if (scoreIndex === -1 || metricIndex === -1 || modelIndex === -1) {
     if (chartInstance) {
       chartInstance.destroy();
       chartInstance = null;
@@ -2610,15 +2662,25 @@ function renderChart() {
     return;
   }
 
+  const xAxisIndex = swapped ? metricIndex : scoreIndex;
+  const yAxisIndex = swapped ? scoreIndex : metricIndex;
+  const chartXLabel = swapped ? metricLabel : scoreLabel;
+  const chartYLabel = swapped ? scoreLabel : metricLabel;
+
   const chartData = state.filteredRows
     .map((row) => {
-      const xValue = parseSortableNumber(row.cells[xAxisIndex]);
+      let xValue = parseSortableNumber(row.cells[xAxisIndex]);
       let yValue = parseSortableNumber(row.cells[yAxisIndex]);
       const modelName = row.cells[modelIndex] || "Unknown";
 
       if (xValue === null || yValue === null) return null;
       if (yAxisType === "cost" && state.locale === "en-US") {
-        yValue = yValue / CNY_PER_USD;
+        // 货币换算作用于指标值（交换后指标在横轴）
+        if (swapped) {
+          xValue = xValue / CNY_PER_USD;
+        } else {
+          yValue = yValue / CNY_PER_USD;
+        }
       }
 
       return {
@@ -2641,14 +2703,14 @@ function renderChart() {
     return;
   }
 
-  // 数值跨度超过一个数量级时启用对数轴（成本常横跨 ¥2–¥207）
-  const yValues = chartData.map((point) => point.y);
-  const minY = Math.min(...yValues);
-  const maxY = Math.max(...yValues);
-  const useLogScale = minY > 0 && maxY / minY >= 15;
+  // 指标数值跨度超过一个数量级时启用对数轴（成本常横跨 ¥2–¥207）
+  const metricValues = chartData.map((point) => (swapped ? point.x : point.y));
+  const minMetric = Math.min(...metricValues);
+  const maxMetric = Math.max(...metricValues);
+  const useLogScale = minMetric > 0 && maxMetric / minMetric >= 15;
 
   const medianX = median(chartData.map((point) => point.x));
-  const medianY = median(yValues);
+  const medianY = median(chartData.map((point) => point.y));
 
   const ctx = elements.chartCanvas.getContext("2d");
   const chartTextColor = getCssVariable("--color-text", "#212428");
@@ -2700,16 +2762,17 @@ function renderChart() {
           callbacks: {
             label: (context) => {
               const point = context.raw;
-              const yText =
+              const metricValue = swapped ? point.x : point.y;
+              const metricText =
                 yAxisType === "cost"
                   ? state.locale === "en-US"
-                    ? formatUsd(point.y)
-                    : `¥${point.y}`
-                  : `${point.y}`;
+                    ? formatUsd(metricValue)
+                    : `¥${metricValue}`
+                  : `${metricValue}`;
               return [
                 `${t("chart.tooltip.model")}: ${point.label}`,
-                `${xAxisLabel}: ${point.x}`,
-                `${yAxisLabel}: ${yText}`,
+                `${chartXLabel}: ${swapped ? metricText : point.x}`,
+                `${chartYLabel}: ${swapped ? point.y : metricText}`,
               ];
             },
           },
@@ -2720,12 +2783,20 @@ function renderChart() {
           sweetBg: getCssVariable("--color-chart-quadrant-sweet", "rgba(58, 107, 79, 0.05)"),
           lineColor: getCssVariable("--color-chart-median-line", "rgba(111, 108, 101, 0.75)"),
           labelColor: getCssVariable("--color-chart-quadrant-label", "rgba(111, 108, 101, 0.9)"),
-          labels: {
-            tr: t(`chart.quad.${yAxisType}.tr`),
-            br: t(`chart.quad.${yAxisType}.br`),
-            tl: t(`chart.quad.${yAxisType}.tl`),
-            bl: t(`chart.quad.${yAxisType}.bl`),
-          },
+          // 交换坐标后象限含义随之旋转：右上↔右下、左上↔左下
+          labels: swapped
+            ? {
+                tr: t(`chart.quad.${yAxisType}.tr`),
+                br: t(`chart.quad.${yAxisType}.tl`),
+                tl: t(`chart.quad.${yAxisType}.br`),
+                bl: t(`chart.quad.${yAxisType}.bl`),
+              }
+            : {
+                tr: t(`chart.quad.${yAxisType}.tr`),
+                br: t(`chart.quad.${yAxisType}.br`),
+                tl: t(`chart.quad.${yAxisType}.tl`),
+                bl: t(`chart.quad.${yAxisType}.bl`),
+              },
         },
         pointLabels: {
           display: true,
@@ -2736,9 +2807,10 @@ function renderChart() {
       },
       scales: {
         x: {
+          type: swapped && useLogScale ? "logarithmic" : "linear",
           title: {
             display: true,
-            text: xAxisLabel,
+            text: chartXLabel,
             color: chartTextColor,
             font: {
               size: 13,
@@ -2756,10 +2828,10 @@ function renderChart() {
           },
         },
         y: {
-          type: useLogScale ? "logarithmic" : "linear",
+          type: !swapped && useLogScale ? "logarithmic" : "linear",
           title: {
             display: true,
-            text: yAxisLabel,
+            text: chartYLabel,
             color: chartTextColor,
             font: {
               size: 13,

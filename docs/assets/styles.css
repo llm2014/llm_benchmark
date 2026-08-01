@@ -333,13 +333,15 @@ main {
   font-family: var(--font-family-serif);
   font-size: 15px;
   letter-spacing: 0.04em;
-  color: var(--color-muted);
+  color: var(--color-text);
+  opacity: 0.8;
   cursor: pointer;
-  transition: color 0.15s ease, border-color 0.15s ease;
+  transition: color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
 }
 
 .view-tab:hover {
   color: var(--color-text);
+  opacity: 1;
 }
 
 .view-tab:focus-visible {
@@ -349,6 +351,7 @@ main {
 
 .view-tab.active {
   color: var(--color-text);
+  opacity: 1;
   border-bottom-color: var(--color-rule);
   font-weight: 600;
 }
@@ -416,6 +419,54 @@ main {
   background-color: var(--color-disabled-bg);
   color: var(--color-muted);
   cursor: not-allowed;
+}
+
+/* ---------------- 视图标签栏中的类别（与榜单/趋势同级） ---------------- */
+
+.view-tabs {
+  gap: 0 24px;
+}
+
+.view-tabs-categories {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 0 20px;
+  border-left: 1px solid var(--color-border);
+  border-right: 1px solid var(--color-border);
+}
+
+.category-item {
+  appearance: none;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  padding: 10px 2px;
+  font-family: var(--font-family-serif);
+  font-size: 15px;
+  letter-spacing: 0.04em;
+  color: var(--color-text);
+  opacity: 0.8;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+}
+
+.category-item:hover {
+  color: var(--color-text);
+  opacity: 1;
+}
+
+.category-item:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.category-item.active {
+  color: var(--color-text);
+  opacity: 1;
+  border-bottom-color: var(--color-rule);
+  font-weight: 600;
 }
 
 /* ---------------- 数据集信息条 ---------------- */
@@ -1257,6 +1308,16 @@ main {
 
   .control {
     width: 100%;
+  }
+
+  .view-tabs {
+    gap: 0 16px;
+    overflow-x: auto;
+  }
+
+  .view-tabs-categories {
+    gap: 14px 18px;
+    margin-left: 10px;
   }
 
   .table-container.mobile-cards {

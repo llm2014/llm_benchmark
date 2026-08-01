@@ -20,16 +20,13 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <main>
       <nav class="view-tabs" id="viewTabs" aria-label="">
-        <button id="viewTabBoard" type="button" class="view-tab active"></button>
+        <button id="viewTabBoard" type="button" class="view-tab"></button>
+        <div class="view-tabs-categories" id="viewTabsCategories" role="group" aria-label=""></div>
         <button id="viewTabTrends" type="button" class="view-tab"></button>
       </nav>
 
       <div id="boardView">
         <section class="controls">
-          <div class="control">
-            <label for="categorySelect" id="categoryLabel">数据类别</label>
-            <select id="categorySelect" aria-label=""></select>
-          </div>
           <div class="control">
             <label for="datasetSelect" id="datasetLabel">数据集</label>
             <select id="datasetSelect" aria-label="" disabled></select>
