@@ -1,4 +1,4 @@
-"Model","MacOS App(C)","Flutter(D)","Web(E)","Game(F)","Rust App(G)","Simple Model(H)","iOS+Server(I)","Unprompted","IDE/CLI","Think"
+"Model","MacOS App(C)","Flutter(D)","Web(E)","Game(F)","Rust App(G)","Simple Model(H)","iOS+Server(I)","Unprompted","Scaffold","Think"
 "Fable-5 (high)","Pass","Pass","Pass","Pass","Pending","2/A+","3/A+","1","Claude Code","1"
 "GPT-5.6-Sol (max)","Pass","Pass","Pass","Pass","15/B+","4/A","8/A","1","Codex App","1"
 "Claude Opus 5 (max)","Pass","Pass","8/B+","Pass","15/B+","4/A","1/A+","2","Claude Code","1"
@@ -9,12 +9,11 @@
 "Tencent Hy3 (high)","11/B","12/B","12/B","13/B","Failed(5/9)","10/B","20/C+",0,"Claude Code",1
 "GPT-5.6-Luna (max)","Skip","Skip","Skip","Skip","Skip","27/C","21/C","0","Codex App","1"
 "Gemini 3.5 Flash (high)","21/C","15/B","20/C","17/B","Skip","Skip","Pending","3","Gemini CLI","1"
-"DeepSeek V4 Pro (max)","16/C","8/B","21/C","36/C","Failed(0/9)","31/C","28/C","0","Claude Code","1"
+"DeepSeek V4 Pro preview(max)","16/C","8/B","21/C","36/C","Failed(0/9)","31/C","28/C","0","Claude Code","1"
 "Qwen3.7-Max","Failed(2/12)","14/B","17/C+","46/D","Skip","26/C","Pending","0","Claude Code","1"
-"Kimi-K2.7-Code","30/C","18/C","26/C","55/D","Skip","30/C","Pending","0","Kimi Code","1"
-"DeepSeek V4 Flash (max)","Failed(5/12)","19/C","32/C","48/D","Skip","Skip","Pending","0","Claude Code","1"
+"DeepSeek V4 Flash preview(max)","Failed(5/12)","19/C","32/C","48/D","Skip","Skip","Pending","0","Claude Code","1"
 "MiniMax-M3","Skip","19/C+","51/D+","Skip","Skip","Skip","Skip","1","Claude Code","1"
-"Qwen3.6-Plus(Think)","Failed(5/12)","16/C","43/D+","Failed(3/9)","Failed(0/9)","Skip","Skip","0","Claude Code","1"
+"Qwen3.6-Plus","Failed(5/12)","16/C","43/D+","Failed(3/9)","Failed(0/9)","Skip","Skip","0","Claude Code","1"
 "Doubao-Seed-2.0-Code  (high)","Failed(7/12)","40/C","39/C","Failed(3/9)","Skip","Skip","Skip","1","TRAE","1"
 "MiMo-V2.5-Pro","Skip","Failed(6/9)","42/C","Skip","Skip","Skip","Skip","0","Claude Code","1"
 
