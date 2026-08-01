@@ -2711,6 +2711,9 @@ function renderChart() {
 
   const medianX = median(chartData.map((point) => point.x));
   const medianY = median(chartData.map((point) => point.y));
+  // 性能 × 成本图以 40 分作为固定性能分界；成本分界仍取当月中位数。
+  const quadrantX = yAxisType === "cost" && !swapped ? 40 : medianX;
+  const quadrantY = yAxisType === "cost" && swapped ? 40 : medianY;
 
   const ctx = elements.chartCanvas.getContext("2d");
   const chartTextColor = getCssVariable("--color-text", "#212428");
@@ -2778,8 +2781,8 @@ function renderChart() {
           },
         },
         quadrants: {
-          medianX,
-          medianY,
+          medianX: quadrantX,
+          medianY: quadrantY,
           sweetBg: getCssVariable("--color-chart-quadrant-sweet", "rgba(58, 107, 79, 0.05)"),
           lineColor: getCssVariable("--color-chart-median-line", "rgba(111, 108, 101, 0.75)"),
           labelColor: getCssVariable("--color-chart-quadrant-label", "rgba(111, 108, 101, 0.9)"),
@@ -2808,6 +2811,8 @@ function renderChart() {
       scales: {
         x: {
           type: swapped && useLogScale ? "logarithmic" : "linear",
+          suggestedMin: yAxisType === "cost" && !swapped ? 40 : undefined,
+          suggestedMax: yAxisType === "cost" && !swapped ? 40 : undefined,
           title: {
             display: true,
             text: chartXLabel,
@@ -2829,6 +2834,8 @@ function renderChart() {
         },
         y: {
           type: !swapped && useLogScale ? "logarithmic" : "linear",
+          suggestedMin: yAxisType === "cost" && swapped ? 40 : undefined,
+          suggestedMax: yAxisType === "cost" && swapped ? 40 : undefined,
           title: {
             display: true,
             text: chartYLabel,

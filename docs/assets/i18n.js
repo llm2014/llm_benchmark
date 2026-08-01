@@ -10,12 +10,12 @@ const LOCALE_LABELS = {
 /** @type {Record<string, Record<string, string>>} */
 const TRANSLATIONS = {
   "app.title": {
-    "zh-CN": "LLM Benchmark Dashboard",
+    "zh-CN": "致知",
     "en-US": "LLM Benchmark Dashboard",
   },
   "header.subtitle": {
     "zh-CN":
-      '基于个人私有题目的大模型长期跟踪测评项目(<a href="https://github.com/llm2014/llm_benchmark/">GitHub</a>)',
+      '大模型智力长期追踪榜单（<a href="https://github.com/llm2014/llm_benchmark/">GitHub</a>）',
     "en-US":
       'Long-term evaluation of large language models on private benchmarks (<a href="https://github.com/llm2014/llm_benchmark/">GitHub</a>)',
   },
@@ -420,9 +420,9 @@ const TRANSLATIONS = {
     "en-US": "Cost (USD)",
   },
   "chart.caption.cost": {
-    "zh-CN": "图 1. 性能 × 成本象限分布（虚线为当月中位数）",
+    "zh-CN": "图 1. 性能 × 成本象限分布（性能分界固定为 40 分，成本分界为当月中位数）",
     "en-US":
-      "Fig. 1. Performance vs. cost quadrants (dashed lines mark medians; CNY converted to USD at 6.9)",
+      "Fig. 1. Performance vs. cost quadrants (performance threshold fixed at 40; cost threshold marks the monthly median; CNY converted to USD at 6.9)",
   },
   "chart.caption.time": {
     "zh-CN": "图 1. 性能 × 耗时象限分布（虚线为当月中位数）",
