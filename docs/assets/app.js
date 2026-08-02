@@ -2584,9 +2584,13 @@ function renderTrendsChart() {
               }
             : {
                 min: 0,
-                max: 100,
+                max: 105,
                 grid: { color: gridColor },
-                ticks: { color: textColor, font: { size: 11 }, callback: (value) => `${value}%` },
+                ticks: {
+                  color: textColor,
+                  font: { size: 11 },
+                  callback: (value) => (value <= 100 ? `${value}%` : ""),
+                },
                 title: {
                   display: true,
                   text: t("trends.mode.percentile"),
