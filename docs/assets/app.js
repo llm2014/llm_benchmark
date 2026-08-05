@@ -279,6 +279,78 @@ const pointLabelsPlugin = {
   },
 };
 
+// Chart.js 自定义插件：在每条趋势线的最后一个有效点附近标注模型名。
+// 优先放在点的上方；发生碰撞时允许小幅左右移动或放到点下方。
+const trendEndLabelsPlugin = {
+  id: "trendEndLabels",
+  afterDatasetsDraw(chart, args, opts) {
+    if (!opts || !opts.display) return;
+    const { ctx, chartArea } = chart;
+    if (!chartArea) return;
+
+    const fontSize = opts.fontSize || 11;
+    const padX = 4;
+    const boxH = fontSize + 6;
+    const offset = 8;
+    const placed = [];
+    const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+    const intersects = (a, b) =>
+      a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+    const inside = (box) =>
+      box.x >= chartArea.left &&
+      box.x + box.w <= chartArea.right &&
+      box.y >= chartArea.top &&
+      box.y + box.h <= chartArea.bottom;
+
+    ctx.save();
+    ctx.font = "600 " + fontSize + "px " + getComputedStyle(document.body).fontFamily;
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+
+    chart.data.datasets.forEach((dataset, datasetIndex) => {
+      let lastIndex = dataset.data.length - 1;
+      while (lastIndex >= 0 && dataset.data[lastIndex] === null) lastIndex -= 1;
+      if (lastIndex < 0) return;
+
+      const element = chart.getDatasetMeta(datasetIndex).data[lastIndex];
+      if (!element || !dataset.label) return;
+
+      const boxW = ctx.measureText(dataset.label).width + padX * 2;
+      const centeredX = clamp(element.x - boxW / 2, chartArea.left, chartArea.right - boxW);
+      const candidates = [
+        { x: centeredX, y: element.y - boxH - offset },
+        {
+          x: clamp(element.x - boxW - offset, chartArea.left, chartArea.right - boxW),
+          y: element.y - boxH - offset,
+        },
+        {
+          x: clamp(element.x + offset, chartArea.left, chartArea.right - boxW),
+          y: element.y - boxH - offset,
+        },
+        { x: centeredX, y: element.y + offset },
+      ];
+
+      const position =
+        candidates.find((candidate) => {
+          const box = { ...candidate, w: boxW, h: boxH };
+          return inside(box) && !placed.some((other) => intersects(box, other));
+        }) || candidates.find((candidate) => inside({ ...candidate, w: boxW, h: boxH }));
+      if (!position) return;
+
+      const box = { ...position, w: boxW, h: boxH };
+      ctx.globalAlpha = 0.9;
+      ctx.fillStyle = opts.backgroundColor || "#fff";
+      ctx.fillRect(box.x, box.y, box.w, box.h);
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = dataset.borderColor;
+      ctx.fillText(dataset.label, box.x + padX, box.y + boxH / 2);
+      placed.push(box);
+    });
+
+    ctx.restore();
+  },
+};
+
 const MOBILE_CARD_LAYOUTS = {
   code: {
     className: "mobile-card--code",
@@ -398,7 +470,7 @@ const state = {
   view: "board",
   trends: {
     category: null,
-    mode: "percentile",
+    mode: "rank",
     months: [],
     models: [],
     selected: new Set(),
@@ -620,8 +692,8 @@ function updateStaticCopy() {
     setSelectOptions(
       elements.trendsModeSelect,
       [
-        { value: "percentile", label: t("trends.mode.percentile") },
         { value: "rank", label: t("trends.mode.rank") },
+        { value: "percentile", label: t("trends.mode.percentile") },
       ],
       state.trends.mode
     );
@@ -2490,6 +2562,13 @@ function isDarkThemeActive() {
   return prefersDarkQuery ? prefersDarkQuery.matches : false;
 }
 
+function getVisibleTrendMonths(months, selected) {
+  const firstVisibleIndex = months.findIndex((month) =>
+    selected.some((name) => month.ranks.has(name))
+  );
+  return firstVisibleIndex === -1 ? months : months.slice(firstVisibleIndex);
+}
+
 function renderTrendsChart() {
   if (!elements.trendsCanvas || state.view !== "trends") return;
   if (state.trends.loading || !state.trends.months.length) return;
@@ -2504,16 +2583,17 @@ function renderTrendsChart() {
     return;
   }
 
+  const visibleMonths = getVisibleTrendMonths(months, selected);
   const mode = state.trends.mode;
   const palette = isDarkThemeActive() ? SERIES_PALETTE_DARK : SERIES_PALETTE_LIGHT;
   const colorIndex = new Map(state.trends.models.map((model, index) => [model.name, index]));
-  const labels = months.map((month) => month.label);
+  const labels = visibleMonths.map((month) => month.label);
 
   const datasets = selected.map((name) => {
     const color = palette[(colorIndex.get(name) ?? 0) % palette.length];
     return {
       label: name,
-      data: months.map((month) => {
+      data: visibleMonths.map((month) => {
         const record = month.ranks.get(name);
         if (!record) return null;
         return mode === "rank" ? record.rank : Math.round(record.percentile * 10) / 10;
@@ -2543,11 +2623,13 @@ function renderTrendsChart() {
       responsive: true,
       maintainAspectRatio: false,
       interaction: { mode: "nearest", intersect: false },
+      layout: { padding: { top: 12, right: 8 } },
       plugins: {
-        legend: {
+        legend: { display: false },
+        trendEndLabels: {
           display: true,
-          position: "bottom",
-          labels: { color: textColor, boxWidth: 12, boxHeight: 2, font: { size: 12 } },
+          fontSize: 11,
+          backgroundColor: panelColor,
         },
         tooltip: {
           backgroundColor: panelColor,
@@ -2557,7 +2639,7 @@ function renderTrendsChart() {
           borderWidth: 1,
           callbacks: {
             label: (context) => {
-              const record = months[context.dataIndex].ranks.get(context.dataset.label);
+              const record = visibleMonths[context.dataIndex].ranks.get(context.dataset.label);
               if (!record) return context.dataset.label;
               const rankText = `#${record.rank}/${record.cohortSize}`;
               const scoreText = `${t("trends.tooltip.score")}: ${record.score}`;
@@ -2577,9 +2659,15 @@ function renderTrendsChart() {
           mode === "rank"
             ? {
                 reverse: true,
-                min: 1,
+                suggestedMin: 1,
+                grace: "8%",
                 grid: { color: gridColor },
-                ticks: { color: textColor, font: { size: 11 }, precision: 0 },
+                ticks: {
+                  color: textColor,
+                  font: { size: 11 },
+                  precision: 0,
+                  callback: (value) => (Number.isInteger(value) && value >= 1 ? value : ""),
+                },
                 title: { display: true, text: t("trends.mode.rank"), color: textColor, font: { size: 12 } },
               }
             : {
@@ -2600,6 +2688,7 @@ function renderTrendsChart() {
               },
       },
     },
+    plugins: [trendEndLabelsPlugin],
   });
 }
 
