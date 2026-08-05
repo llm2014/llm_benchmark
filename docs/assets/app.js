@@ -673,7 +673,9 @@ function updateStaticCopy() {
     elements.viewTabs.setAttribute("aria-label", t("view.tabs.aria"));
   }
   if (elements.viewTabBoard) {
-    elements.viewTabBoard.textContent = t("view.board");
+    const boardLabel = t("view.board");
+    elements.viewTabBoard.setAttribute("aria-label", boardLabel);
+    elements.viewTabBoard.title = boardLabel;
   }
   if (elements.viewTabTrends) {
     elements.viewTabTrends.textContent = t("view.trends");
@@ -1593,13 +1595,20 @@ function parseCodeV3RankGrade(value) {
   if (state.currentCategory !== "code_v3") return null;
   const normalized = String(value ?? "").trim();
   if (!normalized) return null;
-  const match = normalized.match(/^(.+?)\/([ABCD])([+-]?)$/i);
+  const match = normalized.match(/^(.+?)\/([ABCD])([+-]?)(?:\(\s*(\d+(?:\.\d+)?)\s*\))?$/i);
   if (!match) return null;
   return {
     rank: match[1].trim(),
     grade: `${match[2].toUpperCase()}${match[3] || ""}`,
     gradeBase: match[2].toUpperCase(),
+    priceCny: match[4] || null,
   };
+}
+
+function formatCodeV3Price(priceCny) {
+  if (!priceCny) return null;
+  if (state.locale !== "en-US") return `¥${priceCny}`;
+  return formatUsd(Number(priceCny) / CNY_PER_USD);
 }
 
 function appendCodeV3ValueContent(target, value) {
@@ -1614,6 +1623,14 @@ function appendCodeV3ValueContent(target, value) {
   grade.className = `codev3-grade codev3-grade--${parsed.gradeBase.toLowerCase()}`;
   grade.textContent = parsed.grade;
   target.appendChild(grade);
+
+  const price = formatCodeV3Price(parsed.priceCny);
+  if (price) {
+    const priceLabel = document.createElement("span");
+    priceLabel.className = "codev3-price";
+    priceLabel.textContent = price;
+    target.appendChild(priceLabel);
+  }
 }
 
 function findModelColumnIndex(headers, rows, headerIndexMap) {

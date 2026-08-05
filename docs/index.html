@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>致知 - 大模型智力长期追踪榜单</title>
+    <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon.png" />
     <link rel="stylesheet" href="assets/styles.css" />
   </head>
   <body>
@@ -37,7 +38,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <main>
       <nav class="view-tabs" id="viewTabs" aria-label="">
-        <button id="viewTabBoard" type="button" class="view-tab"></button>
+        <button id="viewTabBoard" type="button" class="view-tab view-tab--icon" aria-label="致知" title="致知">
+          <img class="view-tab-icon" src="assets/favicon.png" alt="" />
+        </button>
         <div class="view-tabs-categories" id="viewTabsCategories" role="group" aria-label=""></div>
         <button id="viewTabTrends" type="button" class="view-tab"></button>
       </nav>
