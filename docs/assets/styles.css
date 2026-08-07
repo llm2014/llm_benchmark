@@ -977,6 +977,12 @@ main {
   color: var(--color-status-skip);
 }
 
+.codev3-rank {
+  display: inline-block;
+  min-width: 3ch;
+  text-align: right;
+}
+
 .codev3-grade {
   font-weight: 700;
 }

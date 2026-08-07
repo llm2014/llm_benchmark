@@ -1679,7 +1679,11 @@ function appendCodeV3ValueContent(target, value) {
     return;
   }
 
-  target.appendChild(document.createTextNode(`${parsed.rank}/`));
+  const rank = document.createElement("span");
+  rank.className = "codev3-rank";
+  rank.textContent = `${parsed.rank}/`;
+  target.appendChild(rank);
+
   const grade = document.createElement("span");
   grade.className = `codev3-grade codev3-grade--${parsed.gradeBase.toLowerCase()}`;
   grade.textContent = parsed.grade;
