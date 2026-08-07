@@ -586,11 +586,20 @@ main {
   position: relative;
 }
 
+.table-sticky-scope {
+  display: grid;
+}
+
+.table-sticky-scope > .table-container,
+.table-sticky-scope > .sticky-table-header {
+  grid-area: 1 / 1;
+}
+
 .table-container {
   background: var(--color-panel);
   border-radius: var(--radius);
   border: 1px solid var(--color-border);
-  overflow: hidden;
+  overflow: clip;
 }
 
 .table-container--codev3 {
@@ -613,6 +622,29 @@ main {
 
 .table-container thead {
   background: var(--color-table-head);
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
+
+/* code_v3 的横向滚动容器会阻断原生 sticky，使用同列宽的镜像表头吸顶。 */
+.table-container--codev3 thead {
+  position: static;
+}
+
+.sticky-table-header {
+  position: sticky;
+  /* 抵消容器边框，让实际 th 在吸顶后恰好位于 viewport 顶部。 */
+  top: -2px;
+  z-index: 5;
+  align-self: start;
+  min-width: 0;
+  pointer-events: none;
+}
+
+.sticky-table-header-viewport {
+  overflow: hidden;
+  pointer-events: auto;
 }
 
 .table-container th,

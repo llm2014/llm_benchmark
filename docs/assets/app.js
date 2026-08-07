@@ -487,6 +487,7 @@ const elements = {
   inferenceFilter: document.getElementById("inferenceFilter"),
   countryFilter: document.getElementById("countryFilter"),
   searchInput: document.getElementById("searchInput"),
+  tableStickyScope: document.getElementById("tableStickyScope"),
   tableContainer: document.getElementById("tableContainer"),
   tableNote: document.getElementById("tableNote"),
   datasetMeta: document.getElementById("datasetMeta"),
@@ -1156,6 +1157,7 @@ function bindEventHandlers() {
     wasMobileViewport = isMobile;
     renderTable();
   });
+  elements.tableContainer.addEventListener("scroll", syncStickyTableHeaderScroll, { passive: true });
 }
 
 async function handleCategoryChange(category, options = {}) {
@@ -2015,6 +2017,7 @@ function renderMobileCards(container) {
 
 function renderTable() {
   const container = elements.tableContainer;
+  cleanupStickyTableHeader();
   container.innerHTML = "";
   container.classList.remove("mobile-cards");
   container.classList.remove("table-container--codev3");
@@ -2195,6 +2198,42 @@ function renderTable() {
 
   table.appendChild(tbody);
   container.appendChild(table);
+  prepareStickyTableHeader();
+}
+
+function prepareStickyTableHeader() {
+  const container = elements.tableContainer;
+  const scope = elements.tableStickyScope;
+  const table = container.querySelector("table");
+  const thead = container.querySelector("thead");
+  if (!scope || !table || !thead || !container.classList.contains("table-container--codev3")) return;
+
+  const stickyHeader = document.createElement("div");
+  stickyHeader.className = "sticky-table-header";
+  stickyHeader.setAttribute("aria-hidden", "true");
+
+  const viewport = document.createElement("div");
+  viewport.className = "table-container table-container--codev3 sticky-table-header-viewport";
+
+  const clonedTable = table.cloneNode(false);
+  const clonedHead = thead.cloneNode(true);
+  clonedHead.querySelectorAll("th").forEach((th, index) => {
+    th.addEventListener("click", () => toggleSort(index));
+  });
+  clonedTable.appendChild(clonedHead);
+  viewport.appendChild(clonedTable);
+  stickyHeader.appendChild(viewport);
+  scope.prepend(stickyHeader);
+  syncStickyTableHeaderScroll();
+}
+
+function cleanupStickyTableHeader() {
+  elements.tableStickyScope?.querySelector(".sticky-table-header")?.remove();
+}
+
+function syncStickyTableHeaderScroll() {
+  const viewport = elements.tableStickyScope?.querySelector(".sticky-table-header-viewport");
+  if (viewport) viewport.scrollLeft = elements.tableContainer.scrollLeft;
 }
 
 function renderTableNote() {
@@ -2315,6 +2354,7 @@ function updateMeta(dataset = null) {
 
 function showPlaceholder(message) {
   const container = elements.tableContainer;
+  cleanupStickyTableHeader();
   container.classList.remove("mobile-cards");
   container.classList.remove("table-container--codev3");
   container.innerHTML = `<div class="placeholder" role="status">${message}</div>`;
