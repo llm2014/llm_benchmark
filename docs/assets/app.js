@@ -1679,23 +1679,30 @@ function appendCodeV3ValueContent(target, value) {
     return;
   }
 
+  const result = document.createElement("span");
+  result.className = "codev3-result";
+  const score = document.createElement("span");
+
   const rank = document.createElement("span");
   rank.className = "codev3-rank";
   rank.textContent = `${parsed.rank}/`;
-  target.appendChild(rank);
+  score.appendChild(rank);
 
   const grade = document.createElement("span");
   grade.className = `codev3-grade codev3-grade--${parsed.gradeBase.toLowerCase()}`;
   grade.textContent = parsed.grade;
-  target.appendChild(grade);
+  score.appendChild(grade);
+  result.appendChild(score);
 
   const price = formatCodeV3Price(parsed.priceCny);
   if (price) {
     const priceLabel = document.createElement("span");
     priceLabel.className = "codev3-price";
     priceLabel.textContent = price;
-    target.appendChild(priceLabel);
+    result.appendChild(priceLabel);
   }
+
+  target.appendChild(result);
 }
 
 function findModelColumnIndex(headers, rows, headerIndexMap) {

@@ -977,6 +977,12 @@ main {
   color: var(--color-status-skip);
 }
 
+.codev3-result {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .codev3-rank {
   display: inline-block;
   min-width: 3ch;
@@ -1005,13 +1011,11 @@ main {
 
 /* 新格式在等级后附带人民币价格；展示层按当前语言添加币种并换算。 */
 .codev3-price {
-  float: right;
   margin-left: 0.45em;
   color: var(--color-muted);
   font-size: 0.78em;
   font-weight: 500;
   letter-spacing: 0;
-  vertical-align: 0.08em;
 }
 
 /* 档位单元格整格底色 */
