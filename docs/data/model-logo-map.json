@@ -1,0 +1,206 @@
+{
+  "schemaVersion": 1,
+  "generatedFrom": "data/**/*.csv",
+  "scanSummary": {
+    "csvFiles": 51,
+    "uniqueModelNames": 429,
+    "versionIndependentPrefixes": 30,
+    "matchedPrefixes": 27,
+    "unmatchedPrefixes": 3
+  },
+  "matchPolicy": {
+    "normalization": "trim and case-insensitive comparison",
+    "strategy": "match the longest leading alias, then resolve it to the canonical prefix"
+  },
+  "prefixToLogo": {
+    "Claude": "assets/logo/anthropic.svg",
+    "DeepSeek": "assets/logo/deepseek.svg",
+    "Doubao": "assets/logo/bytedance.svg",
+    "ERNIE": "assets/logo/baidu.svg",
+    "Gemini": "assets/logo/google.svg",
+    "Gemma": "assets/logo/google.svg",
+    "GLM": "assets/logo/glm.svg",
+    "GPT": "assets/logo/openai.svg",
+    "Grok": "assets/logo/xai.svg",
+    "Hunyuan": "assets/logo/hy.svg",
+    "Kimi": "assets/logo/kimi.svg",
+    "Ling": "assets/logo/bailing.png",
+    "Ring": "assets/logo/bailing.png",
+    "Llama": "assets/logo/meta.svg",
+    "LongCat": "assets/logo/longcat.svg",
+    "Magistral": "assets/logo/mistral.svg",
+    "MiMo": "assets/logo/mimo.svg",
+    "MiniMax": "assets/logo/minimax.svg",
+    "Mistral": "assets/logo/mistral.svg",
+    "Muse Spark": "assets/logo/meta.svg",
+    "OpenAI o-series": "assets/logo/openai.svg",
+    "Pangu": "assets/logo/huawei.svg",
+    "Qwen": "assets/logo/qwen.svg",
+    "SenseNova": "assets/logo/sensetime.svg",
+    "Spark": "assets/logo/xunfei.svg",
+    "Step": "assets/logo/stepfun.svg",
+    "YI": "assets/logo/zeroone.svg"
+  },
+  "prefixAliases": {
+    "Baichuan": [
+      "Baichuan",
+      "百川"
+    ],
+    "Claude": [
+      "Claude",
+      "Fable",
+      "Opus",
+      "Sonnet"
+    ],
+    "DeepSeek": [
+      "DeepSeek"
+    ],
+    "Doubao": [
+      "Doubao",
+      "Seed",
+      "字节豆包",
+      "豆包"
+    ],
+    "ERNIE": [
+      "ERNIE",
+      "ERINE",
+      "文心一言",
+      "百度文心一言"
+    ],
+    "Gemini": [
+      "Gemini"
+    ],
+    "Gemma": [
+      "Gemma",
+      "Gemm"
+    ],
+    "GLM": [
+      "ChatGLM",
+      "GLM"
+    ],
+    "GPT": [
+      "ChatGPT",
+      "OpenAI GPT",
+      "GPT",
+      "gpt-oss"
+    ],
+    "Grok": [
+      "Grok"
+    ],
+    "Hunyuan": [
+      "Hunyuan",
+      "Tencent HY",
+      "Tencent Hy",
+      "腾讯 hunyuan",
+      "腾讯 混元",
+      "腾讯混元"
+    ],
+    "KAT-Coder": [
+      "KAT-Coder"
+    ],
+    "Kimi": [
+      "Kimi",
+      "K2"
+    ],
+    "Ling": [
+      "Ling"
+    ],
+    "Ring": [
+      "Ring"
+    ],
+    "Llama": [
+      "Llama"
+    ],
+    "LongCat": [
+      "LongCat"
+    ],
+    "Magistral": [
+      "Magistral"
+    ],
+    "MiMo": [
+      "MiMo"
+    ],
+    "MiniMax": [
+      "MiniMax"
+    ],
+    "Mistral": [
+      "Mistral"
+    ],
+    "Muse Spark": [
+      "Muse Spark"
+    ],
+    "OpenAI o-series": [
+      "OpenAI o",
+      "O1",
+      "o3",
+      "o4"
+    ],
+    "Pangu": [
+      "openPangu",
+      "Pangu"
+    ],
+    "Qwen": [
+      "Qwen",
+      "Qwn",
+      "通义qwen",
+      "通义千问"
+    ],
+    "SenseNova": [
+      "SenseNova",
+      "商汤",
+      "日日新"
+    ],
+    "Spark": [
+      "讯飞 星火",
+      "讯飞星火",
+      "讯飞"
+    ],
+    "Step": [
+      "Step",
+      "阶跃星辰"
+    ],
+    "TianGong": [
+      "天工",
+      "昆仑天工"
+    ],
+    "YI": [
+      "YI"
+    ]
+  },
+  "unmatched": [
+    {
+      "prefix": "Baichuan",
+      "aliases": [
+        "Baichuan",
+        "百川"
+      ],
+      "models": [
+        "Baichuan4 Turbo",
+        "百川3",
+        "百川4"
+      ]
+    },
+    {
+      "prefix": "KAT-Coder",
+      "aliases": [
+        "KAT-Coder"
+      ],
+      "models": [
+        "KAT-Coder"
+      ]
+    },
+    {
+      "prefix": "TianGong",
+      "aliases": [
+        "天工",
+        "昆仑天工"
+      ],
+      "models": [
+        "天工 O1 0104",
+        "天工 O1 Preview",
+        "天工3.0",
+        "昆仑天工3.0"
+      ]
+    }
+  ]
+}

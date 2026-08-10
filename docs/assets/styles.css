@@ -32,6 +32,7 @@
   --color-chart-default-bg: rgba(31, 78, 121, 0.58);
   --color-chart-default-border: rgba(31, 78, 121, 1);
   --color-chart-quadrant-sweet: rgba(58, 107, 79, 0.055);
+  --color-chart-quadrant-second: rgba(34, 197, 94, 0.14);
   --color-chart-median-line: rgba(111, 108, 101, 0.75);
   --color-chart-quadrant-label: rgba(111, 108, 101, 0.9);
 
@@ -100,6 +101,7 @@
   --color-chart-default-bg: rgba(147, 184, 220, 0.66);
   --color-chart-default-border: rgba(147, 184, 220, 1);
   --color-chart-quadrant-sweet: rgba(143, 191, 159, 0.07);
+  --color-chart-quadrant-second: rgba(74, 222, 128, 0.12);
   --color-chart-median-line: rgba(160, 156, 144, 0.8);
   --color-chart-quadrant-label: rgba(160, 156, 144, 0.95);
 
@@ -172,6 +174,7 @@
     --color-chart-default-bg: rgba(147, 184, 220, 0.66);
     --color-chart-default-border: rgba(147, 184, 220, 1);
     --color-chart-quadrant-sweet: rgba(143, 191, 159, 0.07);
+    --color-chart-quadrant-second: rgba(74, 222, 128, 0.12);
     --color-chart-median-line: rgba(160, 156, 144, 0.8);
     --color-chart-quadrant-label: rgba(160, 156, 144, 0.95);
     --mobile-card-code-bg: var(--color-panel);

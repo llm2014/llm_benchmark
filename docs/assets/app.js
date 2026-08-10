@@ -117,6 +117,8 @@ const TRENDS_SUPPORTED = new Set(
 const TRENDS_MAX_MONTHS = 18;
 const TRENDS_RECENT_MONTHS = 6;
 const TRENDS_DEFAULT_SELECTED = 6;
+const MODEL_LOGO_MAP_PATH = "data/model-logo-map.json";
+const MODEL_LOGO_POINT_SIZE = 17;
 const SERIES_PALETTE_LIGHT = [
   "#1f4e79", "#9e3b32", "#3a6b4f", "#8a6d1f",
   "#6b4f8a", "#2f6b6b", "#a2543a", "#5a5f6b",
@@ -176,6 +178,11 @@ const quadrantPlugin = {
       ctx.fillStyle = opts.sweetBg;
       ctx.fillRect(midX, midY, right - midX, bottom - midY);
     }
+    if (opts.secondBg) {
+      // 标准第二象限：x 小于分界、y 大于分界；Canvas 中对应左上区域。
+      ctx.fillStyle = opts.secondBg;
+      ctx.fillRect(left, top, midX - left, midY - top);
+    }
     if (opts.lineColor) {
       ctx.strokeStyle = opts.lineColor;
       ctx.lineWidth = 1;
@@ -222,6 +229,58 @@ const quadrantPlugin = {
   },
 };
 
+// 直接把高分辨率源图绘制到 Chart.js 的高 DPI 画布。
+// 避免先缩成 20px 位图、再被 devicePixelRatio 放大造成的模糊。
+const modelLogoPointsPlugin = {
+  id: "modelLogoPoints",
+  afterDatasetsDraw(chart, args, opts) {
+    if (!opts || opts.display === false) return;
+    const meta = chart.getDatasetMeta(0);
+    const dataset = chart.data.datasets[0];
+    if (!meta || !dataset) return;
+
+    const { ctx } = chart;
+    const size = opts.size || MODEL_LOGO_POINT_SIZE;
+    const padding = 1;
+
+    ctx.save();
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+
+    dataset.data.forEach((point, index) => {
+      const element = meta.data[index];
+      const image = point?.logoImage;
+      if (!element || !image) return;
+
+      const radius = size / 2;
+      ctx.beginPath();
+      ctx.arc(element.x, element.y, radius - 0.5, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(255, 255, 255, 0.96)";
+      ctx.fill();
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(element.x, element.y, radius - padding, 0, Math.PI * 2);
+      ctx.clip();
+
+      const maxSize = size - padding * 2;
+      const scale = Math.min(maxSize / image.naturalWidth, maxSize / image.naturalHeight);
+      const width = image.naturalWidth * scale;
+      const height = image.naturalHeight * scale;
+      ctx.drawImage(image, element.x - width / 2, element.y - height / 2, width, height);
+      ctx.restore();
+
+      ctx.beginPath();
+      ctx.arc(element.x, element.y, radius - 0.5, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(111, 108, 101, 0.35)";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    });
+
+    ctx.restore();
+  },
+};
+
 // Chart.js 自定义插件：在散点旁直接标注模型名。
 // 贪心防重叠：按 右→左→上→下 顺序尝试，全部冲突才放弃该标签；
 // 数据顺序即优先级（排名靠前的模型优先获得标注位）。
@@ -238,7 +297,7 @@ const pointLabelsPlugin = {
     const fontSize = opts.fontSize || 11;
     const padX = 2;
     const boxH = fontSize + 4;
-    const offset = 7;
+    const defaultOffset = 7;
     const placed = [];
 
     const intersects = (a, b) =>
@@ -258,6 +317,9 @@ const pointLabelsPlugin = {
       const element = meta.data[index];
       if (!element || !point || !point.label) return;
       const boxW = ctx.measureText(point.label).width + padX * 2;
+      const offset = point.logoImage
+        ? MODEL_LOGO_POINT_SIZE / 2 + 4
+        : defaultOffset;
       const candidates = [
         { x: element.x + offset, y: element.y - boxH / 2 },
         { x: element.x - offset - boxW, y: element.y - boxH / 2 },
@@ -468,6 +530,10 @@ const state = {
   sort: { columnIndex: null, direction: null },
   themeMode: readStoredThemeMode(),
   view: "board",
+  modelLogos: {
+    matchers: [],
+    images: new Map(),
+  },
   trends: {
     category: null,
     mode: "rank",
@@ -950,7 +1016,7 @@ async function applyStateFromHash(rawHash = window.location.hash) {
 
 async function init() {
   showPlaceholder(t("placeholders.loadingData"));
-  const manifest = await fetchManifest();
+  const [manifest] = await Promise.all([fetchManifest(), loadModelLogoAssets()]);
   if (!manifest.length) {
     showPlaceholder(t("placeholders.noDatasets"));
     return;
@@ -978,6 +1044,71 @@ async function fetchManifest() {
   }
   const payload = await response.json();
   return Array.isArray(payload.datasets) ? payload.datasets : [];
+}
+
+async function loadModelLogoAssets() {
+  try {
+    const response = await fetch(MODEL_LOGO_MAP_PATH, { cache: "no-cache" });
+    if (!response.ok) {
+      throw new Error(`Unable to load model logo map: ${response.status}`);
+    }
+
+    const payload = await response.json();
+    const prefixToLogo = payload?.prefixToLogo || {};
+    const prefixAliases = payload?.prefixAliases || {};
+    const matchers = [];
+
+    Object.entries(prefixAliases).forEach(([prefix, aliases]) => {
+      const logoPath = prefixToLogo[prefix];
+      if (!logoPath || !Array.isArray(aliases)) return;
+      aliases.forEach((alias) => {
+        const normalizedAlias = String(alias || "").trim().toLowerCase();
+        if (!normalizedAlias) return;
+        matchers.push({ alias: normalizedAlias, logoPath });
+      });
+    });
+
+    // Longer aliases win, e.g. "OpenAI o" is checked before shorter families.
+    matchers.sort((a, b) => b.alias.length - a.alias.length);
+    state.modelLogos.matchers = matchers;
+
+    const logoPaths = [...new Set(matchers.map((matcher) => matcher.logoPath))];
+    const loaded = await Promise.all(
+      logoPaths.map(async (logoPath) => [logoPath, await loadLogoImage(logoPath)])
+    );
+    loaded.forEach(([logoPath, image]) => {
+      if (image) {
+        state.modelLogos.images.set(logoPath, image);
+      }
+    });
+  } catch (error) {
+    // Logo is progressive enhancement: the chart remains usable with circles.
+    console.warn("Unable to initialize model logos; using circle markers.", error);
+    state.modelLogos.matchers = [];
+    state.modelLogos.images.clear();
+  }
+}
+
+function loadLogoImage(path) {
+  return new Promise((resolve) => {
+    const image = new Image();
+    image.decoding = "async";
+    image.onload = () => resolve(image);
+    image.onerror = () => {
+      console.warn(`Unable to load model logo: ${path}`);
+      resolve(null);
+    };
+    image.src = path;
+  });
+}
+
+function getModelLogoImage(modelName) {
+  const normalizedName = String(modelName || "").trim().toLowerCase();
+  if (!normalizedName) return null;
+  const matcher = state.modelLogos.matchers.find(({ alias }) =>
+    normalizedName.startsWith(alias)
+  );
+  return matcher ? state.modelLogos.images.get(matcher.logoPath) || null : null;
 }
 
 function renderCategoryNav({ preserveSelection = false } = {}) {
@@ -2838,6 +2969,7 @@ function renderChart() {
         y: yValue,
         label: modelName,
         isThink: row.isThink,
+        logoImage: getModelLogoImage(modelName),
       };
     })
     .filter((item) => item !== null);
@@ -2887,15 +3019,19 @@ function renderChart() {
           data: chartData,
           backgroundColor: (context) => {
             const point = context.raw;
+            if (point?.logoImage) return "rgba(0, 0, 0, 0)";
             return point && point.isThink ? chartThinkBg : chartDefaultBg;
           },
           borderColor: (context) => {
             const point = context.raw;
+            if (point?.logoImage) return "rgba(0, 0, 0, 0)";
             return point && point.isThink ? chartThinkBorder : chartDefaultBorder;
           },
           borderWidth: 1.5,
-          pointRadius: 5,
-          pointHoverRadius: 7,
+          pointRadius: (context) => (context.raw?.logoImage ? MODEL_LOGO_POINT_SIZE / 2 : 5),
+          pointHoverRadius: (context) =>
+            context.raw?.logoImage ? MODEL_LOGO_POINT_SIZE / 2 + 2 : 7,
+          pointHitRadius: 4,
         },
       ],
     },
@@ -2934,6 +3070,10 @@ function renderChart() {
           medianX: quadrantX,
           medianY: quadrantY,
           sweetBg: getCssVariable("--color-chart-quadrant-sweet", "rgba(58, 107, 79, 0.05)"),
+          secondBg:
+            yAxisType === "cost"
+              ? getCssVariable("--color-chart-quadrant-second", "rgba(34, 197, 94, 0.14)")
+              : null,
           lineColor: getCssVariable("--color-chart-median-line", "rgba(111, 108, 101, 0.75)"),
           labelColor: getCssVariable("--color-chart-quadrant-label", "rgba(111, 108, 101, 0.9)"),
           // 交换坐标后象限含义随之旋转：右上↔右下、左上↔左下
@@ -2956,6 +3096,10 @@ function renderChart() {
           fontSize: 11,
           thinkColor: chartThinkBorder,
           defaultColor: chartDefaultBorder,
+        },
+        modelLogoPoints: {
+          display: true,
+          size: MODEL_LOGO_POINT_SIZE,
         },
       },
       scales: {
@@ -3007,7 +3151,7 @@ function renderChart() {
         },
       },
     },
-    plugins: [quadrantPlugin, pointLabelsPlugin],
+    plugins: [quadrantPlugin, modelLogoPointsPlugin, pointLabelsPlugin],
   });
 
   if (elements.chartCaption) {
