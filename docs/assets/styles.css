@@ -1189,6 +1189,11 @@ main {
   background-color: var(--color-status-bg-pass);
 }
 
+.table-note .grade-chip--skip {
+  color: var(--color-status-skip);
+  background-color: var(--color-status-bg-pending);
+}
+
 .table-note .grade-chip--pending {
   color: var(--color-status-pending);
   background-color: var(--color-status-bg-pending);

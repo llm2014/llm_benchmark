@@ -537,8 +537,8 @@ const TRANSLATIONS = {
     "en-US": "Grade: almost never makes mistakes — only minor UI or interaction errors.",
   },
   "codev3Note.gradeB": {
-    "zh-CN": "档：大概率会错，但只要描述错误，都可以在不超过 2 轮内修复。",
-    "en-US": "Grade: likely to make mistakes, but any described error can be fixed within 2 rounds.",
+    "zh-CN": "档：大概率会错，但只要描述错误现象，都可以1轮修复。",
+    "en-US": "Grade: likely to make mistakes, but any described issue can be fixed in 1 round.",
   },
   "codev3Note.gradeC": {
     "zh-CN": "档：大概率错，但需要交互更多轮，模型能自主推进修复，无需人工提供辅助。",
@@ -555,8 +555,12 @@ const TRANSLATIONS = {
     "en-US": "— lacks the knowledge or methodology to complete the task even with help.",
   },
   "codev3Note.pass": {
-    "zh-CN": "：推测模型可顺利完成测试。",
-    "en-US": ": expected to complete the test successfully.",
+    "zh-CN": "：前代模型已经拿到 A，不再测试。",
+    "en-US": ": a previous model version already earned an A, so it is no longer tested.",
+  },
+  "codev3Note.skip": {
+    "zh-CN": "：各方面原因，不进行测试。",
+    "en-US": ": not tested for various reasons.",
   },
   "codev3Note.pending": {
     "zh-CN": "：正在测试中。",
@@ -567,38 +571,37 @@ const TRANSLATIONS = {
     "en-US":
       "Within the same grade, when only a few rounds have issues and the model performs well most of the time, it is upgraded by a half grade, denoted as B+ or C+.",
   },
-  "codev3Note.monthlyTitle": {
-    "zh-CN": "2026-07 月榜方法说明",
-    "en-US": "2026-07 Monthly Methodology",
+  "codev3Note.projectsTitle": {
+    "zh-CN": "项目说明",
+    "en-US": "Project Guide",
   },
-  "codev3Note.monthlyP1": {
-    "zh-CN":
-      "本月主要尝试优化测试效率。原先 C 到 G 5 个项目都是多轮项目，通过中途多次重启来观察模型面对存量代码，如何有效发起探索。随着模型能力提升，存量探索已大体不是问题。观察二三梯队模型的错误情况，通常也不是来自存量探索不充分，而是对新需求把握不好。所以得到一个洞察：轮次可以压缩，不必再把完成工程拆成 10 轮。",
-    "en-US":
-      "This month we focused on improving testing efficiency. Projects C through G (5 projects) were previously all multi-round, restarting midway several times to observe how models effectively initiate exploration when facing existing code. As model capabilities improve, exploring existing code is largely no longer a problem. Errors from second- and third-tier models usually stem not from insufficient exploration of existing code, but from failing to grasp new requirements. This led to the insight that rounds can be compressed — no need to split a full project into 10 rounds.",
+  "codev3Note.projectC": {
+    "zh-CN": "C: MacOS App + OpenGL",
+    "en-US": "C: MacOS App + OpenGL",
   },
-  "codev3Note.monthlyP2": {
-    "zh-CN":
-      "因此新的 H 和 I 项目实践了新的模式，只保留 2 轮：第一轮让模型从 0 开发完整需求；第二轮重启后修复所有 Bug。从结果来看，这样的模式也能很好拉开各个模型差距。尤其按档位来看，好的模型依然可以不错或少错，错误能一次改好；下位模型则也会反复出错，Debug 效率低下。",
-    "en-US":
-      "The new H and I projects therefore follow a new pattern with only 2 rounds: round 1 lets the model build the complete requirement from scratch; round 2 restarts and fixes all bugs. As the results show, this pattern still separates the models well. By grade, good models still make few or no mistakes and fix errors in one pass, while lower-tier models repeatedly make mistakes and debug inefficiently.",
+  "codev3Note.projectE": {
+    "zh-CN": "E: Web + WASM",
+    "en-US": "E: Web + WASM",
   },
-  "codev3Note.monthlyP3": {
-    "zh-CN":
-      "H 项目以考察模型的 3D 建模和审美为主，但建模复杂度不高，所以叫 Simple Model。Opus-5、Kimi K3 这类在建模方面有良好口碑的模型，在 H 项目上游刃有余，输出的美观度远超其他模型。尤其 Opus-5 输出的模型材质在精度方面达到了前所未有的高度，甚至超过 Fable-5。当然最终成本也超过 Fable。而下位 C 档模型虽然整体更差，但也有一定可用性，如果是用户提供材质，不要让模型自绘，则无疑会极大提升这类模型的可用性。",
-    "en-US":
-      "The H project mainly tests 3D modeling and aesthetics, but the modeling complexity is low, hence the name Simple Model. Models with a strong reputation in modeling, such as Opus-5 and Kimi K3, excel in H, with output aesthetics far beyond other models. Opus-5's material precision in particular reached an unprecedented level, even surpassing Fable-5 — at a higher final cost than Fable. Lower C-tier models are worse overall but still somewhat usable; if the user provides the materials instead of letting the model draw them itself, their usability improves dramatically.",
+  "codev3Note.projectF": {
+    "zh-CN": "F: Godot + Physics",
+    "en-US": "F: Godot + Physics",
   },
-  "codev3Note.monthlyP4": {
-    "zh-CN":
-      "I 项目是原先 D 项目的升级版本，更换了底层技术栈，但功能基本不变。各模型得分如果跟 D 对照则能看到非常明显的差异。头部模型基本不受影响，无论是拆功能还是完整功能一次性写，最终交付成品是基本相当。甚至 Opus、Fable 这类模型，因为一次拿到了更多需求细节，反而有更多合理发挥空间，能充分考虑用户真实诉求，做出更好的成品，UI 设计、服务端设计等可以做得更妥善。国产 Kimi K3 也完全不弱。而下位模型则普遍差于 D 项目，内容合并后，反而无法细致遵守每一条规则和约束。这也说明，随着模型能力提升，一次性讲清楚需求更为重要。",
-    "en-US":
-      "The I project is an upgraded version of the former D project — the underlying tech stack changed, but the features are basically the same. Comparing scores with D shows a very clear difference. Top models are basically unaffected: whether features are split up or written all at once, the final deliverables are roughly equivalent. Models like Opus and Fable even gain more room to play because they receive more requirement detail at once — they can fully consider the user's real needs and deliver better results, with more careful UI and server-side design. Domestic model Kimi K3 is no slouch either. Lower-tier models, however, generally do worse than in D: once the content is merged, they can no longer follow every rule and constraint meticulously. This also shows that as models improve, stating requirements completely up front matters more.",
+  "codev3Note.projectH": {
+    "zh-CN": "H: Web + 3D Modeling",
+    "en-US": "H: Web + 3D Modeling",
   },
-  "codev3Note.monthlyP5": {
-    "zh-CN": "现有的 C 和 D 项目对头部模型已饱和，下月起将不再使用。其中 C 项目也会升级为 2 轮版本。D 项目已被 I 项目取代。",
-    "en-US":
-      "The current C and D projects have saturated for top models and will be retired starting next month. C will be upgraded to a 2-round version, and D has been replaced by I.",
+  "codev3Note.projectI": {
+    "zh-CN": "I: iOS App + Rust Server",
+    "en-US": "I: iOS App + Rust Server",
+  },
+  "codev3Note.projectJ": {
+    "zh-CN": "J: Web + 2D Animation",
+    "en-US": "J: Web + 2D Animation",
+  },
+  "codev3Note.projectK": {
+    "zh-CN": "K: Harmony OS App + C++ Native",
+    "en-US": "K: Harmony OS App + C++ Native",
   },
   "meta.codev3CellFormat": {
     "zh-CN": "1/A 代表扣分数/档位",

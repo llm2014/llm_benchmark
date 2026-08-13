@@ -2394,6 +2394,7 @@ function renderTableNote() {
     ["d", t("codev3Note.gradeD")],
     ["failed", t("codev3Note.failed")],
     ["pass", t("codev3Note.pass")],
+    ["skip", t("codev3Note.skip")],
     ["pending", t("codev3Note.pending")],
   ];
   const gradeList = gradeItems
@@ -2405,14 +2406,16 @@ function renderTableNote() {
     )
     .join("");
 
-  const monthly = hasNewMode
+  const projectGuide = hasNewMode
     ? [
-        `<h3>${t("codev3Note.monthlyTitle")}</h3>`,
-        `<p>${t("codev3Note.monthlyP1")}</p>`,
-        `<p>${t("codev3Note.monthlyP2")}</p>`,
-        `<p>${t("codev3Note.monthlyP3")}</p>`,
-        `<p>${t("codev3Note.monthlyP4")}</p>`,
-        `<p>${t("codev3Note.monthlyP5")}</p>`,
+        `<h3>${t("codev3Note.projectsTitle")}</h3>`,
+        `<p>${t("codev3Note.projectC")}</p>`,
+        `<p>${t("codev3Note.projectE")}</p>`,
+        `<p>${t("codev3Note.projectF")}</p>`,
+        `<p>${t("codev3Note.projectH")}</p>`,
+        `<p>${t("codev3Note.projectI")}</p>`,
+        `<p>${t("codev3Note.projectJ")}</p>`,
+        `<p>${t("codev3Note.projectK")}</p>`,
       ].join("")
     : "";
 
@@ -2420,7 +2423,7 @@ function renderTableNote() {
     `<h3>${t("codev3Note.title")}</h3>`,
     `<ul class="grade-list">${gradeList}</ul>`,
     `<p>${t("codev3Note.halfGrade")}</p>`,
-    monthly,
+    projectGuide,
   ].join("");
 }
 
