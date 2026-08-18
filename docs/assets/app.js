@@ -6,7 +6,7 @@ import {
   onLocaleChange,
   setLocale,
   t,
-} from "./i18n.js";
+} from "./i18n.js?v=20260818-seo";
 
 const DATASET_TITLE_KEYS = {
   月榜: "dataset.title.monthly",
@@ -679,7 +679,17 @@ function initializeThemeUi() {
 }
 
 function updateStaticCopy() {
-  document.title = t("app.title");
+  const documentTitle = t("app.documentTitle");
+  const metaDescription = t("app.metaDescription");
+  const socialDescription = t("app.socialDescription");
+
+  document.title = documentTitle;
+  updateMetaContent('meta[name="description"]', metaDescription);
+  updateMetaContent('meta[property="og:title"]', documentTitle);
+  updateMetaContent('meta[property="og:description"]', socialDescription);
+  updateMetaContent('meta[property="og:locale"]', state.locale.replace("-", "_"));
+  updateMetaContent('meta[name="twitter:title"]', documentTitle);
+  updateMetaContent('meta[name="twitter:description"]', socialDescription);
   if (elements.pageTitle) {
     elements.pageTitle.textContent = t("app.title");
   }
@@ -823,6 +833,13 @@ function readStoredThemeMode() {
   } catch (error) {
     console.warn("Unable to read stored theme:", error);
     return "system";
+  }
+}
+
+function updateMetaContent(selector, content) {
+  const element = document.head.querySelector(selector);
+  if (element) {
+    element.setAttribute("content", content);
   }
 }
 

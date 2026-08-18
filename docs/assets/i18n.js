@@ -13,6 +13,18 @@ const TRANSLATIONS = {
     "zh-CN": "致知",
     "en-US": "LLM Benchmark Dashboard",
   },
+  "app.documentTitle": {
+    "zh-CN": "致知｜大模型智力长期追踪榜单",
+    "en-US": "LLM Benchmark Dashboard | Long-Term Model Rankings",
+  },
+  "app.metaDescription": {
+    "zh-CN": "致知持续追踪主流大语言模型在逻辑、编程与视觉等私有基准上的表现，提供月度榜单、模型筛选、成本与趋势对比。",
+    "en-US": "Track leading large language models across private logic, coding, and vision benchmarks with monthly rankings, model filters, cost analysis, and performance trends.",
+  },
+  "app.socialDescription": {
+    "zh-CN": "持续追踪主流大语言模型在逻辑、编程与视觉等私有基准上的表现，对比月度排名、成本与长期趋势。",
+    "en-US": "Compare leading language models on private logic, coding, and vision benchmarks through monthly rankings, costs, and long-term trends.",
+  },
   "header.subtitle": {
     "zh-CN": "大模型智力长期追踪榜单",
     "en-US": "Long-term evaluation of large language models on private benchmarks",

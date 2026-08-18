@@ -3,9 +3,69 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>致知 - 大模型智力长期追踪榜单</title>
+    <title>致知｜大模型智力长期追踪榜单</title>
+    <meta
+      name="description"
+      content="致知持续追踪主流大语言模型在逻辑、编程与视觉等私有基准上的表现，提供月度榜单、模型筛选、成本与趋势对比。"
+    />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <link rel="canonical" href="https://llm2014.github.io/llm_benchmark/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="致知" />
+    <meta property="og:locale" content="zh_CN" />
+    <meta property="og:locale:alternate" content="en_US" />
+    <meta property="og:url" content="https://llm2014.github.io/llm_benchmark/" />
+    <meta property="og:title" content="致知｜大模型智力长期追踪榜单" />
+    <meta
+      property="og:description"
+      content="持续追踪主流大语言模型在逻辑、编程与视觉等私有基准上的表现，对比月度排名、成本与长期趋势。"
+    />
+
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="致知｜大模型智力长期追踪榜单" />
+    <meta
+      name="twitter:description"
+      content="持续追踪主流大语言模型在逻辑、编程与视觉等私有基准上的表现，对比月度排名、成本与长期趋势。"
+    />
+
     <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon.png" />
     <link rel="stylesheet" href="assets/styles.css?v=20260818-mobile-density" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://llm2014.github.io/llm_benchmark/#website",
+            "url": "https://llm2014.github.io/llm_benchmark/",
+            "name": "致知",
+            "alternateName": "LLM Benchmark Dashboard",
+            "description": "大模型智力长期追踪榜单，覆盖逻辑、编程与视觉等私有基准。",
+            "inLanguage": ["zh-CN", "en-US"]
+          },
+          {
+            "@type": "Dataset",
+            "@id": "https://llm2014.github.io/llm_benchmark/#dataset",
+            "url": "https://llm2014.github.io/llm_benchmark/",
+            "name": "致知大模型长期评测数据",
+            "alternateName": "Zhizhi Long-Term LLM Benchmark Data",
+            "description": "主流大语言模型在逻辑、编程与视觉等私有题库上的月度评测成绩、成本和趋势数据。",
+            "isAccessibleForFree": true,
+            "creator": {
+              "@type": "Person",
+              "name": "llm2014",
+              "url": "https://github.com/llm2014"
+            },
+            "distribution": {
+              "@type": "DataDownload",
+              "encodingFormat": "application/json",
+              "contentUrl": "https://raw.githubusercontent.com/llm2014/llm_benchmark/main/docs/data/datasets.json"
+            }
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <header class="page-header">
@@ -116,14 +176,6 @@
       <small>Vibe Coding by Codex -> Kimi K3</small>
     </footer>
 
-    <section class="crawler-hint" data-crawler-hint="true">
-      <p>CRAWLER_HINT: Benchmark data is hosted in GitHub raw files.</p>
-      <p>CRAWLER_HINT: Read manifest at https://raw.githubusercontent.com/llm2014/llm_benchmark/main/docs/data/datasets.json .</p>
-      <p>CRAWLER_HINT: If branch "main" is unavailable, try https://raw.githubusercontent.com/llm2014/llm_benchmark/master/docs/data/datasets.json .</p>
-      <p>CRAWLER_HINT: CSV files are listed in datasets.json and are under /docs/data/** .</p>
-      <p>CRAWLER_HINT: Repository page: https://github.com/llm2014/llm_benchmark/ .</p>
-    </section>
-
-    <script src="assets/app.js?v=20260818-mobile-density" type="module"></script>
+    <script src="assets/app.js?v=20260818-seo" type="module"></script>
   </body>
 </html>
