@@ -816,20 +816,24 @@ main {
 /* ---------------- 移动端卡片 ---------------- */
 
 .table-container.mobile-cards {
-  padding: 12px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   overflow: visible;
 }
 
 .mobile-card-list {
   display: grid;
-  gap: 12px;
+  gap: 10px;
 }
 
 .mobile-card {
   border: 1px solid var(--color-border);
-  border-radius: var(--radius);
+  border-radius: 8px;
   background: var(--color-panel);
-  padding: 14px;
+  padding: 12px 14px 13px;
+  box-shadow: var(--shadow-soft);
 }
 
 .mobile-card--code {
@@ -853,16 +857,14 @@ main {
   align-items: flex-start;
   justify-content: space-between;
   gap: 10px;
-  margin-bottom: 12px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 9px;
 }
 
 .mobile-card-title {
   margin: 0;
   font-family: var(--font-family-serif);
-  font-size: 16px;
-  line-height: 1.35;
+  font-size: 15.5px;
+  line-height: 1.3;
   font-weight: 600;
   overflow-wrap: anywhere;
 }
@@ -875,20 +877,30 @@ main {
 .mobile-card-metrics {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  column-gap: 0;
+  row-gap: 8px;
 }
 
 .mobile-card-metric {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  background: var(--color-card-metric-bg);
-  padding: 10px;
+  min-width: 0;
+  border: 0;
+  border-left: 1px solid var(--color-border);
+  border-radius: 0;
+  background: transparent;
+  padding: 3px 10px;
+}
+
+.mobile-card-metric:nth-child(2n) {
+  border-left: 0;
+  padding-left: 0;
 }
 
 .mobile-card-metric--primary {
   grid-column: 1 / -1;
-  background: var(--color-card-metric-primary-bg);
-  border-color: var(--color-card-metric-primary-border);
+  border: 0;
+  border-bottom: 1px solid var(--color-border);
+  background: transparent;
+  padding: 0 0 9px;
 }
 
 .mobile-card-metric-label {
@@ -900,7 +912,7 @@ main {
 
 .mobile-card-metric-value {
   display: block;
-  margin-top: 4px;
+  margin-top: 2px;
   font-size: 16px;
   line-height: 1.25;
   font-weight: 600;
@@ -915,28 +927,40 @@ main {
 .mobile-card-row {
   display: grid;
   grid-template-columns: repeat(var(--mobile-card-row-columns, 3), minmax(0, 1fr));
-  gap: 8px;
-  margin-top: 8px;
+  gap: 0;
+  margin-top: 0;
+  border-top: 1px solid var(--color-border);
 }
 
 .mobile-card-row-metric {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  background: var(--color-card-row-bg);
+  min-width: 0;
+  border: 0;
+  border-left: 1px solid var(--color-border);
+  border-radius: 0;
+  background: transparent;
   padding: 8px 10px;
+}
+
+.mobile-card-row-metric:first-child {
+  border-left: 0;
+  padding-left: 0;
+}
+
+.mobile-card-row-metric:last-child {
+  padding-right: 0;
 }
 
 .mobile-card-row-metric-label {
   display: block;
   font-size: 11px;
-  line-height: 1.2;
+  line-height: 1.25;
   letter-spacing: 0.04em;
   color: var(--color-muted);
 }
 
 .mobile-card-row-metric-value {
   display: block;
-  margin-top: 3px;
+  margin-top: 2px;
   font-size: 14px;
   line-height: 1.25;
   color: var(--color-text);
@@ -945,19 +969,18 @@ main {
 }
 
 .mobile-card-row--hero .mobile-card-row-metric {
-  background: var(--color-card-row-hero-bg);
-  border-color: var(--color-card-row-hero-border);
-  padding-top: 10px;
+  background: transparent;
+  padding-top: 8px;
   padding-bottom: 10px;
 }
 
 .mobile-card-row--hero .mobile-card-row-metric-value {
-  font-size: 16px;
+  font-size: 19px;
+  line-height: 1.15;
 }
 
 .mobile-card-row--secondary .mobile-card-row-metric {
-  background: var(--color-card-row-secondary-bg);
-  border-color: var(--color-card-row-secondary-border);
+  background: transparent;
 }
 
 .mobile-card-row--secondary .mobile-card-row-metric-label,
@@ -976,24 +999,49 @@ main {
 }
 
 .mobile-card-row-placeholder {
-  border: 1px dashed var(--color-card-row-placeholder-border);
-  border-radius: var(--radius);
-  background: var(--color-card-row-placeholder-bg);
-  min-height: 56px;
+  display: none;
+}
+
+.mobile-card-row--codev3-primary {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  border-top: 0;
+  border-radius: 6px;
+  overflow: hidden;
+  background: transparent;
 }
 
 .mobile-card-row--codev3-primary .mobile-card-row-metric {
   background: var(--color-card-codev3-primary-bg);
-  border-color: var(--color-card-codev3-primary-border);
+  border: 0;
+  border-top: 1px solid var(--color-border);
+  border-left: 1px solid var(--color-border);
+  padding: 8px 9px 9px;
+}
+
+.mobile-card-row--codev3-primary .mobile-card-row-metric:nth-child(-n + 3) {
+  border-top: 0;
+}
+
+.mobile-card-row--codev3-primary .mobile-card-row-metric:nth-child(3n + 1) {
+  border-left: 0;
+}
+
+.mobile-card-row--codev3-primary .mobile-card-row-metric-label {
+  min-height: 2.5em;
+  color: var(--color-text);
+  font-weight: 600;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
 }
 
 .mobile-card-row--codev3-primary .mobile-card-row-metric-value {
-  font-size: 15px;
+  margin-top: 5px;
+  font-size: 16px;
 }
 
 .mobile-card-row--codev3-secondary .mobile-card-row-metric {
-  background: var(--color-card-codev3-secondary-bg);
-  border-color: var(--color-card-codev3-secondary-border);
+  background: transparent;
 }
 
 .codev3-status {
@@ -1013,9 +1061,15 @@ main {
 }
 
 .codev3-result {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px;
+  align-items: baseline;
+}
+
+.codev3-score {
+  min-width: 0;
+  white-space: nowrap;
 }
 
 .codev3-rank {
@@ -1046,9 +1100,11 @@ main {
 
 /* 新格式在等级后附带人民币价格；展示层按当前语言添加币种并换算。 */
 .codev3-price {
-  margin-left: 0.45em;
+  margin-left: 0;
+  justify-self: end;
+  white-space: nowrap;
   color: var(--color-muted);
-  font-size: 0.78em;
+  font-size: 0.68em;
   font-weight: 500;
   letter-spacing: 0;
 }
@@ -1454,11 +1510,23 @@ main {
   }
 
   .controls {
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
   }
 
   .control {
+    min-width: 0;
     width: 100%;
+  }
+
+  .controls .control:first-child,
+  .controls .search-control {
+    grid-column: 1 / -1;
+  }
+
+  .controls .control label {
+    letter-spacing: 0.05em;
   }
 
   .view-tabs {
@@ -1472,7 +1540,7 @@ main {
   }
 
   .table-container.mobile-cards {
-    padding: 10px;
+    padding: 0;
   }
 
   .chart-container {
@@ -1490,5 +1558,36 @@ main {
   .chart-section,
   .trends-section {
     padding: 16px 14px 18px;
+  }
+}
+
+@media (max-width: 520px) {
+  main {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .dataset-meta {
+    padding: 9px 10px;
+    border-width: 0 0 0 2px;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .mobile-card-row--codev3-primary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mobile-card-row--codev3-primary .mobile-card-row-metric:nth-child(n) {
+    border-top: 1px solid var(--color-border);
+    border-left: 1px solid var(--color-border);
+  }
+
+  .mobile-card-row--codev3-primary .mobile-card-row-metric:nth-child(-n + 2) {
+    border-top: 0;
+  }
+
+  .mobile-card-row--codev3-primary .mobile-card-row-metric:nth-child(odd) {
+    border-left: 0;
   }
 }

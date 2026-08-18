@@ -1815,6 +1815,7 @@ function appendCodeV3ValueContent(target, value) {
   const result = document.createElement("span");
   result.className = "codev3-result";
   const score = document.createElement("span");
+  score.className = "codev3-score";
 
   const rank = document.createElement("span");
   rank.className = "codev3-rank";
@@ -2014,25 +2015,20 @@ function renderCodeV3PrimaryRows(card, row, modelColumnIndex, usedIndices) {
 
   if (!primaryIndices.length) return false;
 
-  for (let start = 0; start < primaryIndices.length; start += 3) {
-    const chunk = primaryIndices.slice(start, start + 3);
-    const rowElement = document.createElement("div");
-    rowElement.className = "mobile-card-row mobile-card-row--codev3-primary";
-    rowElement.style.setProperty("--mobile-card-row-columns", "3");
+  // Keep all project results in one semantic grid. CSS can then switch the
+  // grid from three to two columns on narrow phones without leaving holes
+  // created by hard-coded, three-item DOM rows.
+  const rowElement = document.createElement("div");
+  rowElement.className = "mobile-card-row mobile-card-row--codev3-primary";
 
-    chunk.forEach((index) => {
-      const metric = buildMetricFromIndex(row, index, usedIndices);
-      if (metric) {
-        appendStructuredMetric(rowElement, metric);
-      }
-    });
-
-    for (let index = chunk.length; index < 3; index += 1) {
-      appendStructuredPlaceholder(rowElement);
+  primaryIndices.forEach((index) => {
+    const metric = buildMetricFromIndex(row, index, usedIndices);
+    if (metric) {
+      appendStructuredMetric(rowElement, metric);
     }
+  });
 
-    card.appendChild(rowElement);
-  }
+  card.appendChild(rowElement);
 
   return true;
 }
