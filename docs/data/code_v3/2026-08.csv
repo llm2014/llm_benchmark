@@ -3,7 +3,7 @@
 "Claude Opus 5 (max)","Pass","Pending","Pass","Pending","4/A(123.94)","1/A+(122.57)","12/B+(573.18)","16/D(304.84)","3","Claude Code","1"
 "GPT-5.6 Sol (max)","Pass","Pass","Pass","15/B+(683.21)","4/A(63.86)","8/A(26.97)","23/B(97.98)","8/B(770.41)","2","Codex App","1"
 "Kimi-K3 (max)","7/A(122.87)","12/B(171.72)","15/B(126.40)","18/B(771.86)","6/A(29.59)","5/A(43.22)","22/B(43.23)","28/D+(383.49)","2","Claude Code","1"
-"GLM-5.3 (max)","Skip","Pass","Pass","Pending","8/B+(11.48)","7/A(25.25)","Pending","30/D(83.29)","0","Claude Code","1"
+"GLM-5.3 (max)","Skip","Pass","Pass","Pending","8/B+(11.48)","7/A(25.25)","20/C+(90.76)","30/D(83.29)","0","Claude Code","1"
 "Qwen3.8-Max (max)","Skip","Skip","8/B(293.87)","Skip","11/B(33.16)","10/B(50.86)","15/B(48.94)","Skip","0","Claude Code","1"
 "Gemini 3.7 Flash (high)","Skip","12/B(38.76)","Skip","Skip","14/B(9.38)","8/B(16.84)","14/B(14.28)","34/D(28.93)","4","OpenCode CLI","1"
 "Grok 4.6 (high)","Skip","Pass","Skip","Skip","16/C+(17.67)","7/B+(18.69)","20/C+(23.19)","Skip","1","Grok Build","1"
