@@ -540,6 +540,53 @@ const TRANSLATIONS = {
     "zh-CN": "当月得分",
     "en-US": "Score",
   },
+
+  "trends.share.aria": {
+    "zh-CN": "分享当前趋势图",
+    "en-US": "Share current trend chart",
+  },
+  "trends.share.title": {
+    "zh-CN": "分享趋势图",
+    "en-US": "Share trend chart",
+  },
+
+  "trends.share.copy": {
+    "zh-CN": "复制链接",
+    "en-US": "Copy link",
+  },
+  "trends.share.copyFailed": {
+    "zh-CN": "复制失败，请检查浏览器权限。",
+    "en-US": "Copy failed. Check the browser permission.",
+  },
+  "trends.share.download": {
+    "zh-CN": "下载图片",
+    "en-US": "Download image",
+  },
+  "trends.share.close": {
+    "zh-CN": "关闭分享预览",
+    "en-US": "Close share preview",
+  },
+  "trends.share.cancel": {
+    "zh-CN": "取消",
+    "en-US": "Cancel",
+  },
+  "trends.share.copied": {
+    "zh-CN": "已复制链接",
+    "en-US": "Link copied",
+  },
+  "trends.share.downloadFailed": {
+    "zh-CN": "图片生成失败，请重试。",
+    "en-US": "The image could not be generated. Please try again.",
+  },
+  "trends.share.imageSaved": {
+    "zh-CN": "图片已下载",
+    "en-US": "Image downloaded",
+  },
+
+  "trends.share.empty": {
+    "zh-CN": "请至少选择一个模型后再分享。",
+    "en-US": "Select at least one model before sharing.",
+  },
   "codev3Note.title": {
     "zh-CN": "档位说明",
     "en-US": "Grade Guide",

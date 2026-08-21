@@ -600,11 +600,22 @@ const elements = {
   trendsCanvas: document.getElementById("trendsChart"),
   trendsCaption: document.getElementById("trendsCaption"),
   trendsNote: document.getElementById("trendsNote"),
+  trendsShareButton: document.getElementById("trendsShareButton"),
+  shareDialog: document.getElementById("shareDialog"),
+  shareDialogTitle: document.getElementById("shareDialogTitle"),
+  shareDialogClose: document.getElementById("shareDialogClose"),
+  sharePreviewCanvas: document.getElementById("sharePreviewCanvas"),
+  shareCopyLinkButton: document.getElementById("shareCopyLinkButton"),
+  shareDownloadImageButton: document.getElementById("shareDownloadImageButton"),
+  shareStatus: document.getElementById("shareStatus"),
+  shareDialogCancel: document.getElementById("shareDialogCancel"),
 };
 
 let chartInstance = null;
 let trendsChartInstance = null;
 let isApplyingHashState = false;
+let shareImageCanvas = null;
+let shareRenderSerial = 0;
 
 initializeLocaleUi();
 initializeThemeUi();
@@ -796,6 +807,14 @@ function updateStaticCopy() {
   if (elements.modelPicker) {
     elements.modelPicker.setAttribute("aria-label", t("trends.picker.aria"));
   }
+  if (elements.trendsShareButton) {
+    elements.trendsShareButton.setAttribute("aria-label", t("trends.share.aria"));
+    elements.trendsShareButton.title = t("trends.share.aria");
+  }
+  updateShareDialogCopy();
+  if (elements.shareDialog && elements.shareDialog.open) {
+    refreshShareDialog();
+  }
   buildTrendsCategoryOptions();
   updateThemeToggle();
 }
@@ -898,6 +917,17 @@ function normalizeCountryFilter(value) {
   return VALID_COUNTRY_FILTERS.has(value) ? value : DEFAULT_COUNTRY_FILTER;
 }
 
+function normalizeTrendMode(value) {
+  return value === "percentile" ? "percentile" : "rank";
+}
+
+function parseTrendModels(value) {
+  return String(value || "")
+    .split("|")
+    .map((name) => name.trim())
+    .filter(Boolean);
+}
+
 function parseHashState(rawHash = window.location.hash) {
   const hash = String(rawHash || "").replace(/^#/, "");
   const params = new URLSearchParams(hash);
@@ -906,6 +936,8 @@ function parseHashState(rawHash = window.location.hash) {
     hasParams: hash.length > 0,
     view: (params.get("view") || "").trim(),
     trendsCategory: (params.get("trendcat") || "").trim(),
+    trendsMode: normalizeTrendMode((params.get("trendmode") || "").trim()),
+    trendsModels: parseTrendModels(params.get("trendmodels")),
     category: (params.get("category") || "").trim(),
     datasetKey: (params.get("dataset") || "").trim(),
     inferenceFilter: normalizeInferenceFilter((params.get("inference") || "").trim()),
@@ -938,6 +970,11 @@ function buildHashFromState() {
     params.set("view", "trends");
     if (state.trends.category) {
       params.set("trendcat", state.trends.category);
+    }
+    params.set("trendmode", normalizeTrendMode(state.trends.mode));
+    const selectedModels = [...state.trends.selected].filter(Boolean);
+    if (selectedModels.length) {
+      params.set("trendmodels", selectedModels.join("|"));
     }
     return params.toString();
   }
@@ -994,6 +1031,8 @@ async function applyStateFromHash(rawHash = window.location.hash) {
         state.trends.loadedCategory = null;
       }
     }
+    state.trends.mode = hashState.trendsMode;
+    state.trends.selected = new Set(hashState.trendsModels);
     setView("trends", { sync: false });
     return true;
   }
@@ -1287,16 +1326,42 @@ function bindEventHandlers() {
       state.trends.category = category;
       state.trends.loadedCategory = null;
       state.trends.selected = new Set();
-      ensureTrendsData().then(renderTrends);
+      ensureTrendsData().then(() => {
+        renderTrends();
+        refreshShareDialog();
+      });
       syncHashFromState();
     });
   }
 
   if (elements.trendsModeSelect) {
     elements.trendsModeSelect.addEventListener("change", (event) => {
-      state.trends.mode = event.target.value === "rank" ? "rank" : "percentile";
+      state.trends.mode = normalizeTrendMode(event.target.value);
       renderTrendsChart();
       updateTrendsCaption();
+      syncHashFromState();
+      refreshShareDialog();
+    });
+  }
+
+  if (elements.trendsShareButton) {
+    elements.trendsShareButton.addEventListener("click", openShareDialog);
+  }
+  if (elements.shareDialogClose) {
+    elements.shareDialogClose.addEventListener("click", closeShareDialog);
+  }
+  if (elements.shareDialogCancel) {
+    elements.shareDialogCancel.addEventListener("click", closeShareDialog);
+  }
+  if (elements.shareCopyLinkButton) {
+    elements.shareCopyLinkButton.addEventListener("click", copyShareLink);
+  }
+  if (elements.shareDownloadImageButton) {
+    elements.shareDownloadImageButton.addEventListener("click", downloadShareImageAction);
+  }
+  if (elements.shareDialog) {
+    elements.shareDialog.addEventListener("click", (event) => {
+      if (event.target === elements.shareDialog) closeShareDialog();
     });
   }
 
@@ -2727,6 +2792,7 @@ async function ensureTrendsData() {
   state.trends.loadedCategory = category;
   state.trends.loading = false;
   buildTrendsModelList();
+  syncHashFromState();
 }
 
 function buildTrendsModelList() {
@@ -2763,6 +2829,9 @@ function renderTrends() {
   const hasData = state.trends.months.length > 0;
   if (elements.modelPicker) {
     elements.modelPicker.style.display = hasData ? "" : "none";
+  }
+  if (elements.trendsShareButton) {
+    elements.trendsShareButton.disabled = !hasData || !state.trends.selected.size;
   }
   const chartWrap = elements.trendsCanvas ? elements.trendsCanvas.parentElement : null;
   if (chartWrap) {
@@ -2820,6 +2889,8 @@ function renderModelPicker() {
       if (chartWrap) {
         chartWrap.style.display = state.trends.selected.size ? "" : "none";
       }
+      syncHashFromState();
+      refreshShareDialog();
     });
     picker.appendChild(chip);
   });
@@ -2966,6 +3037,183 @@ function renderTrendsChart() {
     },
     plugins: [trendEndLabelsPlugin],
   });
+}
+
+function buildTrendShareUrl() {
+  const url = new URL(window.location.href);
+  url.hash = buildHashFromState();
+  return url.toString();
+}
+
+function updateShareDialogCopy() {
+  if (!elements.shareDialog) return;
+  if (elements.shareDialogTitle) {
+    elements.shareDialogTitle.textContent = t("trends.share.title");
+  }
+  if (elements.shareDialogClose) {
+    elements.shareDialogClose.setAttribute("aria-label", t("trends.share.close"));
+  }
+  if (elements.shareCopyLinkButton) {
+    elements.shareCopyLinkButton.textContent = t("trends.share.copy");
+  }
+  if (elements.shareDownloadImageButton) {
+    elements.shareDownloadImageButton.textContent = t("trends.share.download");
+  }
+  if (elements.shareDialogCancel) {
+    elements.shareDialogCancel.textContent = t("trends.share.cancel");
+  }
+}
+
+function closeShareDialog() {
+  if (!elements.shareDialog) return;
+  if (typeof elements.shareDialog.close === "function" && elements.shareDialog.open) {
+    elements.shareDialog.close();
+  } else {
+    elements.shareDialog.removeAttribute("open");
+  }
+}
+
+async function openShareDialog() {
+  if (!elements.shareDialog) return;
+  if (!state.trends.selected.size) {
+    if (elements.shareStatus) elements.shareStatus.textContent = t("trends.share.empty");
+    return;
+  }
+  updateShareDialogCopy();
+  if (typeof elements.shareDialog.showModal === "function" && !elements.shareDialog.open) {
+    elements.shareDialog.showModal();
+  } else {
+    elements.shareDialog.setAttribute("open", "");
+  }
+  await refreshShareDialog();
+}
+
+async function copyTextToClipboard(text) {
+  if (!text) return false;
+  try {
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch (error) {
+    console.warn("Unable to write clipboard text:", error);
+  }
+
+  try {
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.setAttribute("readonly", "");
+    textarea.style.position = "fixed";
+    textarea.style.opacity = "0";
+    document.body.appendChild(textarea);
+    textarea.select();
+    const copied = typeof document.execCommand === "function" && document.execCommand("copy");
+    textarea.remove();
+    return copied;
+  } catch (error) {
+    console.warn("Clipboard fallback failed:", error);
+    return false;
+  }
+}
+
+async function copyShareLink() {
+  const link = buildTrendShareUrl();
+
+  const copied = await copyTextToClipboard(link);
+  if (elements.shareStatus) {
+    elements.shareStatus.textContent = copied
+      ? t("trends.share.copied")
+      : t("trends.share.copyFailed");
+  }
+}
+
+function downloadShareImage() {
+  if (!shareImageCanvas) return false;
+  const link = document.createElement("a");
+  const category = state.trends.category || "trend";
+  link.download = "llm-benchmark-trend-" + category + ".png";
+  link.href = shareImageCanvas.toDataURL("image/png");
+  link.click();
+  return true;
+}
+
+function downloadShareImageAction() {
+  const downloaded = downloadShareImage();
+  if (elements.shareStatus) {
+    elements.shareStatus.textContent = downloaded ? t("trends.share.imageSaved") : t("trends.share.downloadFailed");
+  }
+}
+
+async function buildShareImage(url) {
+  if (!elements.trendsCanvas || !state.trends.selected.size) return null;
+  const canvas = document.createElement("canvas");
+  const width = 1800;
+  const height = 1120;
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext("2d");
+  if (!context) return null;
+
+  const panelColor = getCssVariable("--color-panel", "#ffffff");
+  const textColor = getCssVariable("--color-text", "#212428");
+  const mutedColor = getCssVariable("--color-muted", "#77736c");
+  const borderColor = getCssVariable("--color-border", "#e3e1d9");
+  context.fillStyle = panelColor;
+  context.fillRect(0, 0, width, height);
+
+  context.fillStyle = textColor;
+  context.font = "600 42px system-ui, sans-serif";
+  context.fillText(t("app.title"), 88, 78);
+  context.fillStyle = mutedColor;
+  context.font = "24px system-ui, sans-serif";
+  context.fillText(t("header.subtitle").replace(/<[^>]+>/g, ""), 88, 120);
+
+  context.strokeStyle = borderColor;
+  context.lineWidth = 2;
+  context.beginPath();
+  context.moveTo(88, 154);
+  context.lineTo(width - 88, 154);
+  context.stroke();
+
+  const chartX = 72;
+  const chartY = 184;
+  const chartWidth = width - 144;
+  const chartHeight = 760;
+  context.drawImage(elements.trendsCanvas, chartX, chartY, chartWidth, chartHeight);
+
+  context.fillStyle = mutedColor;
+  context.font = "22px system-ui, sans-serif";
+  const categoryLabel = getCategoryLabel(state.trends.category);
+  const modeLabel = t("trends.mode." + normalizeTrendMode(state.trends.mode));
+  context.fillText(categoryLabel + " · " + modeLabel, 88, 1010);
+  context.fillText("llm_benchmark · trend share · " + new URL(url).host, 88, 1054);
+
+  return canvas;
+}
+
+async function refreshShareDialog() {
+  if (!elements.shareDialog) return;
+  const url = buildTrendShareUrl();
+
+  const serial = ++shareRenderSerial;
+  if (!state.trends.selected.size) {
+    shareImageCanvas = null;
+    if (elements.shareStatus) elements.shareStatus.textContent = t("trends.share.empty");
+    return;
+  }
+  await new Promise((resolve) => window.requestAnimationFrame(resolve));
+  const canvas = await buildShareImage(url);
+  if (serial !== shareRenderSerial) return;
+  shareImageCanvas = canvas;
+  if (!canvas || !elements.sharePreviewCanvas) return;
+  elements.sharePreviewCanvas.width = canvas.width;
+  elements.sharePreviewCanvas.height = canvas.height;
+  const previewContext = elements.sharePreviewCanvas.getContext("2d");
+  if (previewContext) {
+    previewContext.clearRect(0, 0, canvas.width, canvas.height);
+    previewContext.drawImage(canvas, 0, 0);
+  }
+  if (elements.shareStatus) elements.shareStatus.textContent = "";
 }
 
 function getCssVariable(name, fallback = "") {

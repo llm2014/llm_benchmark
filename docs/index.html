@@ -30,7 +30,7 @@
     />
 
     <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon.png" />
-    <link rel="stylesheet" href="assets/styles.css?v=20260818-mobile-density" />
+    <link rel="stylesheet" href="assets/styles.css?v=20260820-trend-share-v4" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -163,6 +163,13 @@
             <label for="trendsModeSelect" id="trendsModeLabel"></label>
             <select id="trendsModeSelect" aria-label=""></select>
           </div>
+          <div class="trends-toolbar-actions">
+            <button id="trendsShareButton" type="button" class="share-trigger" aria-label="" title="">
+              <svg class="share-trigger-icon" viewBox="0 0 128 128" aria-hidden="true" focusable="false">
+                <path d="M27 108C30 80 46 60 70 53V32C70 27 76 25 80 29L115 60C120 64 120 70 115 74L80 104C76 108 70 105 70 100V83C51 89 38 99 29 114C26 118 23 114 24 110Z" />
+              </svg>
+            </button>
+          </div>
         </div>
         <div class="chip-picker" id="modelPicker" role="group" aria-label=""></div>
         <div class="trends-chart-container">
@@ -171,11 +178,32 @@
         <p class="chart-caption" id="trendsCaption"></p>
         <p class="trends-note" id="trendsNote"></p>
       </section>
+      <dialog id="shareDialog" class="share-dialog" aria-labelledby="shareDialogTitle">
+        <div class="share-dialog-shell">
+          <div class="share-dialog-header">
+            <h2 id="shareDialogTitle"></h2>
+            <button id="shareDialogClose" type="button" class="share-dialog-close" aria-label="">×</button>
+          </div>
+          <div class="share-dialog-body">
+            <div class="share-preview-frame">
+              <canvas id="sharePreviewCanvas" class="share-preview-canvas"></canvas>
+            </div>
+          </div>
+          <div class="share-dialog-footer">
+            <span id="shareStatus" class="share-status" role="status"></span>
+            <div class="share-dialog-actions">
+              <button id="shareDialogCancel" type="button" class="secondary-button"></button>
+              <button id="shareCopyLinkButton" type="button" class="secondary-button"></button>
+              <button id="shareDownloadImageButton" type="button" class="primary-button"></button>
+            </div>
+          </div>
+        </div>
+      </dialog>
     </main>
     <footer class="page-footer">
       <small>Vibe Coding by Codex -> Kimi K3</small>
     </footer>
 
-    <script src="assets/app.js?v=20260818-seo" type="module"></script>
+    <script src="assets/app.js?v=20260820-trend-share-v4" type="module"></script>
   </body>
 </html>
