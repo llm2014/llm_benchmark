@@ -1135,13 +1135,47 @@ function loadLogoImage(path) {
   });
 }
 
-function getModelLogoImage(modelName) {
+function getModelLogoPath(modelName) {
   const normalizedName = String(modelName || "").trim().toLowerCase();
   if (!normalizedName) return null;
   const matcher = state.modelLogos.matchers.find(({ alias }) =>
     normalizedName.startsWith(alias)
   );
-  return matcher ? state.modelLogos.images.get(matcher.logoPath) || null : null;
+  return matcher && state.modelLogos.images.has(matcher.logoPath) ? matcher.logoPath : null;
+}
+
+function getModelLogoImage(modelName) {
+  const logoPath = getModelLogoPath(modelName);
+  return logoPath ? state.modelLogos.images.get(logoPath) || null : null;
+}
+
+function createModelLogoSlot(modelName) {
+  const slot = document.createElement("span");
+  slot.className = "model-logo-slot";
+  slot.setAttribute("aria-hidden", "true");
+
+  const logoPath = getModelLogoPath(modelName);
+  if (logoPath) {
+    const logo = document.createElement("img");
+    logo.className = "model-logo";
+    logo.src = logoPath;
+    logo.alt = "";
+    slot.appendChild(logo);
+  }
+
+  return slot;
+}
+
+function appendModelNameContent(target, modelName) {
+  const content = document.createElement("span");
+  content.className = "model-name-content";
+  content.appendChild(createModelLogoSlot(modelName));
+
+  const label = document.createElement("span");
+  label.className = "model-name-label";
+  label.textContent = modelName;
+  content.appendChild(label);
+  target.appendChild(content);
 }
 
 function renderCategoryNav({ preserveSelection = false } = {}) {
@@ -2125,7 +2159,7 @@ function createMobileCard(row, layout, headerIndexMap, modelColumnIndex) {
 
   const title = document.createElement("h3");
   title.className = "mobile-card-title";
-  title.textContent = modelValue || t("table.mobile.unknownModel");
+  appendModelNameContent(title, modelValue || t("table.mobile.unknownModel"));
   header.appendChild(title);
 
   if (row.isThink) {
@@ -2333,7 +2367,11 @@ function renderTable() {
       if (cellBackgroundClass) {
         td.classList.add(cellBackgroundClass);
       }
-      appendCodeV3ValueContent(td, displayValue);
+      if (columnIndex === modelColumnIndex) {
+        appendModelNameContent(td, displayValue);
+      } else {
+        appendCodeV3ValueContent(td, displayValue);
+      }
 
       if (columnIndex === modelColumnIndex && row.isThink) {
         td.classList.add("think-model");
