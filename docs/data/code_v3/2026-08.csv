@@ -7,6 +7,7 @@
 "Qwen3.8-Max (max)","Skip","Skip","8/B(293.87)","Skip","11/B(33.16)","10/B(50.86)","15/B(48.94)","Skip","0","Claude Code","1"
 "Gemini 3.7 Flash (high)","Skip","12/B(38.76)","Skip","Skip","14/B(9.38)","8/B(16.84)","14/B(14.28)","34/D(28.93)","4","OpenCode CLI","1"
 "Grok 4.6 (high)","Skip","Pass","Skip","Skip","16/C+(17.67)","7/B+(18.69)","20/C+(23.19)","Skip","1","Grok Build","1"
+"GLM-5.3-Flash (max)","Skip","Skip","Skip","Skip","9/B(2.11)","13/B(3.31)","Failed","Skip","0","Claude Code","1"
 "Grok 4.5 (high)","12/B+(55.98)","7/A(91.51)","Skip","Skip","16/B(23.12)","7/B+(15.98)","Failed","Skip","1","Grok Build","1"
 "GLM-5.2 (max)","16/B(58.92)","8/A(79.17)","8/A(51.98)","43/C(266.62)","14/B(10.75)","15/C+(28.61)","30/C(26.76)","Skip","0","Claude Code","1"
 "DeepSeek V4 Pro 0813 (max)","Skip","Skip","Skip","Skip","14/B(13.46)","16/C(12.73)","Failed","16/B(18.64)","0","Claude Code","1"
