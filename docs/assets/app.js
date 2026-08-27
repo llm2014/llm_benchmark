@@ -6,7 +6,7 @@ import {
   onLocaleChange,
   setLocale,
   t,
-} from "./i18n.js?v=20260818-seo";
+} from "./i18n.js?v=20260827-median-score";
 
 const DATASET_TITLE_KEYS = {
   月榜: "dataset.title.monthly",
@@ -100,11 +100,11 @@ const HIDDEN_CATEGORIES = new Set(["code"]);
 
 // 各榜单类别的数值列配置：趋势视图与象限图共用。
 // code_v3 为等级制（Pass/A+…），不在此列。
-// scoreFallbacks 供趋势视图使用：评分体系迭代过，早期月份用旧列名，
+// score 供象限图使用；scoreFallbacks 供趋势视图使用。评分体系迭代过，早期月份用旧列名，
 // 排名只要求当月分数单调可比，跨月不做绝对比较。
 const CATEGORY_CHART_CONFIG = {
   logic: {
-    score: "极限分数",
+    score: "中位分数",
     cost: "测试成本(元)",
     time: "平均耗时(秒)",
     scoreFallbacks: ["极限分数", "百分制", "原始分数"],
@@ -118,7 +118,7 @@ const CATEGORY_CHART_CONFIG = {
     scoreFallbacks: ["多轮总分"],
   },
   vision: {
-    score: "极限分数",
+    score: "中位分数",
     cost: "成本",
     time: "平均耗时/s",
     scoreFallbacks: ["极限分数", "原始分数"],
@@ -3045,7 +3045,9 @@ function renderChart() {
   const swapped = !!config.swapAxes;
 
   const scoreLabel =
-    state.currentCategory === "code" ? t("chart.axis.multiTurnScore") : t("chart.axis.maxScore");
+    state.currentCategory === "code"
+      ? t("chart.axis.multiTurnScore")
+      : t("chart.axis.medianScore");
   const metricLabel = yAxisType === "cost" ? t("chart.axis.cost") : t("chart.axis.avgTime");
 
   let scoreIndex = -1;

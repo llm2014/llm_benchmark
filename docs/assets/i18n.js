@@ -413,6 +413,10 @@ const TRANSLATIONS = {
     "zh-CN": "极限分数",
     "en-US": "Max Score",
   },
+  "chart.axis.medianScore": {
+    "zh-CN": "中位分数",
+    "en-US": "Median Score",
+  },
   "chart.axis.avgTime": {
     "zh-CN": "平均耗时(秒)",
     "en-US": "Average Time (seconds)",
