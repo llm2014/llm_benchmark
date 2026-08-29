@@ -484,11 +484,11 @@ const TRANSLATIONS = {
     "en-US": "E: Web + WASM",
   },
   "codev3Note.projectF": {
-    "zh-CN": "F: Godot + Physics",
+    "zh-CN": "F: Godot + 物理算法",
     "en-US": "F: Godot + Physics",
   },
   "codev3Note.projectH": {
-    "zh-CN": "H: Web + 3D Modeling",
+    "zh-CN": "H: Web + 3D 建模",
     "en-US": "H: Web + 3D Modeling",
   },
   "codev3Note.projectI": {
@@ -496,12 +496,16 @@ const TRANSLATIONS = {
     "en-US": "I: iOS App + Rust Server",
   },
   "codev3Note.projectJ": {
-    "zh-CN": "J: Web + 2D Animation",
+    "zh-CN": "J: Web + 2D 动画",
     "en-US": "J: Web + 2D Animation",
   },
   "codev3Note.projectK": {
-    "zh-CN": "K: Harmony OS App + C++ Native",
+    "zh-CN": "K: 鸿蒙 App + C++ 本地插件",
     "en-US": "K: Harmony OS App + C++ Native",
+  },
+  "codev3Note.projectL": {
+    "zh-CN": "L: Metal + 图形算法优化",
+    "en-US": "L: Metal + Graphics algorithm optimization",
   },
   "meta.codev3CellFormat": {
     "zh-CN": "1/A 代表扣分数/档位",
