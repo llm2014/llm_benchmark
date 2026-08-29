@@ -6,7 +6,7 @@ import {
   onLocaleChange,
   setLocale,
   t,
-} from "./i18n.js?v=20260829-schema-cleanup";
+} from "./i18n.js?v=20260829-codev3-insights";
 import {
   CATEGORY_CHART_CONFIG,
   CATEGORY_ORDER,
@@ -20,8 +20,10 @@ import {
   TRENDS_MAX_MONTHS,
   TRENDS_RECENT_MONTHS,
   TRENDS_SUPPORTED,
+  buildCodeV3InsightIndex,
   buildDatasetKey,
   classifyModelCountry,
+  extractCodeV3TaskId,
   getDatasetDirectoryFromPath,
   getModelFamily,
   isCodeV3AuxiliaryHeader,
@@ -31,9 +33,10 @@ import {
   parseCodeV3RankGrade as parseCodeV3RankGradeValue,
   parseCsv,
   parseSortableNumber,
+  resolveCodeV3Insight,
   sortRows as sortBenchmarkRows,
-} from "./benchmark-domain.js?v=20260829-modular";
-import { createCharts } from "./charts.js?v=20260829-modular";
+} from "./benchmark-domain.js?v=20260829-codev3-insights";
+import { createCharts } from "./charts.js?v=20260829-codev3-insights";
 
 const DATASET_TITLE_KEYS = {
   月榜: "dataset.title.monthly",
@@ -184,6 +187,7 @@ const state = {
     matchers: [],
     images: new Map(),
   },
+  insights: createEmptyCodeV3InsightIndex(),
   trends: {
     category: null,
     mode: "rank",
@@ -196,6 +200,7 @@ const state = {
 };
 
 const csvCache = new Map();
+const insightCache = new Map();
 
 const elements = {
   categoryNav: document.getElementById("viewTabsCategories"),
@@ -244,6 +249,9 @@ const charts = createCharts({
   getModelLogoImage,
 });
 let isApplyingHashState = false;
+let insightPopover = null;
+let insightBackdrop = null;
+let activeInsightCell = null;
 
 initializeLocaleUi();
 initializeThemeUi();
@@ -260,6 +268,15 @@ function createCollator(locale) {
     console.warn("Collator initialization failed, falling back to default locale.", error);
     return new Intl.Collator(FALLBACK_LOCALE);
   }
+}
+
+function createEmptyCodeV3InsightIndex() {
+  return {
+    schemaVersion: 1,
+    datasetKey: "",
+    defaultLocale: FALLBACK_LOCALE,
+    byRow: new Map(),
+  };
 }
 
 function initializeLocaleUi() {
@@ -981,12 +998,26 @@ function bindEventHandlers() {
 
   let wasMobileViewport = isMobileViewport();
   window.addEventListener("resize", () => {
+    hideCodeV3InsightPopover();
     const isMobile = isMobileViewport();
     if (isMobile === wasMobileViewport) return;
     wasMobileViewport = isMobile;
     renderTable();
   });
-  elements.tableContainer.addEventListener("scroll", syncStickyTableHeaderScroll, { passive: true });
+  elements.tableContainer.addEventListener(
+    "scroll",
+    () => {
+      syncStickyTableHeaderScroll();
+      hideCodeV3InsightPopover();
+    },
+    { passive: true }
+  );
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape" || !activeInsightCell) return;
+    const target = activeInsightCell;
+    hideCodeV3InsightPopover();
+    if (target.isConnected) target.focus();
+  });
 }
 
 async function handleCategoryChange(category, options = {}) {
@@ -1011,6 +1042,8 @@ async function handleCategoryChange(category, options = {}) {
   state.headers = [];
   state.rows = [];
   state.filteredRows = [];
+  state.insights = createEmptyCodeV3InsightIndex();
+  hideCodeV3InsightPopover();
   updateMeta();
   showPlaceholder(t("placeholders.loadingCategory"));
 
@@ -1107,7 +1140,13 @@ async function loadDatasetByKey(key) {
 
   showPlaceholder(t("placeholders.loadingTable"));
 
-  const { headers, rows } = await fetchCsvDataset(dataset.csv);
+  state.insights = createEmptyCodeV3InsightIndex();
+  hideCodeV3InsightPopover();
+  const [{ headers, rows }, insights] = await Promise.all([
+    fetchCsvDataset(dataset.csv),
+    fetchCodeV3Insights(dataset.insights),
+  ]);
+  state.insights = insights;
   const thinkIndex = headers.findIndex(
     (header) => header && header.trim().toLowerCase() === "think"
   );
@@ -1174,6 +1213,29 @@ async function fetchCsvDataset(path) {
     return parseCsv(text);
   })();
   csvCache.set(path, promise);
+  return promise;
+}
+
+async function fetchCodeV3Insights(path) {
+  if (!path) return createEmptyCodeV3InsightIndex();
+  if (insightCache.has(path)) {
+    return insightCache.get(path);
+  }
+
+  const promise = (async () => {
+    try {
+      const response = await fetch(path, { cache: "no-cache" });
+      if (!response.ok) {
+        throw new Error(`Unable to load Code V3 insights: ${path} (${response.status})`);
+      }
+      return buildCodeV3InsightIndex(await response.json());
+    } catch (error) {
+      console.warn("Code V3 insights are unavailable; continuing without detail cards.", error);
+      return createEmptyCodeV3InsightIndex();
+    }
+  })();
+
+  insightCache.set(path, promise);
   return promise;
 }
 
@@ -1330,6 +1392,209 @@ function appendCodeV3ValueContent(target, value) {
   target.appendChild(result);
 }
 
+function ensureCodeV3InsightPopover() {
+  if (insightPopover) return insightPopover;
+
+  insightBackdrop = document.createElement("div");
+  insightBackdrop.className = "codev3-insight-backdrop";
+  insightBackdrop.setAttribute("aria-hidden", "true");
+  insightBackdrop.addEventListener("click", () => hideCodeV3InsightPopover());
+  document.body.appendChild(insightBackdrop);
+
+  insightPopover = document.createElement("aside");
+  insightPopover.id = "codev3InsightPopover";
+  insightPopover.className = "codev3-insight-popover";
+  insightPopover.setAttribute("role", "tooltip");
+  insightPopover.setAttribute("aria-hidden", "true");
+  document.body.appendChild(insightPopover);
+  return insightPopover;
+}
+
+function getInsightKindLabel(kind) {
+  return t(`insight.type.${kind}`, undefined, kind);
+}
+
+function buildCodeV3InsightPopoverContent({ rowId, taskId, taskLabel, insight }) {
+  const fragment = document.createDocumentFragment();
+  const header = document.createElement("header");
+  header.className = "codev3-insight-header";
+
+  const heading = document.createElement("div");
+  const kicker = document.createElement("p");
+  kicker.className = "codev3-insight-kicker";
+  kicker.textContent = `${t("insight.task", { id: taskId })} · ${taskLabel}`;
+
+  const title = document.createElement("h3");
+  title.className = "codev3-insight-title";
+  title.textContent = rowId;
+  heading.appendChild(kicker);
+  heading.appendChild(title);
+  header.appendChild(heading);
+
+  const actions = document.createElement("div");
+  actions.className = "codev3-insight-actions";
+
+  const closeButton = document.createElement("button");
+  closeButton.className = "codev3-insight-close";
+  closeButton.type = "button";
+  closeButton.setAttribute("aria-label", t("insight.close"));
+  closeButton.textContent = "×";
+  closeButton.addEventListener("click", () => {
+    const target = activeInsightCell;
+    hideCodeV3InsightPopover();
+    if (target?.isConnected) target.focus();
+  });
+  actions.appendChild(closeButton);
+  header.appendChild(actions);
+  fragment.appendChild(header);
+
+  const list = document.createElement("ul");
+  list.className = "codev3-insight-list";
+  insight.lines.forEach((line) => {
+    const item = document.createElement("li");
+    item.className = `codev3-insight-line codev3-insight-line--${line.kind}`;
+    item.setAttribute("aria-label", `${getInsightKindLabel(line.kind)}：${line.text}`);
+
+    const marker = document.createElement("span");
+    marker.className = "codev3-insight-marker";
+    marker.textContent = line.marker;
+    marker.setAttribute("aria-hidden", "true");
+
+    const text = document.createElement("span");
+    text.className = "codev3-insight-text";
+    text.textContent = line.text;
+    item.appendChild(marker);
+    item.appendChild(text);
+    list.appendChild(item);
+  });
+  fragment.appendChild(list);
+  return fragment;
+}
+
+function positionCodeV3InsightPopover(cell, popover) {
+  const cellRect = cell.getBoundingClientRect();
+  const width = popover.offsetWidth;
+  const height = popover.offsetHeight;
+  const viewportPadding = 12;
+  const gap = 10;
+
+  const left = Math.min(
+    window.innerWidth - width - viewportPadding,
+    Math.max(viewportPadding, cellRect.left + cellRect.width / 2 - width / 2)
+  );
+  const fitsBelow = cellRect.bottom + gap + height <= window.innerHeight - viewportPadding;
+  const placement = fitsBelow ? "bottom" : "top";
+  const top = fitsBelow ? cellRect.bottom + gap : Math.max(viewportPadding, cellRect.top - height - gap);
+
+  popover.dataset.placement = placement;
+  popover.style.left = `${Math.round(left)}px`;
+  popover.style.top = `${Math.round(top)}px`;
+  popover.style.setProperty(
+    "--insight-anchor-x",
+    `${Math.round(Math.min(width - 18, Math.max(18, cellRect.left + cellRect.width / 2 - left)))}px`
+  );
+}
+
+function showCodeV3InsightPopover(cell, context, { mobile = false } = {}) {
+  const popover = ensureCodeV3InsightPopover();
+  if (activeInsightCell && activeInsightCell !== cell) {
+    activeInsightCell.classList.remove("insight-active");
+    if (activeInsightCell.hasAttribute("aria-expanded")) {
+      activeInsightCell.setAttribute("aria-expanded", "false");
+    }
+  }
+  activeInsightCell = cell;
+  cell.classList.add("insight-active");
+  if (cell.hasAttribute("aria-expanded")) {
+    cell.setAttribute("aria-expanded", "true");
+  }
+
+  popover.classList.remove("is-visible");
+  popover.classList.toggle("codev3-insight-popover--mobile", mobile);
+  popover.replaceChildren(buildCodeV3InsightPopoverContent(context));
+  popover.setAttribute("role", mobile ? "dialog" : "tooltip");
+  popover.setAttribute("aria-label", `${context.rowId} · ${context.taskLabel}`);
+  popover.setAttribute("aria-hidden", "false");
+  if (mobile) {
+    popover.dataset.placement = "mobile";
+    popover.style.removeProperty("left");
+    popover.style.removeProperty("top");
+    popover.style.removeProperty("--insight-anchor-x");
+  } else {
+    positionCodeV3InsightPopover(cell, popover);
+  }
+  void popover.offsetWidth;
+  popover.classList.add("is-visible");
+  insightBackdrop?.classList.toggle("is-visible", mobile);
+}
+
+function hideCodeV3InsightPopover(cell = null) {
+  if (cell && activeInsightCell !== cell) return;
+  if (activeInsightCell) {
+    activeInsightCell.classList.remove("insight-active");
+    if (activeInsightCell.hasAttribute("aria-expanded")) {
+      activeInsightCell.setAttribute("aria-expanded", "false");
+    }
+  }
+  activeInsightCell = null;
+  if (!insightPopover) return;
+  insightPopover.classList.remove("is-visible");
+  insightPopover.setAttribute("aria-hidden", "true");
+  insightBackdrop?.classList.remove("is-visible");
+}
+
+function getCodeV3InsightContext(rowId, header) {
+  const taskId = extractCodeV3TaskId(header);
+  if (!rowId || !taskId) return null;
+  const insight = resolveCodeV3Insight(state.insights, rowId, taskId, state.locale);
+  if (!insight) return null;
+
+  const taskLabel = String(header).replace(/\s*\([A-Z]\)\s*$/, "").trim();
+  return { rowId, taskId, taskLabel, insight };
+}
+
+function attachCodeV3InsightCell(cell, { rowId, header }) {
+  const context = getCodeV3InsightContext(rowId, header);
+  if (!context) return;
+  const popover = ensureCodeV3InsightPopover();
+  cell.classList.add("codev3-cell--has-insight");
+  cell.tabIndex = 0;
+  cell.setAttribute("aria-describedby", popover.id);
+  cell.addEventListener("mouseenter", () => showCodeV3InsightPopover(cell, context));
+  cell.addEventListener("mouseleave", () => hideCodeV3InsightPopover(cell));
+  cell.addEventListener("focus", () => showCodeV3InsightPopover(cell, context));
+  cell.addEventListener("blur", () => hideCodeV3InsightPopover(cell));
+}
+
+function attachMobileCodeV3InsightTarget(target, { rowId, header }) {
+  const context = getCodeV3InsightContext(rowId, header);
+  if (!context) return;
+  const popover = ensureCodeV3InsightPopover();
+  target.classList.add("mobile-codev3-insight-trigger");
+  target.tabIndex = 0;
+  target.setAttribute("role", "button");
+  target.setAttribute("aria-haspopup", "dialog");
+  target.setAttribute("aria-controls", popover.id);
+  target.setAttribute("aria-expanded", "false");
+
+  const toggle = () => {
+    const isAlreadyOpen =
+      activeInsightCell === target && popover.classList.contains("is-visible");
+    if (isAlreadyOpen) {
+      hideCodeV3InsightPopover(target);
+    } else {
+      showCodeV3InsightPopover(target, context, { mobile: true });
+    }
+  };
+
+  target.addEventListener("click", toggle);
+  target.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    toggle();
+  });
+}
+
 function findModelColumnIndex(headers) {
   return MODEL_HEADER_CANDIDATES.reduce((foundIndex, candidate) => {
     if (foundIndex !== -1) return foundIndex;
@@ -1365,6 +1630,7 @@ function resolveFieldByGroup(row, fieldGroup, headerIndexMap, usedIndices) {
     return {
       label: rawHeader ? getHeaderLabel(rawHeader) : t("table.mobile.unnamedField"),
       value: formatCellForDisplay(rawHeader, value),
+      rawHeader,
       tone,
       statusClass: getCodeV3StatusClass(value),
     };
@@ -1414,7 +1680,7 @@ function appendCardMetric(metricsContainer, metric, isPrimary = false) {
   metricsContainer.appendChild(item);
 }
 
-function appendStructuredMetric(rowElement, metric) {
+function appendStructuredMetric(rowElement, metric, rowId = "") {
   const item = document.createElement("div");
   item.className = "mobile-card-row-metric";
   if (metric.tone === "muted") {
@@ -1439,6 +1705,9 @@ function appendStructuredMetric(rowElement, metric) {
 
   item.appendChild(label);
   item.appendChild(value);
+  if (state.currentCategory === "code_v3") {
+    attachMobileCodeV3InsightTarget(item, { rowId, header: metric.rawHeader });
+  }
   rowElement.appendChild(item);
 }
 
@@ -1458,6 +1727,7 @@ function buildMetricFromIndex(row, index, usedIndices) {
   return {
     label: rawHeader ? getHeaderLabel(rawHeader) : t("table.mobile.unnamedField"),
     value: formatCellForDisplay(rawHeader, value),
+    rawHeader,
     statusClass: getCodeV3StatusClass(value),
   };
 }
@@ -1474,11 +1744,12 @@ function renderCodeV3PrimaryRows(card, row, modelColumnIndex, usedIndices) {
   // created by hard-coded, three-item DOM rows.
   const rowElement = document.createElement("div");
   rowElement.className = "mobile-card-row mobile-card-row--codev3-primary";
+  const rowId = modelColumnIndex >= 0 ? String(row.cells[modelColumnIndex] ?? "").trim() : "";
 
   primaryIndices.forEach((index) => {
     const metric = buildMetricFromIndex(row, index, usedIndices);
     if (metric) {
-      appendStructuredMetric(rowElement, metric);
+      appendStructuredMetric(rowElement, metric, rowId);
     }
   });
 
@@ -1498,6 +1769,7 @@ function renderStructuredCardRows(card, row, layout, headerIndexMap, usedIndices
   }
 
   let rendered = hasCodeV3PrimaryRows;
+  const rowId = modelColumnIndex >= 0 ? String(row.cells[modelColumnIndex] ?? "").trim() : "";
 
   layout.rows.forEach((rowConfig) => {
     const fields = Array.isArray(rowConfig?.fields) ? rowConfig.fields : [];
@@ -1523,7 +1795,7 @@ function renderStructuredCardRows(card, row, layout, headerIndexMap, usedIndices
     const normalizedColumns = Math.max(1, columns);
     rowElement.style.setProperty("--mobile-card-row-columns", String(normalizedColumns));
 
-    rowMetrics.forEach((metric) => appendStructuredMetric(rowElement, metric));
+    rowMetrics.forEach((metric) => appendStructuredMetric(rowElement, metric, rowId));
     if (rowConfig.fillWithPlaceholders && rowMetrics.length < normalizedColumns) {
       for (let i = rowMetrics.length; i < normalizedColumns; i += 1) {
         appendStructuredPlaceholder(rowElement);
@@ -1670,6 +1942,7 @@ function renderMobileCards(container) {
 
 function renderTable() {
   const container = elements.tableContainer;
+  hideCodeV3InsightPopover();
   cleanupStickyTableHeader();
   container.innerHTML = "";
   container.classList.remove("mobile-cards");
@@ -1736,6 +2009,7 @@ function renderTable() {
   const tbody = document.createElement("tbody");
   state.filteredRows.forEach((row) => {
     const tr = document.createElement("tr");
+    const rowId = modelColumnIndex >= 0 ? String(row.cells[modelColumnIndex] ?? "").trim() : "";
     const family = modelColumnIndex >= 0 ? getModelFamily(row.cells[modelColumnIndex]) : "";
     if (family) {
       tr.dataset.family = family;
@@ -1774,6 +2048,13 @@ function renderTable() {
         appendModelNameContent(td, displayValue);
       } else {
         appendCodeV3ValueContent(td, displayValue);
+      }
+
+      if (isCodeV3Table && columnIndex !== modelColumnIndex) {
+        attachCodeV3InsightCell(td, {
+          rowId,
+          header: state.headers[columnIndex],
+        });
       }
 
       if (columnIndex === modelColumnIndex && row.isThink) {

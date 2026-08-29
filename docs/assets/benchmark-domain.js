@@ -218,6 +218,74 @@ export function parseCodeV3RankGrade(value) {
   };
 }
 
+const CODE_V3_INSIGHT_KIND_BY_MARKER = new Map([
+  ["+", "positive"],
+  ["-", "negative"],
+  ["#", "finding"],
+]);
+
+export function extractCodeV3TaskId(header) {
+  const match = String(header ?? "").trim().match(/\(([A-Z])\)\s*$/);
+  return match ? match[1] : null;
+}
+
+export function parseCodeV3InsightLine(value) {
+  const line = String(value ?? "").trim();
+  const marker = line.charAt(0);
+  const kind = CODE_V3_INSIGHT_KIND_BY_MARKER.get(marker);
+  const text = line.slice(1).trim();
+  if (!kind || !text) return null;
+  return { marker, kind, text };
+}
+
+export function buildCodeV3InsightIndex(payload) {
+  const byRow = new Map();
+  const rows = Array.isArray(payload?.rows) ? payload.rows : [];
+
+  rows.forEach((row) => {
+    const rowId = String(row?.rowId ?? "").trim();
+    if (!rowId || !Array.isArray(row?.tasks)) return;
+
+    const byTask = new Map();
+    row.tasks.forEach((task) => {
+      const taskId = String(task?.taskId ?? "").trim().toUpperCase();
+      if (!/^[A-Z]$/.test(taskId) || !task?.lines || typeof task.lines !== "object") return;
+
+      const linesByLocale = new Map();
+      Object.entries(task.lines).forEach(([locale, lines]) => {
+        if (!Array.isArray(lines)) return;
+        const parsedLines = lines.map(parseCodeV3InsightLine).filter(Boolean);
+        if (parsedLines.length) {
+          linesByLocale.set(locale, parsedLines);
+        }
+      });
+
+      if (linesByLocale.size) {
+        byTask.set(taskId, { taskId, linesByLocale });
+      }
+    });
+
+    if (byTask.size) {
+      byRow.set(rowId, byTask);
+    }
+  });
+
+  return {
+    schemaVersion: Number(payload?.schemaVersion) || 1,
+    datasetKey: String(payload?.datasetKey ?? ""),
+    defaultLocale: String(payload?.defaultLocale ?? "zh-CN"),
+    byRow,
+  };
+}
+
+export function resolveCodeV3Insight(index, rowId, taskId, locale) {
+  const task = index?.byRow?.get(rowId)?.get(taskId);
+  if (!task) return null;
+  const lines =
+    task.linesByLocale.get(locale) ?? task.linesByLocale.get(index.defaultLocale) ?? null;
+  return lines?.length ? { taskId, lines } : null;
+}
+
 export function parseCodeV3SortKey(value) {
   const normalized = String(value ?? "").trim();
   if (/^pass$/i.test(normalized)) return { gradeOrder: 9, errorCount: 0 };

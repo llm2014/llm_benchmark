@@ -507,6 +507,26 @@ const TRANSLATIONS = {
     "zh-CN": "L: Metal + 图形算法优化",
     "en-US": "L: Metal + Graphics algorithm optimization",
   },
+  "insight.task": {
+    "zh-CN": "任务 {{id}}",
+    "en-US": "Task {{id}}",
+  },
+  "insight.close": {
+    "zh-CN": "关闭详情卡片",
+    "en-US": "Close detail card",
+  },
+  "insight.type.positive": {
+    "zh-CN": "优势",
+    "en-US": "Strength",
+  },
+  "insight.type.negative": {
+    "zh-CN": "问题",
+    "en-US": "Issue",
+  },
+  "insight.type.finding": {
+    "zh-CN": "发现",
+    "en-US": "Finding",
+  },
   "meta.codev3CellFormat": {
     "zh-CN": "1/A 代表扣分数/档位",
     "en-US": "1/A means deduction points / grade",

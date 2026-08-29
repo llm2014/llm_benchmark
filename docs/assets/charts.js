@@ -1,11 +1,11 @@
-import { t } from "./i18n.js?v=20260829-schema-cleanup";
+import { t } from "./i18n.js?v=20260829-codev3-insights";
 import {
   CATEGORY_CHART_CONFIG,
   CNY_PER_USD,
   TRENDS_SUPPORTED,
   median,
   parseSortableNumber,
-} from "./benchmark-domain.js?v=20260829-modular";
+} from "./benchmark-domain.js?v=20260829-codev3-insights";
 
 const MODEL_LOGO_POINT_SIZE = 17;
 const SERIES_PALETTE_LIGHT = [
