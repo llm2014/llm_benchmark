@@ -3,7 +3,7 @@
   "generatedFrom": "data/**/*.csv",
   "scanSummary": {
     "csvFiles": 51,
-    "uniqueModelNames": 435,
+    "uniqueModelNames": 397,
     "versionIndependentPrefixes": 31,
     "matchedPrefixes": 30,
     "unmatchedPrefixes": 1
@@ -52,6 +52,7 @@
     "Claude": [
       "Claude",
       "Fable",
+      "Haiku",
       "Opus",
       "Sonnet"
     ],
@@ -94,6 +95,8 @@
       "Grok"
     ],
     "Hunyuan": [
+      "HY 2.0",
+      "Hy3",
       "Hunyuan",
       "Tencent HY",
       "Tencent Hy",
