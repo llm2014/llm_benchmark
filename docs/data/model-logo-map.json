@@ -3,16 +3,17 @@
   "generatedFrom": "data/**/*.csv",
   "scanSummary": {
     "csvFiles": 51,
-    "uniqueModelNames": 429,
-    "versionIndependentPrefixes": 30,
-    "matchedPrefixes": 27,
-    "unmatchedPrefixes": 3
+    "uniqueModelNames": 435,
+    "versionIndependentPrefixes": 31,
+    "matchedPrefixes": 30,
+    "unmatchedPrefixes": 1
   },
   "matchPolicy": {
     "normalization": "trim and case-insensitive comparison",
     "strategy": "match the longest leading alias, then resolve it to the canonical prefix"
   },
   "prefixToLogo": {
+    "Baichuan": "assets/logo/baichuan.svg",
     "Claude": "assets/logo/anthropic.svg",
     "DeepSeek": "assets/logo/deepseek.svg",
     "Doubao": "assets/logo/bytedance.svg",
@@ -23,6 +24,7 @@
     "GPT": "assets/logo/openai.svg",
     "Grok": "assets/logo/xai.svg",
     "Hunyuan": "assets/logo/hy.svg",
+    "KAT-Coder": "assets/logo/kwaikat.svg",
     "Kimi": "assets/logo/kimi.svg",
     "Ling": "assets/logo/bailing.png",
     "Ring": "assets/logo/bailing.png",
@@ -39,6 +41,7 @@
     "SenseNova": "assets/logo/sensetime.svg",
     "Spark": "assets/logo/xunfei.svg",
     "Step": "assets/logo/stepfun.svg",
+    "TianGong": "assets/logo/tiangong.svg",
     "YI": "assets/logo/zeroone.svg"
   },
   "prefixAliases": {
@@ -60,6 +63,9 @@
       "Seed",
       "字节豆包",
       "豆包"
+    ],
+    "Dots3": [
+      "Dots3"
     ],
     "ERNIE": [
       "ERNIE",
@@ -147,10 +153,12 @@
     ],
     "SenseNova": [
       "SenseNova",
+      "SenseChat",
       "商汤",
       "日日新"
     ],
     "Spark": [
+      "Spark",
       "讯飞 星火",
       "讯飞星火",
       "讯飞"
@@ -160,6 +168,7 @@
       "阶跃星辰"
     ],
     "TianGong": [
+      "TianGong",
       "天工",
       "昆仑天工"
     ],
@@ -169,37 +178,12 @@
   },
   "unmatched": [
     {
-      "prefix": "Baichuan",
+      "prefix": "Dots3",
       "aliases": [
-        "Baichuan",
-        "百川"
+        "Dots3"
       ],
       "models": [
-        "Baichuan4 Turbo",
-        "百川3",
-        "百川4"
-      ]
-    },
-    {
-      "prefix": "KAT-Coder",
-      "aliases": [
-        "KAT-Coder"
-      ],
-      "models": [
-        "KAT-Coder"
-      ]
-    },
-    {
-      "prefix": "TianGong",
-      "aliases": [
-        "天工",
-        "昆仑天工"
-      ],
-      "models": [
-        "天工 O1 0104",
-        "天工 O1 Preview",
-        "天工3.0",
-        "昆仑天工3.0"
+        "Dots3-Note Preview"
       ]
     }
   ]
