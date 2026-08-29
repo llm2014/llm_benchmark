@@ -6,67 +6,40 @@ import {
   onLocaleChange,
   setLocale,
   t,
-} from "./i18n.js?v=20260827-median-score";
+} from "./i18n.js?v=20260829-schema-cleanup";
 
 const DATASET_TITLE_KEYS = {
   月榜: "dataset.title.monthly",
-  "各语言平均成绩": "dataset.title.averageByLanguage",
 };
 
 const DEFAULT_DATASET_TITLE_KEY = "dataset.title.default";
 
 const HEADER_TRANSLATIONS = {
-  报告日期: "table.header.reportDate",
   模型: "table.header.model",
-  原始分数: "table.header.rawScore",
-  原始中位: "table.header.rawMedian",
-  运行异常: "table.header.runtimeErrors",
-  语法错误: "table.header.syntaxErrors",
-  "0分率": "table.header.zeroRate",
-  总异常: "table.header.totalErrors",
   极限分数: "table.header.maxScore",
   中位分数: "table.header.medianScore",
   中位差距: "table.header.medianGap",
   "平均耗时(秒)": "table.header.avgTimeSeconds",
-  平均代码行: "table.header.avgLines",
-  "成本(元)": "table.header.costCny",
-  备注: "table.header.notes",
-  "使用成本(元)": "table.header.usageCostCny",
-  修复后异常: "table.header.errorsAfterFix",
-  修正极限: "table.header.adjustedMaxScore",
-  分差: "table.header.scoreDelta",
   发布时间: "table.header.releaseDate",
   变更: "table.header.change",
-  多轮总分: "table.header.multiTurnScore",
   平均Token: "table.header.avgTokens",
   "平均耗时/s": "table.header.avgTimePerSecond",
-  平均长度: "table.header.avgLength",
-  "平均长度(字)": "table.header.avgLengthChars",
-  异常率: "table.header.errorRate",
-  总轮数: "table.header.totalRounds",
   成本: "table.header.cost",
   "价格(元/百万)": "table.header.pricePerMillion",
-  最终不可用: "table.header.finalUnavailable",
   "测试成本(元)": "table.header.testCostCny",
-  测试时间: "table.header.testTime",
-  百分制: "table.header.percentScale",
-  较上次变更: "table.header.changeSinceLast",
-  首轮总分: "table.header.firstRoundScore",
-  使用成本: "table.header.usageCost",
 };
 
-const CATEGORY_ORDER = ["logic", "code", "code_v3", "vision"];
+const CATEGORY_ORDER = ["logic", "code_v3", "vision"];
 const DEFAULT_INFERENCE_FILTER = "all";
 const VALID_INFERENCE_FILTERS = new Set(["all", "think", "non-think"]);
 const DEFAULT_COUNTRY_FILTER = "all";
 const VALID_COUNTRY_FILTERS = new Set(["all", "china", "usa", "other"]);
 const MOBILE_BREAKPOINT_PX = 768;
-const MODEL_HEADER_CANDIDATES = ["模型", "Model", "Language"];
-const MODEL_COUNTRY_HEADER_CANDIDATES = ["模型", "Model"];
+const MODEL_HEADER_CANDIDATES = ["模型", "Model"];
 const CHINA_MODEL_PATTERNS = [
   /[\u4e00-\u9fff]/,
   /^k2(?:\b|[.\s-])/i,
-  /\b(?:baichuan|chatglm|deepseek|doubao|ernie|erine|glm|hunyuan|kat|kimi|ling|longcat|minimax|mimo|openpangu|pangu|qwen|qwn|qvq|qwq|ring|seed|sensenova|step|tencent|yi)(?=$|[^a-z0-9]|[0-9])/i,
+  /\b(?:baichuan|chatglm|deepseek|doubao|ernie|erine|glm|hunyuan|kat|kimi|ling|longcat|minimax|mimo|openpangu|pangu|qwen|qwn|qvq|qwq|ring|seed|sensechat|sensenova|spark|step|tencent|tiangong|yi)(?=$|[^a-z0-9]|[0-9])/i,
 ];
 const US_MODEL_PATTERNS = [
   /\b(?:anthropic|chatgpt|claude|fable|gemini|gemm3|gemma|gpt|grok|haiku|llama|muse|o1|o3|o4|openai|opus|sonnet)(?=$|[^a-z0-9]|[0-9])/i,
@@ -100,28 +73,18 @@ const HIDDEN_CATEGORIES = new Set(["code"]);
 
 // 各榜单类别的数值列配置：趋势视图与象限图共用。
 // code_v3 为等级制（Pass/A+…），不在此列。
-// score 供象限图使用；scoreFallbacks 供趋势视图使用。评分体系迭代过，早期月份用旧列名，
-// 排名只要求当月分数单调可比，跨月不做绝对比较。
 const CATEGORY_CHART_CONFIG = {
   logic: {
     score: "中位分数",
     cost: "测试成本(元)",
     time: "平均耗时(秒)",
-    scoreFallbacks: ["极限分数", "百分制", "原始分数"],
     // 推理类别交换横纵坐标：横轴 = 指标（成本/耗时），纵轴 = 分数
     swapAxes: true,
-  },
-  code: {
-    score: "多轮总分",
-    cost: "测试成本(元)",
-    time: "平均耗时(秒)",
-    scoreFallbacks: ["多轮总分"],
   },
   vision: {
     score: "中位分数",
     cost: "成本",
     time: "平均耗时/s",
-    scoreFallbacks: ["极限分数", "原始分数"],
     // 与推理类别一致：横轴 = 指标（成本/耗时），纵轴 = 分数
     swapAxes: true,
   },
@@ -430,16 +393,6 @@ const trendEndLabelsPlugin = {
 };
 
 const MOBILE_CARD_LAYOUTS = {
-  code: {
-    className: "mobile-card--code",
-    fieldGroups: [
-      ["多轮总分", "极限分数", "修正极限"],
-      ["首轮总分", "中位分数", "原始分数"],
-      ["测试成本(元)", "成本(元)", "使用成本(元)", "成本"],
-      ["平均耗时(秒)", "平均耗时/s"],
-      ["发布时间", "报告日期", "测试时间"],
-    ],
-  },
   logic: {
     className: "mobile-card--logic",
     suppressDetails: true,
@@ -448,27 +401,20 @@ const MOBILE_CARD_LAYOUTS = {
         className: "mobile-card-row--hero",
         columns: 3,
         fields: [
-          ["极限分数", "百分制", "原始分数"],
-          ["中位分数", "原始中位"],
+          "极限分数",
+          "中位分数",
           { candidates: ["中位差距"], tone: "muted" },
         ],
       },
       {
         className: "mobile-card-row--secondary",
         columns: 3,
-        fields: [
-          ["测试成本(元)", "成本(元)", "使用成本(元)", "成本"],
-          ["Token", "平均Token"],
-          ["价格(元/百万)"],
-        ],
+        fields: ["测试成本(元)", "Token", "价格(元/百万)"],
       },
       {
         className: "mobile-card-row--tertiary",
         columns: 2,
-        fields: [
-          ["平均耗时(秒)", "平均耗时/s"],
-          ["发布时间", "报告日期", "测试时间"],
-        ],
+        fields: ["平均耗时(秒)", "发布时间"],
       },
     ],
   },
@@ -480,27 +426,20 @@ const MOBILE_CARD_LAYOUTS = {
         className: "mobile-card-row--hero",
         columns: 3,
         fields: [
-          ["极限分数", "原始分数"],
-          ["中位分数", "原始中位"],
+          "极限分数",
+          "中位分数",
           { candidates: ["中位差距"], tone: "muted" },
         ],
       },
       {
         className: "mobile-card-row--secondary",
         columns: 3,
-        fields: [
-          ["成本", "成本(元)", "测试成本(元)"],
-          ["平均Token", "Token"],
-          ["价格(元/百万)"],
-        ],
+        fields: ["成本", "平均Token", "价格(元/百万)"],
       },
       {
         className: "mobile-card-row--tertiary",
         columns: 2,
-        fields: [
-          ["平均耗时/s", "平均耗时(秒)"],
-          ["发布时间", "报告日期", "测试时间"],
-        ],
+        fields: ["平均耗时/s", "发布时间"],
       },
     ],
   },
@@ -518,12 +457,7 @@ const MOBILE_CARD_LAYOUTS = {
   },
   default: {
     className: "mobile-card--default",
-    fieldGroups: [
-      ["极限分数", "多轮总分", "原始分数"],
-      ["测试成本(元)", "成本(元)", "使用成本(元)", "成本"],
-      ["平均耗时(秒)", "平均耗时/s"],
-      ["发布时间", "报告日期", "测试时间"],
-    ],
+    fieldGroups: [],
   },
 };
 
@@ -1493,7 +1427,7 @@ async function loadDatasetByKey(key) {
 
   const displayHeaders =
     thinkIndex === -1 ? headers.slice() : headers.filter((_, index) => index !== thinkIndex);
-  const modelColumnIndex = findCountryModelColumnIndex(displayHeaders);
+  const modelColumnIndex = findModelColumnIndex(displayHeaders);
   state.hasModelColumn = modelColumnIndex !== -1;
 
   if (state.hasModelColumn) {
@@ -1542,13 +1476,6 @@ function getDatasetDirectoryFromPath(path) {
     return segments[1];
   }
   return "default";
-}
-
-function findCountryModelColumnIndex(headers) {
-  return MODEL_COUNTRY_HEADER_CANDIDATES.reduce((foundIndex, candidate) => {
-    if (foundIndex !== -1) return foundIndex;
-    return headers.findIndex((header) => header === candidate);
-  }, -1);
 }
 
 function classifyModelCountry(modelName) {
@@ -1890,48 +1817,11 @@ function appendCodeV3ValueContent(target, value) {
   target.appendChild(result);
 }
 
-function findModelColumnIndex(headers, rows, headerIndexMap) {
-  for (const candidate of MODEL_HEADER_CANDIDATES) {
-    if (headerIndexMap.has(candidate)) {
-      return headerIndexMap.get(candidate);
-    }
-  }
-
-  let bestIndex = headers.length ? 0 : -1;
-  let bestScore = Number.NEGATIVE_INFINITY;
-  const sampleRows = rows.slice(0, 10);
-
-  headers.forEach((_, index) => {
-    let nonEmpty = 0;
-    let textLike = 0;
-    let numericLike = 0;
-    let totalLength = 0;
-
-    sampleRows.forEach((row) => {
-      const value = normalizeCellValue(row.cells[index]);
-      if (!value) return;
-      nonEmpty += 1;
-      totalLength += value.length;
-
-      if (parseSortableNumber(value) !== null) {
-        numericLike += 1;
-      }
-      if (/[A-Za-z\u4e00-\u9fff]/.test(value)) {
-        textLike += 1;
-      }
-    });
-
-    if (!nonEmpty) return;
-
-    const averageLength = totalLength / nonEmpty;
-    const score = textLike * 2 - numericLike + averageLength / 10;
-    if (score > bestScore) {
-      bestScore = score;
-      bestIndex = index;
-    }
-  });
-
-  return bestIndex;
+function findModelColumnIndex(headers) {
+  return MODEL_HEADER_CANDIDATES.reduce((foundIndex, candidate) => {
+    if (foundIndex !== -1) return foundIndex;
+    return headers.indexOf(candidate);
+  }, -1);
 }
 
 function resolveFieldByGroup(row, fieldGroup, headerIndexMap, usedIndices) {
@@ -2256,7 +2146,7 @@ function renderMobileCards(container) {
 
   const layout = resolveMobileCardLayout();
   const headerIndexMap = buildHeaderIndexMap(state.headers);
-  const modelColumnIndex = findModelColumnIndex(state.headers, state.filteredRows, headerIndexMap);
+  const modelColumnIndex = findModelColumnIndex(state.headers);
 
   state.filteredRows.forEach((row) => {
     list.appendChild(createMobileCard(row, layout, headerIndexMap, modelColumnIndex));
@@ -2290,9 +2180,9 @@ function renderTable() {
   }
 
   const headerIndexMap = buildHeaderIndexMap(state.headers);
-  const modelColumnIndex = findModelColumnIndex(state.headers, state.filteredRows, headerIndexMap);
+  const modelColumnIndex = findModelColumnIndex(state.headers);
   const isCodeV3Table = state.currentCategory === "code_v3";
-  // 成本列（logic/code 为“测试成本(元)”，vision 为“成本”）：用于 hover 局部对比
+  // 成本列（logic 为“测试成本(元)”，vision 为“成本”）：用于 hover 局部对比
   const costHeader = CATEGORY_CHART_CONFIG[state.currentCategory]?.cost ?? null;
   const costColumnIndex = costHeader ? state.headers.indexOf(costHeader) : -1;
 
@@ -2693,14 +2583,6 @@ function buildTrendsCategoryOptions() {
 
 /* ---------------- 趋势视图 ---------------- */
 
-function findChartModelIndex(headers) {
-  const direct = headers.indexOf("模型");
-  if (direct !== -1) return direct;
-  // vision 早期文件模型列表头为空，位于“报告日期”之后。
-  if (headers[0] === "报告日期" && headers.length > 1) return 1;
-  return -1;
-}
-
 async function ensureTrendsData() {
   const category = state.trends.category;
   if (!category || !TRENDS_SUPPORTED.has(category)) {
@@ -2725,11 +2607,8 @@ async function ensureTrendsData() {
     entries.map(async (entry) => {
       try {
         const { headers, rows } = await fetchCsvDataset(entry.csv);
-        const scoreIndex = config.scoreFallbacks.reduce(
-          (found, candidate) => (found !== -1 ? found : headers.indexOf(candidate)),
-          -1
-        );
-        const modelIndex = findChartModelIndex(headers);
+        const scoreIndex = headers.indexOf(config.score);
+        const modelIndex = findModelColumnIndex(headers);
         if (scoreIndex === -1 || modelIndex === -1) return null;
 
         const scored = [];
@@ -3044,10 +2923,7 @@ function renderChart() {
   // 推理类别交换横纵坐标：横轴 = 指标（成本/耗时），纵轴 = 分数
   const swapped = !!config.swapAxes;
 
-  const scoreLabel =
-    state.currentCategory === "code"
-      ? t("chart.axis.multiTurnScore")
-      : t("chart.axis.medianScore");
+  const scoreLabel = t("chart.axis.medianScore");
   const metricLabel = yAxisType === "cost" ? t("chart.axis.cost") : t("chart.axis.avgTime");
 
   let scoreIndex = -1;
@@ -3058,7 +2934,7 @@ function renderChart() {
     if (header === config.score) scoreIndex = i;
     if (header === yAxisColumnName) metricIndex = i;
   }
-  const modelIndex = findChartModelIndex(state.headers);
+  const modelIndex = findModelColumnIndex(state.headers);
 
   if (scoreIndex === -1 || metricIndex === -1 || modelIndex === -1) {
     if (chartInstance) {
