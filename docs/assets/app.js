@@ -7,6 +7,33 @@ import {
   setLocale,
   t,
 } from "./i18n.js?v=20260829-schema-cleanup";
+import {
+  CATEGORY_CHART_CONFIG,
+  CATEGORY_ORDER,
+  CNY_PER_USD,
+  DEFAULT_COUNTRY_FILTER,
+  DEFAULT_INFERENCE_FILTER,
+  HIDDEN_CATEGORIES,
+  MOBILE_BREAKPOINT_PX,
+  MODEL_HEADER_CANDIDATES,
+  TRENDS_DEFAULT_SELECTED,
+  TRENDS_MAX_MONTHS,
+  TRENDS_RECENT_MONTHS,
+  TRENDS_SUPPORTED,
+  buildDatasetKey,
+  classifyModelCountry,
+  getDatasetDirectoryFromPath,
+  getModelFamily,
+  isCodeV3AuxiliaryHeader,
+  isThinkRow,
+  normalizeCountryFilter,
+  normalizeInferenceFilter,
+  parseCodeV3RankGrade as parseCodeV3RankGradeValue,
+  parseCsv,
+  parseSortableNumber,
+  sortRows as sortBenchmarkRows,
+} from "./benchmark-domain.js?v=20260829-modular";
+import { createCharts } from "./charts.js?v=20260829-modular";
 
 const DATASET_TITLE_KEYS = {
   月榜: "dataset.title.monthly",
@@ -29,38 +56,6 @@ const HEADER_TRANSLATIONS = {
   "测试成本(元)": "table.header.testCostCny",
 };
 
-const CATEGORY_ORDER = ["logic", "code_v3", "vision"];
-const DEFAULT_INFERENCE_FILTER = "all";
-const VALID_INFERENCE_FILTERS = new Set(["all", "think", "non-think"]);
-const DEFAULT_COUNTRY_FILTER = "all";
-const VALID_COUNTRY_FILTERS = new Set(["all", "china", "usa", "other"]);
-const MOBILE_BREAKPOINT_PX = 768;
-const MODEL_HEADER_CANDIDATES = ["模型", "Model"];
-const CHINA_MODEL_PATTERNS = [
-  /[\u4e00-\u9fff]/,
-  /^k2(?:\b|[.\s-])/i,
-  /\b(?:baichuan|chatglm|deepseek|doubao|ernie|erine|glm|hunyuan|kat|kimi|ling|longcat|minimax|mimo|openpangu|pangu|qwen|qwn|qvq|qwq|ring|seed|sensechat|sensenova|spark|step|tencent|tiangong|yi)(?=$|[^a-z0-9]|[0-9])/i,
-];
-const US_MODEL_PATTERNS = [
-  /\b(?:anthropic|chatgpt|claude|fable|gemini|gemm3|gemma|gpt|grok|haiku|llama|muse|o1|o3|o4|openai|opus|sonnet)(?=$|[^a-z0-9]|[0-9])/i,
-];
-const CODE_V3_AUXILIARY_HEADERS = new Set([
-  "unprompted",
-  "ide/cli",
-  "scaffold",
-  "think",
-  "总扣分",
-]);
-const CODE_V3_GRADE_ORDER = new Map([
-  ["A+", 8],
-  ["A", 7],
-  ["B+", 6],
-  ["B", 5],
-  ["C+", 4],
-  ["C", 3],
-  ["D+", 2],
-  ["D", 1],
-]);
 const THEME_STORAGE_KEY = "llm-dashboard-theme";
 const THEME_MODES = ["system", "light", "dark"];
 const prefersDarkQuery =
@@ -68,56 +63,10 @@ const prefersDarkQuery =
     ? window.matchMedia("(prefers-color-scheme: dark)")
     : null;
 
-// 暂时在类别下拉中隐藏的分类（数据仍在 manifest 中，仅不展示）
-const HIDDEN_CATEGORIES = new Set(["code"]);
-
-// 各榜单类别的数值列配置：趋势视图与象限图共用。
-// code_v3 为等级制（Pass/A+…），不在此列。
-const CATEGORY_CHART_CONFIG = {
-  logic: {
-    score: "中位分数",
-    cost: "测试成本(元)",
-    time: "平均耗时(秒)",
-    // 推理类别交换横纵坐标：横轴 = 指标（成本/耗时），纵轴 = 分数
-    swapAxes: true,
-  },
-  vision: {
-    score: "中位分数",
-    cost: "成本",
-    time: "平均耗时/s",
-    // 与推理类别一致：横轴 = 指标（成本/耗时），纵轴 = 分数
-    swapAxes: true,
-  },
-};
-const TRENDS_SUPPORTED = new Set(
-  Object.keys(CATEGORY_CHART_CONFIG).filter((category) => !HIDDEN_CATEGORIES.has(category))
-);
-// 趋势视图只取相对最新数据集的最近 18 期（动态计算，随数据更新滚动）
-const TRENDS_MAX_MONTHS = 18;
-const TRENDS_RECENT_MONTHS = 6;
-const TRENDS_DEFAULT_SELECTED = 6;
 const MODEL_LOGO_MAP_PATH = "data/model-logo-map.json";
-const MODEL_LOGO_POINT_SIZE = 17;
-const SERIES_PALETTE_LIGHT = [
-  "#1f4e79", "#9e3b32", "#3a6b4f", "#8a6d1f",
-  "#6b4f8a", "#2f6b6b", "#a2543a", "#5a5f6b",
-];
-const SERIES_PALETTE_DARK = [
-  "#93b8dc", "#d9907f", "#8fbf9f", "#c9a94f",
-  "#b39ddb", "#7fb3b3", "#cf8a6f", "#9aa0ab",
-];
 const VALID_VIEWS = new Set(["board", "trends"]);
 
-function median(values) {
-  if (!values.length) return 0;
-  const sorted = values.slice().sort((a, b) => a - b);
-  const mid = Math.floor(sorted.length / 2);
-  return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
-}
-
 // 货币本地化：数据层始终是人民币，仅展示层在英文界面按固定汇率换算。
-const CNY_PER_USD = 6.9;
-
 function formatUsd(usd) {
   const decimals = Math.abs(usd) >= 1 ? 2 : 3;
   return `$${usd.toFixed(decimals)}`;
@@ -142,255 +91,6 @@ function formatCellForDisplay(header, value) {
   }
   return formatted;
 }
-
-// Chart.js 自定义插件：绘制象限底色、中位分割线与区域标签。
-const quadrantPlugin = {
-  id: "quadrants",  beforeDatasetsDraw(chart, args, opts) {
-    if (!opts || typeof opts.medianX !== "number" || typeof opts.medianY !== "number") return;
-    const { ctx, chartArea, scales } = chart;
-    if (!chartArea) return;
-    const midX = scales.x.getPixelForValue(opts.medianX);
-    const midY = scales.y.getPixelForValue(opts.medianY);
-    const { top, bottom, left, right } = chartArea;
-    ctx.save();
-    if (opts.sweetBg) {
-      ctx.fillStyle = opts.sweetBg;
-      ctx.fillRect(midX, midY, right - midX, bottom - midY);
-    }
-    if (opts.secondBg) {
-      // 标准第二象限：x 小于分界、y 大于分界；Canvas 中对应左上区域。
-      ctx.fillStyle = opts.secondBg;
-      ctx.fillRect(left, top, midX - left, midY - top);
-    }
-    if (opts.lineColor) {
-      ctx.strokeStyle = opts.lineColor;
-      ctx.lineWidth = 1;
-      ctx.setLineDash([5, 4]);
-      ctx.beginPath();
-      ctx.moveTo(midX, top);
-      ctx.lineTo(midX, bottom);
-      ctx.moveTo(left, midY);
-      ctx.lineTo(right, midY);
-      ctx.stroke();
-    }
-    ctx.restore();
-  },
-  afterDatasetsDraw(chart, args, opts) {
-    if (!opts || !opts.labels) return;
-    const { ctx, chartArea } = chart;
-    if (!chartArea) return;
-    const { top, bottom, left, right } = chartArea;
-    const pad = 8;
-    ctx.save();
-    ctx.font = `12px ${getComputedStyle(document.body).fontFamily}`;
-    ctx.fillStyle = opts.labelColor || "#999";
-    if (opts.labels.tr) {
-      ctx.textAlign = "right";
-      ctx.textBaseline = "top";
-      ctx.fillText(opts.labels.tr, right - pad, top + pad);
-    }
-    if (opts.labels.br) {
-      ctx.textAlign = "right";
-      ctx.textBaseline = "bottom";
-      ctx.fillText(opts.labels.br, right - pad, bottom - pad);
-    }
-    if (opts.labels.tl) {
-      ctx.textAlign = "left";
-      ctx.textBaseline = "top";
-      ctx.fillText(opts.labels.tl, left + pad, top + pad);
-    }
-    if (opts.labels.bl) {
-      ctx.textAlign = "left";
-      ctx.textBaseline = "bottom";
-      ctx.fillText(opts.labels.bl, left + pad, bottom - pad);
-    }
-    ctx.restore();
-  },
-};
-
-// 直接把高分辨率源图绘制到 Chart.js 的高 DPI 画布。
-// 避免先缩成 20px 位图、再被 devicePixelRatio 放大造成的模糊。
-const modelLogoPointsPlugin = {
-  id: "modelLogoPoints",
-  afterDatasetsDraw(chart, args, opts) {
-    if (!opts || opts.display === false) return;
-    const meta = chart.getDatasetMeta(0);
-    const dataset = chart.data.datasets[0];
-    if (!meta || !dataset) return;
-
-    const { ctx } = chart;
-    const size = opts.size || MODEL_LOGO_POINT_SIZE;
-    const padding = 1;
-
-    ctx.save();
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = "high";
-
-    dataset.data.forEach((point, index) => {
-      const element = meta.data[index];
-      const image = point?.logoImage;
-      if (!element || !image) return;
-
-      const radius = size / 2;
-      ctx.beginPath();
-      ctx.arc(element.x, element.y, radius - 0.5, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(255, 255, 255, 0.96)";
-      ctx.fill();
-
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(element.x, element.y, radius - padding, 0, Math.PI * 2);
-      ctx.clip();
-
-      const maxSize = size - padding * 2;
-      const scale = Math.min(maxSize / image.naturalWidth, maxSize / image.naturalHeight);
-      const width = image.naturalWidth * scale;
-      const height = image.naturalHeight * scale;
-      ctx.drawImage(image, element.x - width / 2, element.y - height / 2, width, height);
-      ctx.restore();
-
-      ctx.beginPath();
-      ctx.arc(element.x, element.y, radius - 0.5, 0, Math.PI * 2);
-      ctx.strokeStyle = "rgba(111, 108, 101, 0.35)";
-      ctx.lineWidth = 1;
-      ctx.stroke();
-    });
-
-    ctx.restore();
-  },
-};
-
-// Chart.js 自定义插件：在散点旁直接标注模型名。
-// 贪心防重叠：按 右→左→上→下 顺序尝试，全部冲突才放弃该标签；
-// 数据顺序即优先级（排名靠前的模型优先获得标注位）。
-const pointLabelsPlugin = {
-  id: "pointLabels",
-  afterDatasetsDraw(chart, args, opts) {
-    if (!opts || !opts.display) return;
-    const { ctx, chartArea } = chart;
-    if (!chartArea) return;
-    const meta = chart.getDatasetMeta(0);
-    const dataset = chart.data.datasets[0];
-    if (!meta || !dataset) return;
-
-    const fontSize = opts.fontSize || 11;
-    const padX = 2;
-    const boxH = fontSize + 4;
-    const defaultOffset = 7;
-    const placed = [];
-
-    const intersects = (a, b) =>
-      a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
-    const inside = (box) =>
-      box.x >= chartArea.left &&
-      box.x + box.w <= chartArea.right &&
-      box.y >= chartArea.top &&
-      box.y + box.h <= chartArea.bottom;
-
-    ctx.save();
-    ctx.font = `${fontSize}px ${getComputedStyle(document.body).fontFamily}`;
-    ctx.textAlign = "left";
-    ctx.textBaseline = "middle";
-
-    dataset.data.forEach((point, index) => {
-      const element = meta.data[index];
-      if (!element || !point || !point.label) return;
-      const boxW = ctx.measureText(point.label).width + padX * 2;
-      const offset = point.logoImage
-        ? MODEL_LOGO_POINT_SIZE / 2 + 4
-        : defaultOffset;
-      const candidates = [
-        { x: element.x + offset, y: element.y - boxH / 2 },
-        { x: element.x - offset - boxW, y: element.y - boxH / 2 },
-        { x: element.x - boxW / 2, y: element.y - offset - boxH },
-        { x: element.x - boxW / 2, y: element.y + offset },
-      ];
-      for (const candidate of candidates) {
-        const box = { x: candidate.x, y: candidate.y, w: boxW, h: boxH };
-        if (!inside(box)) continue;
-        if (placed.some((other) => intersects(box, other))) continue;
-        ctx.fillStyle = point.isThink ? opts.thinkColor : opts.defaultColor;
-        ctx.fillText(point.label, candidate.x + padX, candidate.y + boxH / 2);
-        placed.push(box);
-        return;
-      }
-    });
-
-    ctx.restore();
-  },
-};
-
-// Chart.js 自定义插件：在每条趋势线的最后一个有效点附近标注模型名。
-// 优先放在点的上方；发生碰撞时允许小幅左右移动或放到点下方。
-const trendEndLabelsPlugin = {
-  id: "trendEndLabels",
-  afterDatasetsDraw(chart, args, opts) {
-    if (!opts || !opts.display) return;
-    const { ctx, chartArea } = chart;
-    if (!chartArea) return;
-
-    const fontSize = opts.fontSize || 11;
-    const padX = 4;
-    const boxH = fontSize + 6;
-    const offset = 8;
-    const placed = [];
-    const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
-    const intersects = (a, b) =>
-      a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
-    const inside = (box) =>
-      box.x >= chartArea.left &&
-      box.x + box.w <= chartArea.right &&
-      box.y >= chartArea.top &&
-      box.y + box.h <= chartArea.bottom;
-
-    ctx.save();
-    ctx.font = "600 " + fontSize + "px " + getComputedStyle(document.body).fontFamily;
-    ctx.textAlign = "left";
-    ctx.textBaseline = "middle";
-
-    chart.data.datasets.forEach((dataset, datasetIndex) => {
-      let lastIndex = dataset.data.length - 1;
-      while (lastIndex >= 0 && dataset.data[lastIndex] === null) lastIndex -= 1;
-      if (lastIndex < 0) return;
-
-      const element = chart.getDatasetMeta(datasetIndex).data[lastIndex];
-      if (!element || !dataset.label) return;
-
-      const boxW = ctx.measureText(dataset.label).width + padX * 2;
-      const centeredX = clamp(element.x - boxW / 2, chartArea.left, chartArea.right - boxW);
-      const candidates = [
-        { x: centeredX, y: element.y - boxH - offset },
-        {
-          x: clamp(element.x - boxW - offset, chartArea.left, chartArea.right - boxW),
-          y: element.y - boxH - offset,
-        },
-        {
-          x: clamp(element.x + offset, chartArea.left, chartArea.right - boxW),
-          y: element.y - boxH - offset,
-        },
-        { x: centeredX, y: element.y + offset },
-      ];
-
-      const position =
-        candidates.find((candidate) => {
-          const box = { ...candidate, w: boxW, h: boxH };
-          return inside(box) && !placed.some((other) => intersects(box, other));
-        }) || candidates.find((candidate) => inside({ ...candidate, w: boxW, h: boxH }));
-      if (!position) return;
-
-      const box = { ...position, w: boxW, h: boxH };
-      ctx.globalAlpha = 0.9;
-      ctx.fillStyle = opts.backgroundColor || "#fff";
-      ctx.fillRect(box.x, box.y, box.w, box.h);
-      ctx.globalAlpha = 1;
-      ctx.fillStyle = dataset.borderColor;
-      ctx.fillText(dataset.label, box.x + padX, box.y + boxH / 2);
-      placed.push(box);
-    });
-
-    ctx.restore();
-  },
-};
 
 const MOBILE_CARD_LAYOUTS = {
   logic: {
@@ -536,8 +236,13 @@ const elements = {
   trendsNote: document.getElementById("trendsNote"),
 };
 
-let chartInstance = null;
-let trendsChartInstance = null;
+const charts = createCharts({
+  state,
+  elements,
+  prefersDarkQuery,
+  findModelColumnIndex,
+  getModelLogoImage,
+});
 let isApplyingHashState = false;
 
 initializeLocaleUi();
@@ -580,7 +285,7 @@ function initializeLocaleUi() {
     updateLanguageToggle();
     updateMeta();
     if (state.view === "trends") {
-      renderTrends();
+      charts.renderTrends();
     }
   });
 }
@@ -594,15 +299,15 @@ function initializeThemeUi() {
       const nextMode = getNextThemeMode(state.themeMode);
       applyThemeMode(nextMode);
       updateThemeToggle();
-      renderChart();
-      renderTrendsChart();
+      charts.renderChart();
+      charts.renderTrendsChart();
     });
   }
 
   const handleSystemThemeChange = () => {
     if (state.themeMode !== "system") return;
-    renderChart();
-    renderTrendsChart();
+    charts.renderChart();
+    charts.renderTrendsChart();
   };
 
   if (prefersDarkQuery && typeof prefersDarkQuery.addEventListener === "function") {
@@ -822,14 +527,6 @@ function setSelectOptions(select, options, selectedValue) {
   if (previousValue && options.some((option) => option.value === previousValue)) {
     select.value = previousValue;
   }
-}
-
-function normalizeInferenceFilter(value) {
-  return VALID_INFERENCE_FILTERS.has(value) ? value : DEFAULT_INFERENCE_FILTER;
-}
-
-function normalizeCountryFilter(value) {
-  return VALID_COUNTRY_FILTERS.has(value) ? value : DEFAULT_COUNTRY_FILTER;
 }
 
 function parseHashState(rawHash = window.location.hash) {
@@ -1228,7 +925,7 @@ function bindEventHandlers() {
 
   if (elements.yAxisSelect) {
     elements.yAxisSelect.addEventListener("change", () => {
-      renderChart();
+      charts.renderChart();
     });
   }
 
@@ -1255,7 +952,7 @@ function bindEventHandlers() {
       state.trends.category = category;
       state.trends.loadedCategory = null;
       state.trends.selected = new Set();
-      ensureTrendsData().then(renderTrends);
+      ensureTrendsData().then(charts.renderTrends);
       syncHashFromState();
     });
   }
@@ -1263,8 +960,8 @@ function bindEventHandlers() {
   if (elements.trendsModeSelect) {
     elements.trendsModeSelect.addEventListener("change", (event) => {
       state.trends.mode = event.target.value === "rank" ? "rank" : "percentile";
-      renderTrendsChart();
-      updateTrendsCaption();
+      charts.renderTrendsChart();
+      charts.updateTrendsCaption();
     });
   }
 
@@ -1464,31 +1161,6 @@ async function loadDatasetByKey(key) {
   updateMeta(dataset);
 }
 
-function buildDatasetKey(dataset) {
-  return `${dataset.category}|${dataset.reportDate}|${dataset.tableIndex}`;
-}
-
-function getDatasetDirectoryFromPath(path) {
-  if (typeof path !== "string" || !path) return "default";
-  const normalized = path.replace(/^\.\//, "");
-  const segments = normalized.split("/");
-  if (segments.length >= 2 && segments[0] === "data") {
-    return segments[1];
-  }
-  return "default";
-}
-
-function classifyModelCountry(modelName) {
-  const normalizedName = String(modelName || "").trim();
-  if (CHINA_MODEL_PATTERNS.some((pattern) => pattern.test(normalizedName))) {
-    return "china";
-  }
-  if (US_MODEL_PATTERNS.some((pattern) => pattern.test(normalizedName))) {
-    return "usa";
-  }
-  return "other";
-}
-
 async function fetchCsvDataset(path) {
   if (csvCache.has(path)) {
     return csvCache.get(path);
@@ -1503,53 +1175,6 @@ async function fetchCsvDataset(path) {
   })();
   csvCache.set(path, promise);
   return promise;
-}
-
-function parseCsv(text) {
-  const lines = text
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter((line) => line.length > 0);
-  if (!lines.length) {
-    return { headers: [], rows: [] };
-  }
-
-  const headers = parseCsvLine(lines[0]);
-  const rows = lines.slice(1).map((line) => parseCsvLine(line, headers.length));
-  return { headers, rows };
-}
-
-function parseCsvLine(line, expectedLength) {
-  const result = [];
-  let current = "";
-  let inQuotes = false;
-
-  for (let i = 0; i < line.length; i += 1) {
-    const char = line[i];
-
-    if (char === '"') {
-      if (inQuotes && line[i + 1] === '"') {
-        current += '"';
-        i += 1;
-      } else {
-        inQuotes = !inQuotes;
-      }
-    } else if (char === "," && !inQuotes) {
-      result.push(current.trim());
-      current = "";
-    } else {
-      current += char;
-    }
-  }
-  result.push(current.trim());
-
-  if (typeof expectedLength === "number" && result.length < expectedLength) {
-    while (result.length < expectedLength) {
-      result.push("");
-    }
-  }
-
-  return result;
 }
 
 function applyFiltersAndRender() {
@@ -1585,69 +1210,16 @@ function applyFiltersAndRender() {
   state.filteredRows = rows;
   renderTable();
   updateMeta();
-  updateChartVisibility();
-  renderChart();
+  charts.updateChartVisibility();
+  charts.renderChart();
 }
 
 function sortRows(rows, columnIndex, direction) {
-  const isCodeV3Project = isCodeV3ProjectColumn(columnIndex);
-  const multiplier = direction === "desc" ? -1 : 1;
-  const parseNumber = isCodeV3Project ? parseCodeV3SortKey : parseSortableNumber;
-  const numbers = rows
-    .map((row) => parseNumber(row.cells[columnIndex]))
-    .filter((value) => value !== null);
-  const isMostlyNumeric = isCodeV3Project || numbers.length >= rows.length / 2;
-
-  const sorted = rows.slice().sort((a, b) => {
-    const valueA = a.cells[columnIndex] ?? "";
-    const valueB = b.cells[columnIndex] ?? "";
-
-    if (isMostlyNumeric) {
-      const numA = parseNumber(valueA);
-      const numB = parseNumber(valueB);
-
-      if (numA === null && numB === null) {
-        return state.collator.compare(String(valueA), String(valueB));
-      }
-      if (numA === null) return 1;
-      if (numB === null) return -1;
-      if (isCodeV3Project) return compareCodeV3SortKeys(numA, numB, direction);
-      if (numA === numB) return 0;
-      return numA > numB ? multiplier : -multiplier;
-    }
-
-    return state.collator.compare(String(valueA), String(valueB)) * multiplier;
+  return sortBenchmarkRows(rows, columnIndex, direction, {
+    currentCategory: state.currentCategory,
+    headers: state.headers,
+    collator: state.collator,
   });
-
-  return sorted;
-}
-
-function parseSortableNumber(value) {
-  if (!value) return null;
-  const trimmed = value.trim();
-  if (!trimmed || /^-+$/.test(trimmed)) return null;
-  if (/^\d{2}-\d{2}-\d{2}$/.test(trimmed) || /^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
-    return null;
-  }
-  const normalized = trimmed.replace(/[¥￥,%]/g, "").replace(/[^\d.-]/g, "");
-  if (!normalized || normalized === "-" || normalized === ".") return null;
-  const number = Number(normalized);
-  return Number.isNaN(number) ? null : number;
-}
-
-function isThinkRow(value) {
-  if (value === undefined || value === null) return false;
-  const normalized = String(value).trim().toLowerCase();
-  return normalized === "1" || normalized === "true";
-}
-
-// 模型家族：命名的首个词（短横线或空格分隔），如
-// "GPT-5.5 (xhigh)" → gpt，"Claude Opus 5" → claude，"Kimi-K3 (max)" → kimi
-function getModelFamily(name) {
-  const normalized = String(name || "").trim();
-  if (!normalized) return "";
-  const match = normalized.match(/^[^\s-]+/);
-  return match ? match[0].toLowerCase() : "";
 }
 
 function isMobileViewport() {
@@ -1672,26 +1244,6 @@ function buildHeaderIndexMap(headers) {
 function normalizeCellValue(value) {
   const normalized = String(value ?? "").trim();
   return normalized.length ? normalized : null;
-}
-
-function normalizeHeaderKey(header) {
-  return String(header ?? "").trim().toLowerCase();
-}
-
-function isCodeV3AuxiliaryHeader(header) {
-  return CODE_V3_AUXILIARY_HEADERS.has(normalizeHeaderKey(header));
-}
-
-function isCodeV3ProjectColumn(columnIndex) {
-  if (state.currentCategory !== "code_v3") return false;
-
-  const header = state.headers[columnIndex];
-  return (
-    !isCodeV3AuxiliaryHeader(header) &&
-    !MODEL_HEADER_CANDIDATES.some(
-      (candidate) => normalizeHeaderKey(candidate) === normalizeHeaderKey(header)
-    )
-  );
 }
 
 function getCodeV3PrimaryHeaderIndices(modelColumnIndex = -1) {
@@ -1735,46 +1287,7 @@ function getCodeV3CellBackgroundClass(value) {
 
 function parseCodeV3RankGrade(value) {
   if (state.currentCategory !== "code_v3") return null;
-  const normalized = String(value ?? "").trim();
-  if (!normalized) return null;
-  const match = normalized.match(/^(.+?)\/([ABCD])([+-]?)(?:\(\s*(\d+(?:\.\d+)?)\s*\))?$/i);
-  if (!match) return null;
-  return {
-    rank: match[1].trim(),
-    grade: `${match[2].toUpperCase()}${match[3] || ""}`,
-    gradeBase: match[2].toUpperCase(),
-    priceCny: match[4] || null,
-  };
-}
-
-function parseCodeV3SortKey(value) {
-  const normalized = String(value ?? "").trim();
-  if (/^pass$/i.test(normalized)) return { gradeOrder: 9, errorCount: 0 };
-  if (/^failed/i.test(normalized)) return { gradeOrder: 0, errorCount: 0 };
-
-  const parsed = parseCodeV3RankGrade(normalized);
-  if (parsed) {
-    const errorCount = Number(parsed.rank);
-    if (!Number.isNaN(errorCount)) {
-      return {
-        gradeOrder: CODE_V3_GRADE_ORDER.get(parsed.grade),
-        errorCount,
-      };
-    }
-  }
-
-  const match = normalized.match(/^>?\s*(\d+(?:\.\d+)?)$/);
-  return match ? { gradeOrder: 0.5, errorCount: Number(match[1]) } : null;
-}
-
-function compareCodeV3SortKeys(a, b, direction) {
-  if (a.gradeOrder !== b.gradeOrder) {
-    return (a.gradeOrder - b.gradeOrder) * (direction === "desc" ? -1 : 1);
-  }
-  if (a.errorCount !== b.errorCount) {
-    return (a.errorCount - b.errorCount) * (direction === "desc" ? 1 : -1);
-  }
-  return 0;
+  return parseCodeV3RankGradeValue(value);
 }
 
 function formatCodeV3Price(priceCny) {
@@ -2533,13 +2046,13 @@ function setView(view, { sync = true } = {}) {
     if (elements.trendsCategorySelect) {
       elements.trendsCategorySelect.value = state.trends.category || "";
     }
-    ensureTrendsData().then(renderTrends);
+    ensureTrendsData().then(charts.renderTrends);
   } else {
     if (!state.currentDatasetKey && state.currentCategory) {
       handleCategoryChange(state.currentCategory);
     } else {
-      updateChartVisibility();
-      renderChart();
+      charts.updateChartVisibility();
+      charts.renderChart();
     }
   }
 
@@ -2595,7 +2108,7 @@ async function ensureTrendsData() {
   }
 
   state.trends.loading = true;
-  renderTrendsStatus();
+  charts.renderTrendsStatus();
 
   const config = CATEGORY_CHART_CONFIG[category];
   const entries = state.manifest
@@ -2669,496 +2182,5 @@ function buildTrendsModelList() {
   state.trends.selected = new Set([...state.trends.selected].filter((name) => validNames.has(name)));
   if (!state.trends.selected.size) {
     models.slice(0, TRENDS_DEFAULT_SELECTED).forEach((model) => state.trends.selected.add(model.name));
-  }
-}
-
-function renderTrends() {
-  if (state.view !== "trends" || !elements.trendsSection) return;
-  renderTrendsStatus();
-  if (state.trends.loading) return;
-
-  const hasData = state.trends.months.length > 0;
-  if (elements.modelPicker) {
-    elements.modelPicker.style.display = hasData ? "" : "none";
-  }
-  const chartWrap = elements.trendsCanvas ? elements.trendsCanvas.parentElement : null;
-  if (chartWrap) {
-    chartWrap.style.display = hasData && state.trends.selected.size ? "" : "none";
-  }
-
-  if (!hasData) {
-    if (trendsChartInstance) {
-      trendsChartInstance.destroy();
-      trendsChartInstance = null;
-    }
-    if (elements.trendsCaption) {
-      elements.trendsCaption.textContent = "";
-    }
-    return;
-  }
-
-  renderModelPicker();
-  renderTrendsChart();
-  updateTrendsCaption();
-}
-
-function renderTrendsStatus() {
-  if (!elements.trendsNote) return;
-  const category = state.trends.category;
-  if (state.trends.loading) {
-    elements.trendsNote.textContent = t("trends.loading");
-  } else if (!category || !TRENDS_SUPPORTED.has(category)) {
-    elements.trendsNote.textContent = t("trends.unsupported");
-  } else if (!state.trends.months.length) {
-    elements.trendsNote.textContent = t("trends.empty");
-  } else {
-    elements.trendsNote.textContent = t("trends.note");
-  }
-}
-
-function renderModelPicker() {
-  const picker = elements.modelPicker;
-  if (!picker) return;
-  picker.innerHTML = "";
-  state.trends.models.forEach((model) => {
-    const chip = document.createElement("button");
-    chip.type = "button";
-    chip.className = "chip" + (state.trends.selected.has(model.name) ? " selected" : "");
-    chip.textContent = model.name;
-    chip.addEventListener("click", () => {
-      if (state.trends.selected.has(model.name)) {
-        state.trends.selected.delete(model.name);
-      } else {
-        state.trends.selected.add(model.name);
-      }
-      chip.classList.toggle("selected");
-      renderTrendsChart();
-      const chartWrap = elements.trendsCanvas ? elements.trendsCanvas.parentElement : null;
-      if (chartWrap) {
-        chartWrap.style.display = state.trends.selected.size ? "" : "none";
-      }
-    });
-    picker.appendChild(chip);
-  });
-}
-
-function updateTrendsCaption() {
-  if (!elements.trendsCaption) return;
-  elements.trendsCaption.textContent = state.trends.months.length
-    ? t(`trends.caption.${state.trends.mode}`)
-    : "";
-}
-
-function isDarkThemeActive() {
-  if (state.themeMode === "dark") return true;
-  if (state.themeMode === "light") return false;
-  return prefersDarkQuery ? prefersDarkQuery.matches : false;
-}
-
-function getVisibleTrendMonths(months, selected) {
-  const firstVisibleIndex = months.findIndex((month) =>
-    selected.some((name) => month.ranks.has(name))
-  );
-  return firstVisibleIndex === -1 ? months : months.slice(firstVisibleIndex);
-}
-
-function renderTrendsChart() {
-  if (!elements.trendsCanvas || state.view !== "trends") return;
-  if (state.trends.loading || !state.trends.months.length) return;
-
-  const months = state.trends.months;
-  const selected = [...state.trends.selected];
-  if (!selected.length) {
-    if (trendsChartInstance) {
-      trendsChartInstance.destroy();
-      trendsChartInstance = null;
-    }
-    return;
-  }
-
-  const visibleMonths = getVisibleTrendMonths(months, selected);
-  const mode = state.trends.mode;
-  const palette = isDarkThemeActive() ? SERIES_PALETTE_DARK : SERIES_PALETTE_LIGHT;
-  const colorIndex = new Map(state.trends.models.map((model, index) => [model.name, index]));
-  const labels = visibleMonths.map((month) => month.label);
-
-  const datasets = selected.map((name) => {
-    const color = palette[(colorIndex.get(name) ?? 0) % palette.length];
-    return {
-      label: name,
-      data: visibleMonths.map((month) => {
-        const record = month.ranks.get(name);
-        if (!record) return null;
-        return mode === "rank" ? record.rank : Math.round(record.percentile * 10) / 10;
-      }),
-      borderColor: color,
-      backgroundColor: color,
-      borderWidth: 2,
-      pointRadius: 3,
-      pointHoverRadius: 5,
-      spanGaps: true,
-      tension: 0.25,
-    };
-  });
-
-  const textColor = getCssVariable("--color-text", "#212428");
-  const gridColor = getCssVariable("--color-border", "#e3e1d9");
-  const panelColor = getCssVariable("--color-panel", "#ffffff");
-
-  if (trendsChartInstance) {
-    trendsChartInstance.destroy();
-  }
-
-  trendsChartInstance = new Chart(elements.trendsCanvas.getContext("2d"), {
-    type: "line",
-    data: { labels, datasets },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: { mode: "nearest", intersect: false },
-      layout: { padding: { top: 12, right: 8 } },
-      plugins: {
-        legend: { display: false },
-        trendEndLabels: {
-          display: true,
-          fontSize: 11,
-          backgroundColor: panelColor,
-        },
-        tooltip: {
-          backgroundColor: panelColor,
-          titleColor: textColor,
-          bodyColor: textColor,
-          borderColor: gridColor,
-          borderWidth: 1,
-          callbacks: {
-            label: (context) => {
-              const record = visibleMonths[context.dataIndex].ranks.get(context.dataset.label);
-              if (!record) return context.dataset.label;
-              const rankText = `#${record.rank}/${record.cohortSize}`;
-              const scoreText = `${t("trends.tooltip.score")}: ${record.score}`;
-              return mode === "rank"
-                ? `${context.dataset.label}: ${rankText} (${scoreText})`
-                : `${context.dataset.label}: ${record.percentile.toFixed(1)}% (${rankText})`;
-            },
-          },
-        },
-      },
-      scales: {
-        x: {
-          grid: { color: gridColor },
-          ticks: { color: textColor, font: { size: 11 }, maxRotation: 45, autoSkip: true },
-        },
-        y:
-          mode === "rank"
-            ? {
-                reverse: true,
-                suggestedMin: 1,
-                grace: "8%",
-                grid: { color: gridColor },
-                ticks: {
-                  color: textColor,
-                  font: { size: 11 },
-                  precision: 0,
-                  callback: (value) => (Number.isInteger(value) && value >= 1 ? value : ""),
-                },
-                title: { display: true, text: t("trends.mode.rank"), color: textColor, font: { size: 12 } },
-              }
-            : {
-                min: 0,
-                max: 105,
-                grid: { color: gridColor },
-                ticks: {
-                  color: textColor,
-                  font: { size: 11 },
-                  callback: (value) => (value <= 100 ? `${value}%` : ""),
-                },
-                title: {
-                  display: true,
-                  text: t("trends.mode.percentile"),
-                  color: textColor,
-                  font: { size: 12 },
-                },
-              },
-      },
-    },
-    plugins: [trendEndLabelsPlugin],
-  });
-}
-
-function getCssVariable(name, fallback = "") {
-  if (typeof window === "undefined") return fallback;
-  const value = window.getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-  return value || fallback;
-}
-
-function updateChartVisibility() {
-  if (!elements.chartSection) return;
-
-  const show =
-    state.view === "board" &&
-    !!CATEGORY_CHART_CONFIG[state.currentCategory] &&
-    state.filteredRows.length > 0;
-
-  elements.chartSection.style.display = show ? "block" : "none";
-}
-
-function renderChart() {
-  if (!elements.chartCanvas || !elements.chartSection) return;
-
-  const config = CATEGORY_CHART_CONFIG[state.currentCategory];
-  if (state.view !== "board" || !config || state.filteredRows.length === 0) {
-    if (chartInstance) {
-      chartInstance.destroy();
-      chartInstance = null;
-    }
-    if (elements.chartCaption) {
-      elements.chartCaption.textContent = "";
-    }
-    return;
-  }
-
-  // 使用 CSV 原始列名定位（非翻译后名称）
-  const yAxisType = elements.yAxisSelect ? elements.yAxisSelect.value : "cost";
-  const yAxisColumnName = yAxisType === "cost" ? config.cost : config.time;
-  // 推理类别交换横纵坐标：横轴 = 指标（成本/耗时），纵轴 = 分数
-  const swapped = !!config.swapAxes;
-
-  const scoreLabel = t("chart.axis.medianScore");
-  const metricLabel = yAxisType === "cost" ? t("chart.axis.cost") : t("chart.axis.avgTime");
-
-  let scoreIndex = -1;
-  let metricIndex = -1;
-
-  for (let i = 0; i < state.headers.length; i++) {
-    const header = state.headers[i];
-    if (header === config.score) scoreIndex = i;
-    if (header === yAxisColumnName) metricIndex = i;
-  }
-  const modelIndex = findModelColumnIndex(state.headers);
-
-  if (scoreIndex === -1 || metricIndex === -1 || modelIndex === -1) {
-    if (chartInstance) {
-      chartInstance.destroy();
-      chartInstance = null;
-    }
-    if (elements.chartCaption) {
-      elements.chartCaption.textContent = "";
-    }
-    return;
-  }
-
-  const xAxisIndex = swapped ? metricIndex : scoreIndex;
-  const yAxisIndex = swapped ? scoreIndex : metricIndex;
-  const chartXLabel = swapped ? metricLabel : scoreLabel;
-  const chartYLabel = swapped ? scoreLabel : metricLabel;
-
-  const chartData = state.filteredRows
-    .map((row) => {
-      let xValue = parseSortableNumber(row.cells[xAxisIndex]);
-      let yValue = parseSortableNumber(row.cells[yAxisIndex]);
-      const modelName = row.cells[modelIndex] || "Unknown";
-
-      if (xValue === null || yValue === null) return null;
-      if (yAxisType === "cost" && state.locale === "en-US") {
-        // 货币换算作用于指标值（交换后指标在横轴）
-        if (swapped) {
-          xValue = xValue / CNY_PER_USD;
-        } else {
-          yValue = yValue / CNY_PER_USD;
-        }
-      }
-
-      return {
-        x: xValue,
-        y: yValue,
-        label: modelName,
-        isThink: row.isThink,
-        logoImage: getModelLogoImage(modelName),
-      };
-    })
-    .filter((item) => item !== null);
-
-  if (chartData.length === 0) {
-    if (chartInstance) {
-      chartInstance.destroy();
-      chartInstance = null;
-    }
-    if (elements.chartCaption) {
-      elements.chartCaption.textContent = "";
-    }
-    return;
-  }
-
-  // 指标数值跨度超过一个数量级时启用对数轴（成本常横跨 ¥2–¥207）
-  const metricValues = chartData.map((point) => (swapped ? point.x : point.y));
-  const minMetric = Math.min(...metricValues);
-  const maxMetric = Math.max(...metricValues);
-  const useLogScale = minMetric > 0 && maxMetric / minMetric >= 15;
-
-  const medianX = median(chartData.map((point) => point.x));
-  const medianY = median(chartData.map((point) => point.y));
-  // 性能 × 成本图以 40 分作为固定性能分界；成本分界仍取当月中位数。
-  const quadrantX = yAxisType === "cost" && !swapped ? 40 : medianX;
-  const quadrantY = yAxisType === "cost" && swapped ? 40 : medianY;
-
-  const ctx = elements.chartCanvas.getContext("2d");
-  const chartTextColor = getCssVariable("--color-text", "#212428");
-  const chartGridColor = getCssVariable("--color-border", "#e3e1d9");
-  const chartPanelColor = getCssVariable("--color-panel", "#ffffff");
-  const chartThinkBg = getCssVariable("--color-chart-think-bg", "rgba(158, 59, 50, 0.62)");
-  const chartThinkBorder = getCssVariable("--color-chart-think-border", "rgba(158, 59, 50, 1)");
-  const chartDefaultBg = getCssVariable("--color-chart-default-bg", "rgba(31, 78, 121, 0.58)");
-  const chartDefaultBorder = getCssVariable("--color-chart-default-border", "rgba(31, 78, 121, 1)");
-
-  if (chartInstance) {
-    chartInstance.destroy();
-  }
-
-  chartInstance = new Chart(ctx, {
-    type: "scatter",
-    data: {
-      datasets: [
-        {
-          label: t("chart.dataset.performance"),
-          data: chartData,
-          backgroundColor: (context) => {
-            const point = context.raw;
-            if (point?.logoImage) return "rgba(0, 0, 0, 0)";
-            return point && point.isThink ? chartThinkBg : chartDefaultBg;
-          },
-          borderColor: (context) => {
-            const point = context.raw;
-            if (point?.logoImage) return "rgba(0, 0, 0, 0)";
-            return point && point.isThink ? chartThinkBorder : chartDefaultBorder;
-          },
-          borderWidth: 1.5,
-          pointRadius: (context) => (context.raw?.logoImage ? MODEL_LOGO_POINT_SIZE / 2 : 5),
-          pointHoverRadius: (context) =>
-            context.raw?.logoImage ? MODEL_LOGO_POINT_SIZE / 2 + 2 : 7,
-          pointHitRadius: 4,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: false,
-        },
-        tooltip: {
-          backgroundColor: chartPanelColor,
-          titleColor: chartTextColor,
-          bodyColor: chartTextColor,
-          borderColor: chartGridColor,
-          borderWidth: 1,
-          callbacks: {
-            label: (context) => {
-              const point = context.raw;
-              const metricValue = swapped ? point.x : point.y;
-              const metricText =
-                yAxisType === "cost"
-                  ? state.locale === "en-US"
-                    ? formatUsd(metricValue)
-                    : `¥${metricValue}`
-                  : `${metricValue}`;
-              return [
-                `${t("chart.tooltip.model")}: ${point.label}`,
-                `${chartXLabel}: ${swapped ? metricText : point.x}`,
-                `${chartYLabel}: ${swapped ? point.y : metricText}`,
-              ];
-            },
-          },
-        },
-        quadrants: {
-          medianX: quadrantX,
-          medianY: quadrantY,
-          sweetBg: getCssVariable("--color-chart-quadrant-sweet", "rgba(58, 107, 79, 0.05)"),
-          secondBg:
-            yAxisType === "cost"
-              ? getCssVariable("--color-chart-quadrant-second", "rgba(34, 197, 94, 0.14)")
-              : null,
-          lineColor: getCssVariable("--color-chart-median-line", "rgba(111, 108, 101, 0.75)"),
-          labelColor: getCssVariable("--color-chart-quadrant-label", "rgba(111, 108, 101, 0.9)"),
-          // 交换坐标后象限含义随之旋转：右上↔右下、左上↔左下
-          labels: swapped
-            ? {
-                tr: t(`chart.quad.${yAxisType}.tr`),
-                br: t(`chart.quad.${yAxisType}.tl`),
-                tl: t(`chart.quad.${yAxisType}.br`),
-                bl: t(`chart.quad.${yAxisType}.bl`),
-              }
-            : {
-                tr: t(`chart.quad.${yAxisType}.tr`),
-                br: t(`chart.quad.${yAxisType}.br`),
-                tl: t(`chart.quad.${yAxisType}.tl`),
-                bl: t(`chart.quad.${yAxisType}.bl`),
-              },
-        },
-        pointLabels: {
-          display: true,
-          fontSize: 11,
-          thinkColor: chartThinkBorder,
-          defaultColor: chartDefaultBorder,
-        },
-        modelLogoPoints: {
-          display: true,
-          size: MODEL_LOGO_POINT_SIZE,
-        },
-      },
-      scales: {
-        x: {
-          type: swapped && useLogScale ? "logarithmic" : "linear",
-          suggestedMin: yAxisType === "cost" && !swapped ? 40 : undefined,
-          suggestedMax: yAxisType === "cost" && !swapped ? 40 : undefined,
-          title: {
-            display: true,
-            text: chartXLabel,
-            color: chartTextColor,
-            font: {
-              size: 13,
-              weight: "600",
-            },
-          },
-          grid: {
-            color: chartGridColor,
-          },
-          ticks: {
-            color: chartTextColor,
-            font: {
-              size: 11,
-            },
-          },
-        },
-        y: {
-          type: !swapped && useLogScale ? "logarithmic" : "linear",
-          suggestedMin: yAxisType === "cost" && swapped ? 40 : undefined,
-          suggestedMax: yAxisType === "cost" && swapped ? 40 : undefined,
-          title: {
-            display: true,
-            text: chartYLabel,
-            color: chartTextColor,
-            font: {
-              size: 13,
-              weight: "600",
-            },
-          },
-          grid: {
-            color: chartGridColor,
-          },
-          ticks: {
-            color: chartTextColor,
-            font: {
-              size: 11,
-            },
-          },
-        },
-      },
-    },
-    plugins: [quadrantPlugin, modelLogoPointsPlugin, pointLabelsPlugin],
-  });
-
-  if (elements.chartCaption) {
-    elements.chartCaption.textContent = t(`chart.caption.${yAxisType}`);
   }
 }
