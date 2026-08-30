@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "datasetKey": "code_v3|2026-08|0",
+  "defaultLocale": "zh-CN",
+  "rows": [
+    {
+      "rowId": "Opus 5 (max)",
+      "tasks": [
+        {
+          "taskId": "L",
+          "lines": {
+            "zh-CN": [
+              "+ 主动发挥做了功能丰富的 UI"
+            ],
+            "en-US": [
+              "+ Proactively implemented a feature-rich UI"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "rowId": "GLM-5.3 (max)",
+      "tasks": [
+        {
+          "taskId": "K",
+          "lines": {
+            "zh-CN": [
+              "- 鸿蒙 API 不熟，而且不会主动搜文档"
+            ],
+            "en-US": [
+              "- Not familiar with the HarmonyOS API and won't search for documentation."
+            ]
+          }
+        },
+        {
+          "taskId": "L",
+          "lines": {
+            "zh-CN": [
+              "- 最终无法优化到 60 fps 目标"
+            ],
+            "en-US": [
+              "- Unable to optimize to 60 fps target"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "rowId": "Kimi-K3 (max)",
+      "tasks": [
+        {
+          "taskId": "L",
+          "lines": {
+            "zh-CN": [
+              "- 最终无法优化到 60 fps 目标"
+            ],
+            "en-US": [
+              "- Unable to optimize to 60 fps target"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

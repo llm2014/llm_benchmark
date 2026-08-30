@@ -1,0 +1,17 @@
+Model,Simple Model(H),iOS+Server(I),Animation(J),Data Process(K),Metal(L),Unprompted,Scaffold,Think
+Fable 5 (high),2/A+(90.52),3/A+(103.95),7/A(59.02),Pending,Pending,1,Claude Code,1
+Opus 5 (max),4/A(123.94),1/A+(122.57),12/B+(573.18),16/D(304.84),18/C(233.48),4,Claude Code,1
+GPT-5.6 Sol (max),4/A(63.86),8/A(26.97),23/B(97.98),8/B(770.41),13/C(125.51),3,Codex App,1
+Kimi-K3 (max),6/A(29.59),5/A(43.22),22/B(43.23),28/D+(383.49),25/D(193.42),2,Claude Code,1
+GLM-5.3 (max),8/B+(11.48),7/A(25.25),20/C+(90.76),30/D(83.29),24/D(343.68),0,Claude Code,1
+Qwen3.8-Max (max),11/B(33.16),10/B(50.86),15/B(48.94),Skip,Skip,0,Claude Code,1
+Gemini 3.7 Flash (high),14/B(9.38),8/B(16.84),14/B(14.28),34/D(28.93),Skip,4,OpenCode CLI,1
+Grok 4.6 (high),16/C+(17.67),7/B+(18.69),20/C+(23.19),Skip,Skip,1,Grok Build,1
+GLM-5.3-Flash (max),9/B(2.11),13/B(3.31),Failed,Skip,Skip,0,Claude Code,1
+DeepSeek V4 Pro 0813 (max),14/B(13.46),16/C(12.73),Failed,16/B(18.64),27/D(69.58),0,Claude Code,1
+Muse Spark 1.2 (xhigh),26/C(15.82),11/B(17.76),Failed,Skip,Skip,0,Claude Code,1
+DeepSeek V4 Flash 0731 (max),17/B(7.38),24/D+(4.79),Failed,Failed,Skip,2,Claude Code,1
+Sonnet 5 (high),22/C(154.97),16/C+(72.34),Failed,Skip,Skip,1,Claude Code,1
+Hy3 (high),10/B(2.01),20/C+(13.29),Failed,Failed,Skip,0,Claude Code,1
+GPT-5.6 Luna (max),27/C(3.84),21/C(4.90),Failed,Skip,Skip,0,Codex,1
+MiniMax-M3,Skip,Skip,Skip,Skip,Skip,1,Claude Code,1

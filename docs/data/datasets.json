@@ -128,6 +128,14 @@
       "insights": "data/code_v3/2026-08.insights.json"
     },
     {
+      "category": "code_v3",
+      "reportDate": "2026-09",
+      "tableIndex": 0,
+      "title": "月榜",
+      "csv": "data/code_v3/2026-09.csv",
+      "insights": "data/code_v3/2026-09.insights.json"
+    },
+    {
       "category": "vision",
       "reportDate": "2025-05",
       "tableIndex": 0,
@@ -357,6 +365,13 @@
       "tableIndex": 0,
       "title": "月榜",
       "csv": "data/logic/2026-08.csv"
+    },
+    {
+      "category": "logic",
+      "reportDate": "2026-09",
+      "tableIndex": 0,
+      "title": "月榜",
+      "csv": "data/logic/2026-09.csv"
     }
   ]
 }
