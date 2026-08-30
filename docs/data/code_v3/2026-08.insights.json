@@ -4,6 +4,22 @@
   "defaultLocale": "zh-CN",
   "rows": [
     {
+      "rowId": "Opus 5 (max)",
+      "tasks": [
+        {
+          "taskId": "L",
+          "lines": {
+            "zh-CN": [
+              "+ 主动发挥做了功能丰富的 UI"
+            ],
+            "en-US": [
+              "+ Proactively implemented a feature-rich UI"
+            ]
+          }
+        }
+      ]
+    },
+    {
       "rowId": "GLM-5.3 (max)",
       "tasks": [
         {
