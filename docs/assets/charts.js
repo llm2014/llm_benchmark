@@ -1,11 +1,11 @@
-import { t } from "./i18n.js?v=20260829-codev3-insights";
+import { t } from "./i18n.js?v=20260831-token-efficiency";
 import {
   CATEGORY_CHART_CONFIG,
   CNY_PER_USD,
   TRENDS_SUPPORTED,
   median,
   parseSortableNumber,
-} from "./benchmark-domain.js?v=20260829-codev3-insights";
+} from "./benchmark-domain.js?v=20260831-token-efficiency";
 
 const MODEL_LOGO_POINT_SIZE = 17;
 const SERIES_PALETTE_LIGHT = [
@@ -20,6 +20,11 @@ const SERIES_PALETTE_DARK = [
 function formatUsd(usd) {
   const decimals = Math.abs(usd) >= 1 ? 2 : 3;
   return `$${usd.toFixed(decimals)}`;
+}
+
+function formatTokenTick(value) {
+  const thousands = Number(value) / 1000;
+  return `${Number.isInteger(thousands) ? thousands : thousands.toFixed(1)}K`;
 }
 
 // Chart.js plugin: quadrant backgrounds, median lines, and region labels.
@@ -527,10 +532,20 @@ export function createCharts({
     }
 
     const yAxisType = elements.yAxisSelect ? elements.yAxisSelect.value : "cost";
-    const yAxisColumnName = yAxisType === "cost" ? config.cost : config.time;
+    const metricColumns = {
+      cost: config.cost,
+      time: config.time,
+      token: config.token,
+    };
+    const yAxisColumnName = metricColumns[yAxisType] || config.cost;
     const swapped = !!config.swapAxes;
     const scoreLabel = t("chart.axis.medianScore");
-    const metricLabel = yAxisType === "cost" ? t("chart.axis.cost") : t("chart.axis.avgTime");
+    const metricLabel =
+      yAxisType === "cost"
+        ? t("chart.axis.cost")
+        : yAxisType === "token"
+          ? t("chart.axis.avgTokens")
+          : t("chart.axis.avgTime");
 
     let scoreIndex = -1;
     let metricIndex = -1;
@@ -589,7 +604,8 @@ export function createCharts({
     const metricValues = chartData.map((point) => (swapped ? point.x : point.y));
     const minMetric = Math.min(...metricValues);
     const maxMetric = Math.max(...metricValues);
-    const useLogScale = minMetric > 0 && maxMetric / minMetric >= 15;
+    const useLogScale =
+      yAxisType !== "token" && minMetric > 0 && maxMetric / minMetric >= 15;
     const medianX = median(chartData.map((point) => point.x));
     const medianY = median(chartData.map((point) => point.y));
     const quadrantX = yAxisType === "cost" && !swapped ? 40 : medianX;
@@ -650,7 +666,9 @@ export function createCharts({
                     ? state.locale === "en-US"
                       ? formatUsd(metricValue)
                       : `¥${metricValue}`
-                    : `${metricValue}`;
+                    : yAxisType === "token"
+                      ? Number(metricValue).toLocaleString("en-US")
+                      : `${metricValue}`;
                 return [
                   `${t("chart.tooltip.model")}: ${point.label}`,
                   `${chartXLabel}: ${swapped ? metricText : point.x}`,
@@ -664,7 +682,7 @@ export function createCharts({
             medianY: quadrantY,
             sweetBg: getCssVariable("--color-chart-quadrant-sweet", "rgba(58, 107, 79, 0.05)"),
             secondBg:
-              yAxisType === "cost"
+              yAxisType === "cost" || yAxisType === "token"
                 ? getCssVariable("--color-chart-quadrant-second", "rgba(34, 197, 94, 0.14)")
                 : null,
             lineColor: getCssVariable("--color-chart-median-line", "rgba(111, 108, 101, 0.75)"),
@@ -694,6 +712,7 @@ export function createCharts({
         scales: {
           x: {
             type: swapped && useLogScale ? "logarithmic" : "linear",
+            beginAtZero: yAxisType === "token" && swapped,
             suggestedMin: yAxisType === "cost" && !swapped ? 40 : undefined,
             suggestedMax: yAxisType === "cost" && !swapped ? 40 : undefined,
             title: {
@@ -703,10 +722,16 @@ export function createCharts({
               font: { size: 13, weight: "600" },
             },
             grid: { color: chartGridColor },
-            ticks: { color: chartTextColor, font: { size: 11 } },
+            ticks: {
+              color: chartTextColor,
+              font: { size: 11 },
+              stepSize: yAxisType === "token" && swapped ? 5000 : undefined,
+              callback: yAxisType === "token" && swapped ? formatTokenTick : undefined,
+            },
           },
           y: {
             type: !swapped && useLogScale ? "logarithmic" : "linear",
+            beginAtZero: yAxisType === "token" && !swapped,
             suggestedMin: yAxisType === "cost" && swapped ? 40 : undefined,
             suggestedMax: yAxisType === "cost" && swapped ? 40 : undefined,
             title: {
@@ -716,7 +741,12 @@ export function createCharts({
               font: { size: 13, weight: "600" },
             },
             grid: { color: chartGridColor },
-            ticks: { color: chartTextColor, font: { size: 11 } },
+            ticks: {
+              color: chartTextColor,
+              font: { size: 11 },
+              stepSize: yAxisType === "token" && !swapped ? 5000 : undefined,
+              callback: yAxisType === "token" && !swapped ? formatTokenTick : undefined,
+            },
           },
         },
       },

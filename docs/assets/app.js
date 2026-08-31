@@ -6,7 +6,7 @@ import {
   onLocaleChange,
   setLocale,
   t,
-} from "./i18n.js?v=20260829-codev3-insights";
+} from "./i18n.js?v=20260831-token-efficiency";
 import {
   CATEGORY_CHART_CONFIG,
   CATEGORY_ORDER,
@@ -35,8 +35,8 @@ import {
   parseSortableNumber,
   resolveCodeV3Insight,
   sortRows as sortBenchmarkRows,
-} from "./benchmark-domain.js?v=20260829-codev3-insights";
-import { createCharts } from "./charts.js?v=20260829-codev3-insights";
+} from "./benchmark-domain.js?v=20260831-token-efficiency";
+import { createCharts } from "./charts.js?v=20260831-token-efficiency";
 
 const DATASET_TITLE_KEYS = {
   月榜: "dataset.title.monthly",
@@ -403,18 +403,7 @@ function updateStaticCopy() {
   if (elements.yAxisLabel) {
     updateMetricAxisLabel();
   }
-  if (elements.yAxisSelect) {
-    elements.yAxisSelect.setAttribute("aria-label", t("chart.yAxis.aria"));
-    const currentValue = elements.yAxisSelect.value || "cost";
-    setSelectOptions(
-      elements.yAxisSelect,
-      [
-        { value: "cost", label: t("chart.yAxis.option.cost") },
-        { value: "time", label: t("chart.yAxis.option.time") },
-      ],
-      currentValue
-    );
-  }
+  updateChartMetricOptions();
   if (elements.footerNote) {
     elements.footerNote.textContent = t("footer.note");
   }
@@ -463,6 +452,28 @@ function updateMetricAxisLabel() {
   elements.yAxisLabel.textContent = swapped
     ? t("chart.xAxis.label")
     : t("chart.yAxis.label");
+}
+
+function updateChartMetricOptions() {
+  if (!elements.yAxisSelect) return;
+  const config = state.currentCategory
+    ? CATEGORY_CHART_CONFIG[state.currentCategory]
+    : null;
+  const ariaKey = config?.swapAxes ? "chart.xAxis.aria" : "chart.yAxis.aria";
+  const options = [
+    { value: "cost", label: t("chart.yAxis.option.cost") },
+    { value: "time", label: t("chart.yAxis.option.time") },
+  ];
+  if (config?.token) {
+    options.push({ value: "token", label: t("chart.yAxis.option.token") });
+  }
+
+  elements.yAxisSelect.setAttribute("aria-label", t(ariaKey));
+  setSelectOptions(
+    elements.yAxisSelect,
+    options,
+    elements.yAxisSelect.value || "cost"
+  );
 }
 
 function updateLanguageToggle() {
@@ -1024,6 +1035,7 @@ async function handleCategoryChange(category, options = {}) {
   const { preferredDatasetKey = null } = options;
   state.currentCategory = category;
   updateMetricAxisLabel();
+  updateChartMetricOptions();
   state.currentDatasetKey = null;
   state.currentDatasetDirectory = null;
   elements.datasetSelect.disabled = true;

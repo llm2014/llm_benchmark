@@ -289,6 +289,10 @@ const TRANSLATIONS = {
     "zh-CN": "选择纵轴指标",
     "en-US": "Select Y-axis metric",
   },
+  "chart.xAxis.aria": {
+    "zh-CN": "选择横轴指标",
+    "en-US": "Select X-axis metric",
+  },
   "chart.yAxis.option.cost": {
     "zh-CN": "成本",
     "en-US": "Cost",
@@ -297,6 +301,10 @@ const TRANSLATIONS = {
     "zh-CN": "平均耗时",
     "en-US": "Average Time",
   },
+  "chart.yAxis.option.token": {
+    "zh-CN": "Token 效率",
+    "en-US": "Token Efficiency",
+  },
   "chart.axis.medianScore": {
     "zh-CN": "中位分数",
     "en-US": "Median Score",
@@ -304,6 +312,10 @@ const TRANSLATIONS = {
   "chart.axis.avgTime": {
     "zh-CN": "平均耗时(秒)",
     "en-US": "Average Time (seconds)",
+  },
+  "chart.axis.avgTokens": {
+    "zh-CN": "平均 Token",
+    "en-US": "Average Tokens",
   },
   "chart.tooltip.model": {
     "zh-CN": "模型",
@@ -318,13 +330,18 @@ const TRANSLATIONS = {
     "en-US": "Cost (USD)",
   },
   "chart.caption.cost": {
-    "zh-CN": "图 1. 性能 × 成本象限分布（性能分界固定为 40 分，成本分界为当月中位数）",
+    "zh-CN": "性能 × 成本象限分布（性能分界固定为 40 分，成本分界为当月中位数）",
     "en-US":
-      "Fig. 1. Performance vs. cost quadrants (performance threshold fixed at 40; cost threshold marks the monthly median; CNY converted to USD at 6.9)",
+      "Performance vs. cost quadrants (performance threshold fixed at 40; cost threshold marks the monthly median; CNY converted to USD at 6.9)",
   },
   "chart.caption.time": {
-    "zh-CN": "图 1. 性能 × 耗时象限分布（虚线为当月中位数）",
-    "en-US": "Fig. 1. Performance vs. latency quadrants (dashed lines mark medians)",
+    "zh-CN": "性能 × 耗时象限分布（虚线为当月中位数）",
+    "en-US": "Performance vs. latency quadrants (dashed lines mark medians)",
+  },
+  "chart.caption.token": {
+    "zh-CN": "Token 效率象限分布（虚线为当月中位数）",
+    "en-US":
+      "Token-efficiency quadrants (dashed lines mark medians)",
   },
   "chart.quad.cost.tr": {
     "zh-CN": "高价旗舰",
@@ -357,6 +374,22 @@ const TRANSLATIONS = {
   "chart.quad.time.bl": {
     "zh-CN": "低性能 · 低耗时",
     "en-US": "Light, fast",
+  },
+  "chart.quad.token.tr": {
+    "zh-CN": "高性能 · 高 Token",
+    "en-US": "Strong, token-heavy",
+  },
+  "chart.quad.token.br": {
+    "zh-CN": "Token 高效区",
+    "en-US": "Token efficient",
+  },
+  "chart.quad.token.tl": {
+    "zh-CN": "Token 低效区",
+    "en-US": "Token inefficient",
+  },
+  "chart.quad.token.bl": {
+    "zh-CN": "轻量入门",
+    "en-US": "Lightweight",
   },
   "view.board": {
     "zh-CN": "致知",

@@ -53,6 +53,7 @@ export const CATEGORY_CHART_CONFIG = {
     score: "中位分数",
     cost: "测试成本(元)",
     time: "平均耗时(秒)",
+    token: "Token",
     swapAxes: true,
   },
   vision: {
