@@ -741,6 +741,28 @@ main {
   object-fit: contain;
 }
 
+/* External SVG images do not inherit the page's currentColor. Keep the
+ * monochrome vendor marks legible against the dark table/card background. */
+:root[data-theme="dark"] .model-logo:is(
+  [src$="/anthropic.svg"],
+  [src$="/openai.svg"],
+  [src$="/glm.svg"],
+  [src$="/xai.svg"]
+) {
+  filter: invert(1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) .model-logo:is(
+    [src$="/anthropic.svg"],
+    [src$="/openai.svg"],
+    [src$="/glm.svg"],
+    [src$="/xai.svg"]
+  ) {
+    filter: invert(1);
+  }
+}
+
 .model-name-label {
   min-width: 0;
 }
