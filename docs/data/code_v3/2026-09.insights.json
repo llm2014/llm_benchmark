@@ -61,6 +61,24 @@
           }
         }
       ]
+    },
+    {
+      "rowId": "Qwen3.8-Max-0902 (max)",
+      "tasks": [
+        {
+          "taskId": "J",
+          "lines": {
+            "zh-CN": [
+              "+ 审美改进明显，UI 细致",
+              "- 动画逻辑多处错误"
+            ],
+            "en-US": [
+              "+ Significantly improved aesthetics, refined UI",
+              "- Multiple errors in animation logic"
+            ]
+          }
+        }
+      ]
     }
   ]
 }
