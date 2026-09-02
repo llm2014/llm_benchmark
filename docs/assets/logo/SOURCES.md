@@ -38,11 +38,10 @@ local fallbacks.
 `Dots3-Note Preview` remains without a local logo because Lobe Icons 1.94.0
 does not contain a Dots Studio icon.
 
-`google.svg` and `qwen.svg` have since been replaced with the latest marks
-from the official Google and Qwen websites, normalized to the same 24x24
-(`1em`) format as the Lobe Icons assets, so they no longer map to the slugs
-above. The matching `.png` fallbacks were re-rendered from these SVGs at
-1024x1024 with transparency (the Qwen mark is cropped tight to the artwork).
+`google.svg` and `qwen.svg` are the latest official marks from the Google and
+Qwen websites, normalized to the same 24x24 (`1em`) format as the Lobe Icons
+assets. Their `.png` fallbacks are rendered from these SVGs at 1024x1024 with
+transparency, with the Qwen mark cropped tight to the artwork.
 
 Both logos consist only of simple geometric shapes or text and fall below the
 threshold of originality required for copyright protection in the United
