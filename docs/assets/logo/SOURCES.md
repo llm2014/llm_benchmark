@@ -14,7 +14,6 @@ The local filenames map to these upstream icon slugs:
 | `bytedance.svg` | `bytedance-color` |
 | `deepseek.svg` | `deepseek-color` |
 | `glm.svg` | `zai` |
-| `google.svg` | `google-color` |
 | `huawei.svg` | `huawei-color` |
 | `hy.svg` | `hunyuan-color` |
 | `kimi.svg` | `kimi` |
@@ -25,7 +24,6 @@ The local filenames map to these upstream icon slugs:
 | `minimax.svg` | `minimax-color` |
 | `mistral.svg` | `mistral-color` |
 | `openai.svg` | `openai` |
-| `qwen.svg` | `qwen-color` |
 | `sensetime.svg` | `sensenova-color` |
 | `stepfun.svg` | `stepfun-color` |
 | `tiangong.svg` | `tiangong-color` |
@@ -40,10 +38,14 @@ local fallbacks.
 `Dots3-Note Preview` remains without a local logo because Lobe Icons 1.94.0
 does not contain a Dots Studio icon.
 
-`google.svg` and `qwen.svg` have since been replaced with updated official
-marks, no longer matching the Lobe Icons slugs above: `google.svg` comes from
-[Google Favicon 2025](https://commons.wikimedia.org/wiki/File:Google_Favicon_2025.svg)
-(Wikimedia Commons), and `qwen.svg` uses the updated official Qwen logo SVG.
-Both are normalized to the same 24x24 (`1em`) format as the Lobe Icons assets,
-and the matching `.png` fallbacks were re-rendered from these SVGs at
-1024x1024 with transparency.
+`google.svg` and `qwen.svg` have since been replaced with the latest marks
+from the official Google and Qwen websites, normalized to the same 24x24
+(`1em`) format as the Lobe Icons assets, so they no longer map to the slugs
+above. The matching `.png` fallbacks were re-rendered from these SVGs at
+1024x1024 with transparency (the Qwen mark is cropped tight to the artwork).
+
+Both logos consist only of simple geometric shapes or text and fall below the
+threshold of originality required for copyright protection in the United
+States, so the images themselves are in the public domain. They remain
+trademarked, however: make sure you have the legal right to use them and do
+not infringe any trademark rights before using them.
