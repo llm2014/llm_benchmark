@@ -1,0 +1,227 @@
+{
+  "schemaVersion": 1,
+  "generatedFrom": "data/logic/*.csv",
+  "generatedAt": "2026-09-03",
+  "filters": {
+    "Think": "1"
+  },
+  "categories": {
+    "logic": {
+      "GPT": [
+        "O1 Preview",
+        "O1",
+        "o3 (high)",
+        "GPT-5 (high)",
+        "GPT-5.1 (high)",
+        "GPT-5.2 (high)",
+        "GPT-5.4 (high)",
+        "GPT-5.5 (xhigh)",
+        "GPT-5.6 Sol (xhigh)"
+      ],
+      "GPT Mini": [
+        "O1 mini preview",
+        "o3 mini medium",
+        "o4 mini (high)",
+        "GPT-5 Mini (high)",
+        "GPT-5.4 Mini (high)"
+      ],
+      "GPT Luna": [
+        "GPT-5.6 Luna (xhigh)"
+      ],
+      "GPT OSS 120B": [
+        "gpt-oss-120b (high)"
+      ],
+      "GPT OSS 20B": [
+        "gpt-oss-20b (high)"
+      ],
+      "Gemini Pro": [
+        "Gemini 2.5 Pro 0325",
+        "Gemini 2.5 Pro 0506",
+        "Gemini 3 Pro",
+        "Gemini 3.1 Pro (high)"
+      ],
+      "Gemini Flash": [
+        "Gemini 3.7 Flash (low)"
+      ],
+      "Gemini Flash (reasoning)": [
+        "gemini-2.0-flash-thinking-exp-1219",
+        "gemini-2.0-flash-thinking-exp-0121",
+        "Gemini 2.5 Flash (Think)",
+        "Gemini 2.5 Flash 0520 (Think)",
+        "Gemini 2.5 Flash 0925 (Think)",
+        "Gemini 3 Flash (high)",
+        "Gemini 3.5 Flash (high)",
+        "Gemini 3.6 Flash (high)",
+        "Gemini 3.7 Flash (high)"
+      ],
+      "Gemini Flash Lite": [
+        "Gemini 2.5 Lite 0617 (Think)",
+        "Gemini 3.1 Flash Lite (high)",
+        "Gemini 3.5 Flash Lite (high)"
+      ],
+      "Gemma": [
+        "Gemma 4 31B (Think)",
+        "Gemma 4 31B"
+      ],
+      "Claude Opus": [
+        "Opus 4.6 (Think)",
+        "Opus 4.6 (high)",
+        "Opus 4.8 (xhigh)",
+        "Opus 5 (xhigh)"
+      ],
+      "Claude Sonnet": [
+        "Sonnet 4 (Think)",
+        "Sonnet 4.5 (Think)",
+        "Sonnet 5 (xhigh)"
+      ],
+      "DeepSeek": [
+        "DeepSeek V3.1 (Think)",
+        "DeepSeek V3.2 (Think)",
+        "DeepSeek V3.2-1201 (Think)",
+        "DeepSeek V3.2-Speciale",
+        "DeepSeek R1",
+        "DeepSeek R1 0528",
+        "DeepSeek V4 Pro (max)",
+        "DeepSeek V4 Pro preview (max)",
+        "DeepSeek V4 Pro 0813 (max)"
+      ],
+      "DeepSeek Flash": [
+        "DeepSeek V4 Flash preview (max)",
+        "DeepSeek V4 Flash 0731 (max)"
+      ],
+      "DeepSeek Flash Vision": [
+        "DeepSeek-V4-Flash-Vision-Exp (max)"
+      ],
+      "GLM": [
+        "GLM-4.5 (Think)",
+        "GLM-4.6 (Think)",
+        "GLM-4.7 (Think)",
+        "GLM-5 (Think)",
+        "GLM-5.1 (Think)",
+        "GLM-5.2 (max)",
+        "GLM-5.3 (max)"
+      ],
+      "GLM Air": [
+        "GLM-4.5-Air (Think)"
+      ],
+      "GLM Flash": [
+        "GLM Zero preview",
+        "GLM-Z1-Flash",
+        "GLM-5.3-Flash (max)"
+      ],
+      "Qwen Max": [
+        "Qwen3-Max (Think)",
+        "Qwen3-Max Preview (Think)",
+        "Qwen3-Max 0123 (Think)",
+        "Qwen3.6-Max-Preview (Think)",
+        "Qwen3.7-Max (xhigh)",
+        "Qwen3.8-Max (xhigh)"
+      ],
+      "Qwen Plus": [
+        "Qwen3.5-Plus (Think)",
+        "Qwen3.6-Plus",
+        "Qwen3.6-Plus (Think)",
+        "Qwen3.7-Plus (high)"
+      ],
+      "Qwen 235B": [
+        "Qwen3-235B-A22B (Think)",
+        "Qwen3-235B-A22B-2507 (Think)"
+      ],
+      "Qwen 30B/32B": [
+        "Qwen3-30B-A3B (Think)",
+        "Qwen3-32B (Think)",
+        "Qwen3-30B-A3B-2507 (Think)"
+      ],
+      "Qwen 27B": [
+        "Qwen3.5-27B",
+        "Qwen3.5-27B (Think)",
+        "Qwen3.8-27B (xhigh)"
+      ],
+      "Qwen Flash": [
+        "Qwen3.5-Flash (Think)",
+        "Qwen3.8-Flash (xhigh)"
+      ],
+      "ERNIE": [
+        "ERNIE 5.0",
+        "ERNIE 5.0 Preview",
+        "ERNIE 5.1"
+      ],
+      "ERNIE X1": [
+        "ERNIE X1",
+        "ERNIE X1 Turbo",
+        "ERNIE X1.1"
+      ],
+      "Kimi": [
+        "Kimi k1",
+        "Kimi K1.5",
+        "Kimi-K2-Thinking",
+        "Kimi-K2.5 (Think)",
+        "Kimi-K2.6",
+        "Kimi-K2.6 (Think)",
+        "Kimi-K3 (max)"
+      ],
+      "Grok": [
+        "Grok3 Thinking",
+        "Grok 4",
+        "Grok4 Fast (Think)",
+        "Grok 4.1 Fast (Think)",
+        "Grok 4.20 Beta (Think)",
+        "Grok 4.3",
+        "Grok 4.5 (high)",
+        "Grok 4.6 (high)"
+      ],
+      "Hunyuan": [
+        "hunyuan T1",
+        "hunyuan T1 0403",
+        "Hunyuan T1 0521",
+        "Hunyuan T1 0711",
+        "HY 2.0 Think",
+        "Hy3 Preview",
+        "Hy3 (high)"
+      ],
+      "MiniMax": [
+        "MiniMax-M1",
+        "MiniMax-M2",
+        "MiniMax-M2.1",
+        "MiniMax-M2.5",
+        "MiniMax-M2.7",
+        "MiniMax-M3"
+      ],
+      "Seed": [
+        "Doubao1.5-thinking-pro",
+        "Seed-1.6 (Think)",
+        "Seed-1.6-thinking",
+        "Seed-1.6-thinking-0715",
+        "Seed-1.6 1015 (Think)",
+        "Seed-1.8 (high)",
+        "Seed-1.8 1228 (high)",
+        "Seed-2.0-pro (high)",
+        "Seed-2.1-pro (high)"
+      ],
+      "Spark": [
+        "Spark X1 0725",
+        "Spark X1.5",
+        "Spark X2"
+      ],
+      "Muse Spark": [
+        "Muse Spark 1.1",
+        "Muse Spark 1.2 (xhigh)"
+      ],
+      "Step": [
+        "Step R1 mini",
+        "Step-R1-V-Mini 0606",
+        "Step-3",
+        "Step-3.5-Flash",
+        "Step-3.7-Flash"
+      ],
+      "MiMo": [
+        "MiMo-V2-Flash (Think)",
+        "MiMo-V2-Flash 0112 (Think)",
+        "MiMo-V2-Flash 0204 (Think)",
+        "MiMo-V2-Pro",
+        "MiMo-V2.5",
+        "MiMo-V2.5-Pro"
+      ]
+    }
+  }
+}

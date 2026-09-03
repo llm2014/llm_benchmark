@@ -441,25 +441,33 @@ const TRANSLATIONS = {
   },
   "trends.note": {
     "zh-CN":
-      "说明：评测题目逐月更换，绝对分数不可跨月直接比较；本图展示各模型在当月参评集合中的相对位置（点击上方标签可增删模型）。",
+      "说明：趋势仅收录 Think=1 的模型。评测题目逐月更换，绝对分数不可跨月直接比较；本图展示各模型系列在当月 thinking 模型集合中的相对位置。早期中位分数缺失时，整月使用极限分数排名。曲线节点标注该版本第一次被采用的月份，点击上方标签可增删系列。",
     "en-US":
-      "Note: benchmark questions rotate monthly, so raw scores are not comparable across months. This chart shows each model's relative position within that month's cohort (toggle models via the tags above).",
+      "Note: trends include only models with Think=1. Benchmark questions rotate monthly, so raw scores are not comparable across months. This chart shows each model series' relative position within that month's thinking-model cohort. When early median scores are missing, the whole month is ranked by maximum score. Labeled points mark the first month a version is used; toggle series via the tags above.",
   },
   "trends.caption.percentile": {
-    "zh-CN": "图 2. 当月百分位走势（100 = 当月最佳）",
-    "en-US": "Fig. 2. Monthly percentile trend (100 = best of the month)",
+    "zh-CN": "图 2. 模型系列当月百分位走势（100 = 当月最佳）",
+    "en-US": "Fig. 2. Model-series monthly percentile trend (100 = best of the month)",
   },
   "trends.caption.rank": {
-    "zh-CN": "图 2. 当月名次走势（1 = 当月最佳）",
-    "en-US": "Fig. 2. Monthly rank trend (1 = best of the month)",
+    "zh-CN": "图 2. 模型系列当月名次走势（1 = 当月最佳）",
+    "en-US": "Fig. 2. Model-series monthly rank trend (1 = best of the month)",
   },
   "trends.picker.aria": {
-    "zh-CN": "选择要对比的模型",
-    "en-US": "Select models to compare",
+    "zh-CN": "选择要对比的模型系列",
+    "en-US": "Select model series to compare",
   },
-  "trends.tooltip.score": {
-    "zh-CN": "当月得分",
-    "en-US": "Score",
+  "trends.tooltip.score.median": {
+    "zh-CN": "当月中位分数",
+    "en-US": "Monthly median score",
+  },
+  "trends.tooltip.score.max": {
+    "zh-CN": "当月极限分数",
+    "en-US": "Monthly maximum score",
+  },
+  "trends.tooltip.version": {
+    "zh-CN": "版本",
+    "en-US": "Version",
   },
   "codev3Note.title": {
     "zh-CN": "档位说明",

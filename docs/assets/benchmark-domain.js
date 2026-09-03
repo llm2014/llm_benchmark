@@ -51,6 +51,7 @@ export const HIDDEN_CATEGORIES = new Set(["code"]);
 export const CATEGORY_CHART_CONFIG = {
   logic: {
     score: "中位分数",
+    fallbackScore: "极限分数",
     cost: "测试成本(元)",
     time: "平均耗时(秒)",
     token: "Token",
@@ -58,6 +59,7 @@ export const CATEGORY_CHART_CONFIG = {
   },
   vision: {
     score: "中位分数",
+    fallbackScore: "极限分数",
     cost: "成本",
     time: "平均耗时/s",
     swapAxes: true,
@@ -68,8 +70,6 @@ export const TRENDS_SUPPORTED = new Set(
   Object.keys(CATEGORY_CHART_CONFIG).filter((category) => !HIDDEN_CATEGORIES.has(category))
 );
 
-export const TRENDS_MAX_MONTHS = 18;
-export const TRENDS_RECENT_MONTHS = 6;
 export const TRENDS_DEFAULT_SELECTED = 6;
 export const CNY_PER_USD = 6.9;
 

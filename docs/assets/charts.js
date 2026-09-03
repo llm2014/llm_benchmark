@@ -1,11 +1,11 @@
-import { t } from "./i18n.js?v=20260831-token-efficiency";
+import { t } from "./i18n.js?v=20260903-thinking-series";
 import {
   CATEGORY_CHART_CONFIG,
   CNY_PER_USD,
   TRENDS_SUPPORTED,
   median,
   parseSortableNumber,
-} from "./benchmark-domain.js?v=20260831-token-efficiency";
+} from "./benchmark-domain.js?v=20260903-thinking-series";
 
 const MODEL_LOGO_POINT_SIZE = 17;
 const SERIES_PALETTE_LIGHT = [
@@ -210,7 +210,7 @@ const trendEndLabelsPlugin = {
     const padX = 4;
     const boxH = fontSize + 6;
     const offset = 8;
-    const placed = [];
+    const placed = [...(chart.$trendVersionLabelBoxes || [])];
     const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
     const intersects = (a, b) =>
       a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
@@ -269,6 +269,75 @@ const trendEndLabelsPlugin = {
   },
 };
 
+// Mark the first plotted month for each configured model version in a series.
+const trendVersionLabelsPlugin = {
+  id: "trendVersionLabels",
+  afterDatasetsDraw(chart, args, opts) {
+    chart.$trendVersionLabelBoxes = [];
+    if (!opts || !opts.display) return;
+    const { ctx, chartArea } = chart;
+    if (!chartArea) return;
+
+    const fontSize = opts.fontSize || 10;
+    const padX = 4;
+    const boxH = fontSize + 6;
+    const offset = 8;
+    const placed = [];
+    const intersects = (a, b) =>
+      a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+    const inside = (box) =>
+      box.x >= chartArea.left &&
+      box.x + box.w <= chartArea.right &&
+      box.y >= chartArea.top &&
+      box.y + box.h <= chartArea.bottom;
+
+    ctx.save();
+    ctx.font = `500 ${fontSize}px ${getComputedStyle(document.body).fontFamily}`;
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+
+    chart.data.datasets.forEach((dataset, datasetIndex) => {
+      if (!dataset.members || dataset.members.length < 2) return;
+      const meta = chart.getDatasetMeta(datasetIndex);
+      const records = dataset.records || [];
+      records.forEach((record, pointIndex) => {
+        if (!record?.isVersionStart) return;
+        const element = meta.data[pointIndex];
+        if (!element || element.skip) return;
+
+        const label = record.modelName;
+        const boxW = ctx.measureText(label).width + padX * 2;
+        const candidates = [
+          { x: element.x + offset, y: element.y - boxH - offset },
+          { x: element.x + offset, y: element.y + offset },
+          { x: element.x - boxW - offset, y: element.y - boxH - offset },
+          { x: element.x - boxW - offset, y: element.y + offset },
+        ];
+        const position = candidates.find((candidate) => {
+          const box = { ...candidate, w: boxW, h: boxH };
+          return inside(box) && !placed.some((other) => intersects(box, other));
+        });
+        if (!position) return;
+
+        const box = { ...position, w: boxW, h: boxH };
+        ctx.globalAlpha = 0.94;
+        ctx.fillStyle = opts.backgroundColor || "#fff";
+        ctx.fillRect(box.x, box.y, box.w, box.h);
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = dataset.borderColor;
+        ctx.lineWidth = 1;
+        ctx.strokeRect(box.x, box.y, box.w, box.h);
+        ctx.fillStyle = opts.textColor || dataset.borderColor;
+        ctx.fillText(label, box.x + padX, box.y + boxH / 2);
+        placed.push(box);
+      });
+    });
+
+    chart.$trendVersionLabelBoxes = placed;
+    ctx.restore();
+  },
+};
+
 /**
  * Owns both Chart.js instances and all chart-specific DOM rendering.
  * The mutable application state is injected to avoid a circular import.
@@ -302,7 +371,7 @@ export function createCharts({
       elements.trendsNote.textContent = t("trends.loading");
     } else if (!category || !TRENDS_SUPPORTED.has(category)) {
       elements.trendsNote.textContent = t("trends.unsupported");
-    } else if (!state.trends.months.length) {
+    } else if (!state.trends.months.length || !state.trends.series.length) {
       elements.trendsNote.textContent = t("trends.empty");
     } else {
       elements.trendsNote.textContent = t("trends.note");
@@ -316,11 +385,11 @@ export function createCharts({
       : "";
   }
 
-  function getVisibleTrendMonths(months, selected) {
-    const firstVisibleIndex = months.findIndex((month) =>
-      selected.some((name) => month.ranks.has(name))
+  function getFirstVisibleTrendMonth(months, selectedSeries) {
+    const firstVisibleIndex = months.findIndex((month, monthIndex) =>
+      selectedSeries.some((series) => series.records[monthIndex])
     );
-    return firstVisibleIndex === -1 ? months : months.slice(firstVisibleIndex);
+    return firstVisibleIndex === -1 ? 0 : firstVisibleIndex;
   }
 
   function renderTrendsChart() {
@@ -328,8 +397,11 @@ export function createCharts({
     if (state.trends.loading || !state.trends.months.length) return;
 
     const months = state.trends.months;
-    const selected = [...state.trends.selected];
-    if (!selected.length) {
+    const seriesByName = new Map(state.trends.series.map((series) => [series.name, series]));
+    const selectedSeries = [...state.trends.selected]
+      .map((name) => seriesByName.get(name))
+      .filter(Boolean);
+    if (!selectedSeries.length) {
       if (trendsChartInstance) {
         trendsChartInstance.destroy();
         trendsChartInstance = null;
@@ -337,26 +409,30 @@ export function createCharts({
       return;
     }
 
-    const visibleMonths = getVisibleTrendMonths(months, selected);
+    const firstVisibleIndex = getFirstVisibleTrendMonth(months, selectedSeries);
+    const visibleMonths = months.slice(firstVisibleIndex);
     const mode = state.trends.mode;
     const palette = isDarkThemeActive() ? SERIES_PALETTE_DARK : SERIES_PALETTE_LIGHT;
-    const colorIndex = new Map(state.trends.models.map((model, index) => [model.name, index]));
+    const colorIndex = new Map(state.trends.series.map((series, index) => [series.name, index]));
     const labels = visibleMonths.map((month) => month.label);
 
-    const datasets = selected.map((name) => {
-      const color = palette[(colorIndex.get(name) ?? 0) % palette.length];
+    const datasets = selectedSeries.map((series) => {
+      const color = palette[(colorIndex.get(series.name) ?? 0) % palette.length];
+      const records = series.records.slice(firstVisibleIndex);
       return {
-        label: name,
-        data: visibleMonths.map((month) => {
-          const record = month.ranks.get(name);
+        label: series.name,
+        members: series.members,
+        records,
+        data: records.map((record) => {
           if (!record) return null;
           return mode === "rank" ? record.rank : Math.round(record.percentile * 10) / 10;
         }),
         borderColor: color,
         backgroundColor: color,
         borderWidth: 2,
-        pointRadius: 3,
-        pointHoverRadius: 5,
+        pointRadius: records.map((record) => (record?.isVersionStart ? 4.5 : 2.5)),
+        pointHoverRadius: records.map((record) => (record?.isVersionStart ? 6 : 5)),
+        pointBorderWidth: records.map((record) => (record?.isVersionStart ? 2 : 1)),
         spanGaps: true,
         tension: 0.25,
       };
@@ -385,6 +461,11 @@ export function createCharts({
             fontSize: 11,
             backgroundColor: panelColor,
           },
+          trendVersionLabels: {
+            display: true,
+            fontSize: 10,
+            backgroundColor: panelColor,
+          },
           tooltip: {
             backgroundColor: panelColor,
             titleColor: textColor,
@@ -393,13 +474,23 @@ export function createCharts({
             borderWidth: 1,
             callbacks: {
               label: (context) => {
-                const record = visibleMonths[context.dataIndex].ranks.get(context.dataset.label);
+                const record = context.dataset.records?.[context.dataIndex];
                 if (!record) return context.dataset.label;
                 const rankText = `#${record.rank}/${record.cohortSize}`;
-                const scoreText = `${t("trends.tooltip.score")}: ${record.score}`;
-                return mode === "rank"
-                  ? `${context.dataset.label}: ${rankText} (${scoreText})`
-                  : `${context.dataset.label}: ${record.percentile.toFixed(1)}% (${rankText})`;
+                const scoreLabel =
+                  record.scoreMetric === "极限分数"
+                    ? t("trends.tooltip.score.max")
+                    : t("trends.tooltip.score.median");
+                const scoreText = `${scoreLabel}: ${record.score}`;
+                const valueText =
+                  mode === "rank"
+                    ? `${context.dataset.label}: ${rankText}`
+                    : `${context.dataset.label}: ${record.percentile.toFixed(1)}% (${rankText})`;
+                return [
+                  valueText,
+                  `${t("trends.tooltip.version")}: ${record.modelName}`,
+                  scoreText,
+                ];
               },
             },
           },
@@ -447,7 +538,7 @@ export function createCharts({
                 },
         },
       },
-      plugins: [trendEndLabelsPlugin],
+      plugins: [trendVersionLabelsPlugin, trendEndLabelsPlugin],
     });
   }
 
@@ -455,18 +546,21 @@ export function createCharts({
     const picker = elements.modelPicker;
     if (!picker) return;
     picker.innerHTML = "";
-    state.trends.models.forEach((model) => {
+    state.trends.series.forEach((series) => {
       const chip = document.createElement("button");
       chip.type = "button";
-      chip.className = "chip" + (state.trends.selected.has(model.name) ? " selected" : "");
-      chip.textContent = model.name;
+      chip.className = "chip" + (state.trends.selected.has(series.name) ? " selected" : "");
+      chip.textContent = series.name;
+      chip.title = series.members.join(" → ");
+      chip.setAttribute("aria-pressed", String(state.trends.selected.has(series.name)));
       chip.addEventListener("click", () => {
-        if (state.trends.selected.has(model.name)) {
-          state.trends.selected.delete(model.name);
+        if (state.trends.selected.has(series.name)) {
+          state.trends.selected.delete(series.name);
         } else {
-          state.trends.selected.add(model.name);
+          state.trends.selected.add(series.name);
         }
         chip.classList.toggle("selected");
+        chip.setAttribute("aria-pressed", String(state.trends.selected.has(series.name)));
         renderTrendsChart();
         const chartWrap = elements.trendsCanvas ? elements.trendsCanvas.parentElement : null;
         if (chartWrap) {
@@ -482,7 +576,7 @@ export function createCharts({
     renderTrendsStatus();
     if (state.trends.loading) return;
 
-    const hasData = state.trends.months.length > 0;
+    const hasData = state.trends.months.length > 0 && state.trends.series.length > 0;
     if (elements.modelPicker) {
       elements.modelPicker.style.display = hasData ? "" : "none";
     }

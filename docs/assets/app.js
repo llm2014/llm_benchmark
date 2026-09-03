@@ -6,7 +6,7 @@ import {
   onLocaleChange,
   setLocale,
   t,
-} from "./i18n.js?v=20260831-token-efficiency";
+} from "./i18n.js?v=20260903-thinking-series";
 import {
   CATEGORY_CHART_CONFIG,
   CATEGORY_ORDER,
@@ -17,8 +17,6 @@ import {
   MOBILE_BREAKPOINT_PX,
   MODEL_HEADER_CANDIDATES,
   TRENDS_DEFAULT_SELECTED,
-  TRENDS_MAX_MONTHS,
-  TRENDS_RECENT_MONTHS,
   TRENDS_SUPPORTED,
   buildCodeV3InsightIndex,
   buildDatasetKey,
@@ -35,8 +33,8 @@ import {
   parseSortableNumber,
   resolveCodeV3Insight,
   sortRows as sortBenchmarkRows,
-} from "./benchmark-domain.js?v=20260831-token-efficiency";
-import { createCharts } from "./charts.js?v=20260831-token-efficiency";
+} from "./benchmark-domain.js?v=20260903-thinking-series";
+import { createCharts } from "./charts.js?v=20260903-thinking-series";
 
 const DATASET_TITLE_KEYS = {
   月榜: "dataset.title.monthly",
@@ -67,6 +65,7 @@ const prefersDarkQuery =
     : null;
 
 const MODEL_LOGO_MAP_PATH = "data/model-logo-map.json";
+const MODEL_SERIES_PATH = "data/series.json";
 const VALID_VIEWS = new Set(["board", "trends"]);
 
 // 货币本地化：数据层始终是人民币，仅展示层在英文界面按固定汇率换算。
@@ -187,12 +186,13 @@ const state = {
     matchers: [],
     images: new Map(),
   },
+  modelSeries: {},
   insights: createEmptyCodeV3InsightIndex(),
   trends: {
     category: null,
     mode: "rank",
     months: [],
-    models: [],
+    series: [],
     selected: new Set(),
     loadedCategory: null,
     loading: false,
@@ -708,13 +708,18 @@ async function applyStateFromHash(rawHash = window.location.hash) {
 
 async function init() {
   showPlaceholder(t("placeholders.loadingData"));
-  const [manifest] = await Promise.all([fetchManifest(), loadModelLogoAssets()]);
+  const [manifest, modelSeries] = await Promise.all([
+    fetchManifest(),
+    loadModelSeries(),
+    loadModelLogoAssets(),
+  ]);
   if (!manifest.length) {
     showPlaceholder(t("placeholders.noDatasets"));
     return;
   }
 
   state.manifest = manifest;
+  state.modelSeries = modelSeries;
   renderCategoryNav();
   buildTrendsCategoryOptions();
   bindEventHandlers();
@@ -736,6 +741,43 @@ async function fetchManifest() {
   }
   const payload = await response.json();
   return Array.isArray(payload.datasets) ? payload.datasets : [];
+}
+
+async function loadModelSeries() {
+  try {
+    const response = await fetch(MODEL_SERIES_PATH, { cache: "no-cache" });
+    if (!response.ok) {
+      throw new Error(`Unable to load model series: ${response.status}`);
+    }
+
+    const payload = await response.json();
+    const categories = payload?.categories;
+    if (!categories || typeof categories !== "object" || Array.isArray(categories)) {
+      throw new Error("Model series config must contain a categories object.");
+    }
+
+    const normalized = {};
+    Object.entries(categories).forEach(([category, groups]) => {
+      if (!groups || typeof groups !== "object" || Array.isArray(groups)) return;
+      const claimedModels = new Set();
+      normalized[category] = Object.entries(groups).flatMap(([seriesName, members]) => {
+        const name = String(seriesName || "").trim();
+        if (!name || !Array.isArray(members)) return [];
+        const uniqueMembers = members
+          .map((member) => String(member || "").trim())
+          .filter((member) => {
+            if (!member || claimedModels.has(member)) return false;
+            claimedModels.add(member);
+            return true;
+          });
+        return uniqueMembers.length ? [{ name, members: uniqueMembers }] : [];
+      });
+    });
+    return normalized;
+  } catch (error) {
+    console.warn("Unable to initialize model series; using individual model names.", error);
+    return {};
+  }
 }
 
 async function loadModelLogoAssets() {
@@ -2394,7 +2436,7 @@ async function ensureTrendsData() {
   const category = state.trends.category;
   if (!category || !TRENDS_SUPPORTED.has(category)) {
     state.trends.months = [];
-    state.trends.models = [];
+    state.trends.series = [];
     return;
   }
   if (state.trends.loadedCategory === category && state.trends.months.length) {
@@ -2407,24 +2449,43 @@ async function ensureTrendsData() {
   const config = CATEGORY_CHART_CONFIG[category];
   const entries = state.manifest
     .filter((entry) => entry.category === category && (entry.title === "月榜" || !entry.title))
-    .sort((a, b) => (a.reportDate < b.reportDate ? -1 : a.reportDate > b.reportDate ? 1 : 0))
-    .slice(-TRENDS_MAX_MONTHS);
+    .sort((a, b) => (a.reportDate < b.reportDate ? -1 : a.reportDate > b.reportDate ? 1 : 0));
 
   const months = await Promise.all(
     entries.map(async (entry) => {
       try {
         const { headers, rows } = await fetchCsvDataset(entry.csv);
-        const scoreIndex = headers.indexOf(config.score);
         const modelIndex = findModelColumnIndex(headers);
-        if (scoreIndex === -1 || modelIndex === -1) return null;
+        const thinkIndex = headers.findIndex(
+          (header) => String(header || "").trim().toLowerCase() === "think"
+        );
+        if (modelIndex === -1 || thinkIndex === -1) return null;
+        const thinkingRows = rows.filter((cells) => isThinkRow(cells[thinkIndex]));
+        if (!thinkingRows.length) return null;
 
-        const scored = [];
-        rows.forEach((cells) => {
-          const name = String(cells[modelIndex] || "").trim();
-          const score = parseSortableNumber(cells[scoreIndex]);
-          if (!name || score === null) return;
-          scored.push({ name, score });
-        });
+        const scoreCandidates = [config.score, config.fallbackScore]
+          .filter(Boolean)
+          .filter((header, index, all) => all.indexOf(header) === index)
+          .map((header, priority) => {
+            const scoreIndex = headers.indexOf(header);
+            if (scoreIndex === -1) return null;
+            const scoresByModel = new Map();
+            thinkingRows.forEach((cells) => {
+              const name = String(cells[modelIndex] || "").trim();
+              const score = parseSortableNumber(cells[scoreIndex]);
+              if (!name || score === null || scoresByModel.has(name)) return;
+              scoresByModel.set(name, score);
+            });
+            return {
+              header,
+              priority,
+              scored: [...scoresByModel].map(([name, score]) => ({ name, score })),
+            };
+          })
+          .filter(Boolean)
+          .sort((a, b) => b.scored.length - a.scored.length || a.priority - b.priority);
+        const selectedScores = scoreCandidates[0];
+        const scored = selectedScores?.scored || [];
         if (!scored.length) return null;
 
         scored.sort((a, b) => b.score - a.score);
@@ -2436,10 +2497,16 @@ async function ensureTrendsData() {
             rank: index + 1,
             percentile: n > 1 ? ((n - index - 1) / (n - 1)) * 100 : 100,
             score: item.score,
+            scoreMetric: selectedScores.header,
             cohortSize: n,
           });
         });
-        return { key: entry.reportDate, label: entry.reportDate, ranks };
+        return {
+          key: entry.reportDate,
+          label: entry.reportDate,
+          scoreMetric: selectedScores.header,
+          ranks,
+        };
       } catch (error) {
         console.warn("Trends: skipping", entry.csv, error);
         return null;
@@ -2450,31 +2517,67 @@ async function ensureTrendsData() {
   state.trends.months = months.filter(Boolean);
   state.trends.loadedCategory = category;
   state.trends.loading = false;
-  buildTrendsModelList();
+  buildTrendsSeriesList();
 }
 
-function buildTrendsModelList() {
+function buildTrendsSeriesList() {
   const months = state.trends.months;
-  const latestByModel = new Map();
-  months.forEach((month, monthIndex) => {
-    month.ranks.forEach((value, name) => {
-      const prev = latestByModel.get(name);
-      if (!prev || monthIndex >= prev.monthIndex) {
-        latestByModel.set(name, { monthIndex, percentile: value.percentile });
-      }
-    });
-  });
+  const configuredSeries = state.modelSeries[state.trends.category] || [];
+  const seriesDefinitions = configuredSeries.length
+    ? configuredSeries
+    : buildIndividualModelSeries(months);
 
-  const cutoff = Math.max(0, months.length - TRENDS_RECENT_MONTHS);
-  const models = [...latestByModel.entries()]
-    .filter(([, value]) => value.monthIndex >= cutoff)
-    .map(([name, value]) => ({ name, percentile: value.percentile }))
-    .sort((a, b) => b.percentile - a.percentile);
+  const series = seriesDefinitions
+    .map(({ name, members }) => {
+      const seenVersions = new Set();
+      const records = months.map((month) => {
+        let modelName = null;
+        let rankRecord = null;
+        for (let index = members.length - 1; index >= 0; index -= 1) {
+          const candidate = members[index];
+          const candidateRecord = month.ranks.get(candidate);
+          if (!candidateRecord) continue;
+          modelName = candidate;
+          rankRecord = candidateRecord;
+          break;
+        }
+        if (!rankRecord) return null;
+        const isVersionStart = !seenVersions.has(modelName);
+        seenVersions.add(modelName);
+        return { ...rankRecord, modelName, isVersionStart };
+      });
 
-  state.trends.models = models;
-  const validNames = new Set(models.map((model) => model.name));
+      let latestMonthIndex = records.length - 1;
+      while (latestMonthIndex >= 0 && !records[latestMonthIndex]) latestMonthIndex -= 1;
+      if (latestMonthIndex < 0) return null;
+      return {
+        name,
+        members,
+        records,
+        latestMonthIndex,
+        percentile: records[latestMonthIndex].percentile,
+      };
+    })
+    .filter(Boolean)
+    .sort(
+      (a, b) =>
+        b.latestMonthIndex - a.latestMonthIndex ||
+        b.percentile - a.percentile ||
+        state.collator.compare(a.name, b.name)
+    );
+
+  state.trends.series = series;
+  const validNames = new Set(series.map((item) => item.name));
   state.trends.selected = new Set([...state.trends.selected].filter((name) => validNames.has(name)));
   if (!state.trends.selected.size) {
-    models.slice(0, TRENDS_DEFAULT_SELECTED).forEach((model) => state.trends.selected.add(model.name));
+    series
+      .slice(0, TRENDS_DEFAULT_SELECTED)
+      .forEach((item) => state.trends.selected.add(item.name));
   }
+}
+
+function buildIndividualModelSeries(months) {
+  const names = new Set();
+  months.forEach((month) => month.ranks.forEach((value, name) => names.add(name)));
+  return [...names].map((name) => ({ name, members: [name] }));
 }
