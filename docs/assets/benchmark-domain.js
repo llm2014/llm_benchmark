@@ -19,7 +19,7 @@ export const MODEL_HEADER_CANDIDATES = ["模型", "Model"];
 const CHINA_MODEL_PATTERNS = [
   /[\u4e00-\u9fff]/,
   /^k2(?:\b|[.\s-])/i,
-  /\b(?:baichuan|chatglm|deepseek|doubao|ernie|erine|glm|hunyuan|kat|kimi|ling|longcat|minimax|mimo|openpangu|pangu|qwen|qwn|qvq|qwq|ring|seed|sensechat|sensenova|spark|step|tencent|tiangong|yi|hy)(?=$|[^a-z0-9]|[0-9])/i,
+  /\b(?:baichuan|chatglm|deepseek|doubao|ernie|erine|glm|hunyuan|kat|kimi|ling|longcat|minimax|mimo|openpangu|pangu|qwen|qwn|qvq|qwq|ring|seed|sensechat|sensenova|spark|step|tencent|tiangong|yi|hy|dots)(?=$|[^a-z0-9]|[0-9])/i,
 ];
 
 const US_MODEL_PATTERNS = [
