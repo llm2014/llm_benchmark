@@ -77,6 +77,19 @@
               "- Multiple errors in animation logic"
             ]
           }
+        },
+        {
+          "taskId": "I",
+          "lines": {
+            "zh-CN": [
+              "- 界面上留有大量调试文案",
+              "- UI 设计粗糙"
+            ],
+            "en-US": [
+              "- The UI contains a lot of debugging text",
+              "- The UI design is rough"
+            ]
+          }
         }
       ]
     }
