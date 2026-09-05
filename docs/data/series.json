@@ -16,7 +16,8 @@
         "GPT-5.2 (high)",
         "GPT-5.4 (high)",
         "GPT-5.5 (xhigh)",
-        "GPT-5.6 Sol (xhigh)"
+        "GPT-5.6 Sol (xhigh)",
+        "GPT-6 Astra (xhigh)"
       ],
       "GPT Mini": [
         "O1 mini preview",
