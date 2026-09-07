@@ -104,12 +104,13 @@ export function getDatasetDirectoryFromPath(path) {
 
 export function classifyModelCountry(modelName) {
   const normalizedName = String(modelName || "").trim();
-  if (CHINA_MODEL_PATTERNS.some((pattern) => pattern.test(normalizedName))) {
-    return "china";
-  }
   if (US_MODEL_PATTERNS.some((pattern) => pattern.test(normalizedName))) {
     return "usa";
   }
+  if (CHINA_MODEL_PATTERNS.some((pattern) => pattern.test(normalizedName))) {
+    return "china";
+  }
+  
   return "other";
 }
 
