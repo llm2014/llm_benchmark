@@ -92,6 +92,24 @@
           }
         }
       ]
+    },
+    {
+      "rowId": "GPT-6 Astra (max)",
+      "tasks": [
+        {
+          "taskId": "L",
+          "lines": {
+            "zh-CN": [
+              "+ 性能完全满足要求",
+              "- 复杂组合场景考虑不周"
+            ],
+            "en-US": [
+              "+ Performance fully meets requirements",
+              "- Insufficient consideration of complex combination scenarios"
+            ]
+          }
+        }
+      ]
     }
   ]
 }
