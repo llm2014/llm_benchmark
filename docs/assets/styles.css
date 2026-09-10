@@ -707,6 +707,46 @@ main {
   background-color: var(--color-accent-soft);
 }
 
+.table-container th.simple-delete-header {
+  width: 1%;
+  cursor: default;
+  text-align: center;
+}
+
+.table-container th.simple-delete-header:hover {
+  background-color: transparent;
+}
+
+.simple-delete-cell {
+  width: 1%;
+  text-align: center !important;
+  white-space: nowrap;
+}
+
+.simple-delete-button {
+  appearance: none;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--color-muted);
+  padding: 4px 9px;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.25;
+  cursor: pointer;
+}
+
+.simple-delete-button:hover {
+  border-color: var(--color-status-failed);
+  color: var(--color-status-failed);
+  background: var(--color-status-bg-failed);
+}
+
+.simple-delete-button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
 /* 当前排序列加粗（默认“中位分数”降序） */
 .table-container th.sorted {
   font-weight: 700;
@@ -745,6 +785,7 @@ main {
  * monochrome vendor marks legible against the dark table/card background. */
 :root[data-theme="dark"] .model-logo:is(
   [src$="/anthropic.svg"],
+  [src$="/dots.svg"],
   [src$="/openai.svg"],
   [src$="/glm.svg"],
   [src$="/kimi.svg"],
@@ -756,6 +797,7 @@ main {
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) .model-logo:is(
     [src$="/anthropic.svg"],
+    [src$="/dots.svg"],
     [src$="/openai.svg"],
     [src$="/glm.svg"],
     [src$="/kimi.svg"],
@@ -1346,6 +1388,14 @@ main {
 
 .mobile-card-header .think-badge {
   margin-left: 0;
+  flex-shrink: 0;
+}
+
+.mobile-card-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
   flex-shrink: 0;
 }
 

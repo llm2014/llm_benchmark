@@ -5,8 +5,8 @@
     "csvFiles": 51,
     "uniqueModelNames": 397,
     "versionIndependentPrefixes": 31,
-    "matchedPrefixes": 30,
-    "unmatchedPrefixes": 1
+    "matchedPrefixes": 31,
+    "unmatchedPrefixes": 0
   },
   "matchPolicy": {
     "normalization": "trim and case-insensitive comparison",
@@ -17,6 +17,7 @@
     "Claude": "assets/logo/anthropic.svg",
     "DeepSeek": "assets/logo/deepseek.svg",
     "Doubao": "assets/logo/bytedance.svg",
+    "Dots3": "assets/logo/dots.svg",
     "ERNIE": "assets/logo/baidu.svg",
     "Gemini": "assets/logo/google.svg",
     "Gemma": "assets/logo/google.svg",
@@ -66,7 +67,8 @@
       "豆包"
     ],
     "Dots3": [
-      "Dots3"
+      "Dots3",
+      "Dots"
     ],
     "ERNIE": [
       "ERNIE",
@@ -179,15 +181,5 @@
       "YI"
     ]
   },
-  "unmatched": [
-    {
-      "prefix": "Dots3",
-      "aliases": [
-        "Dots3"
-      ],
-      "models": [
-        "Dots3-Note Preview"
-      ]
-    }
-  ]
+  "unmatched": []
 }

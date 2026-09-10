@@ -1,6 +1,6 @@
 # Logo sources
 
-The SVG assets in this directory were imported from
+Except for `dots.svg`, the SVG assets in this directory were imported from
 [Lobe Icons 1.94.0](https://github.com/lobehub/lobe-icons/tree/v1.94.0),
 licensed under the MIT License in `LOBE_ICONS_LICENSE`.
 
@@ -37,5 +37,7 @@ The local filenames map to these upstream icon slugs:
 equivalent Ling/InclusionAI mark. The original raster assets are retained as
 local fallbacks.
 
-`Dots3-Note Preview` remains without a local logo because Lobe Icons 1.94.0
-does not contain a Dots Studio icon.
+`dots.svg` is a hand-drawn vector recreation of the left-hand Dots Studio
+symbol in the user-provided reference image
+`104101l031urltrcvia06cuh758t000000000009qeugce.png`. It includes only the
+symbol, with a transparent background, and is not sourced from Lobe Icons.

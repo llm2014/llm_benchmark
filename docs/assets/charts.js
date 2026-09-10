@@ -1,4 +1,4 @@
-import { t } from "./i18n.js?v=20260903-thinking-series";
+import { t } from "./i18n.js?v=20260910-simple-mode";
 import {
   CATEGORY_CHART_CONFIG,
   CNY_PER_USD,

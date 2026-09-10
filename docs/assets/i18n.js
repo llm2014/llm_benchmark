@@ -217,6 +217,18 @@ const TRANSLATIONS = {
     "zh-CN": "推理",
     "en-US": "Reasoning",
   },
+  "table.header.actions": {
+    "zh-CN": "操作",
+    "en-US": "Actions",
+  },
+  "table.action.delete": {
+    "zh-CN": "删除",
+    "en-US": "Delete",
+  },
+  "table.action.deleteRow": {
+    "zh-CN": "删除 {{model}}",
+    "en-US": "Delete {{model}}",
+  },
   "table.mobile.moreFields": {
     "zh-CN": "更多字段",
     "en-US": "More fields",
