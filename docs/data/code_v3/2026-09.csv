@@ -10,7 +10,7 @@ Qwen3.8-Max (max),11/B(33.16),10/B(50.86),15/B(48.94),Skip,Skip,0,Claude Code,1
 Gemini 3.7 Flash (high),14/B(9.38),8/B(16.84),14/B(14.28),34/D(28.93),Skip,4,OpenCode CLI,1
 Grok 4.6 (high),16/C+(17.67),7/B+(18.69),20/C+(23.19),Skip,Skip,1,Grok Build,1
 DeepSeek V4.1 Flash (max),12/B(2.79),7/B(2.92),Failed,20/C(5.88),Pending,0,Claude Code,1
-GLM-5.3-Flash (max),9/B(2.11),13/B(3.31),Failed,Skip,Skip,0,Claude Code,1
+GLM-5.3-Flash (max),9/B(4.21),13/B(6.63),Failed,Skip,Skip,0,Claude Code,1
 DeepSeek V4 Pro 0813 (max),14/B(13.46),16/C(12.73),Failed,16/B(18.64),27/D(69.58),0,Claude Code,1
 Muse Spark 1.2 (xhigh),26/C(15.82),11/B(17.76),Failed,Skip,Skip,0,Claude Code,1
 DeepSeek V4 Flash 0731 (max),17/B(3.95),24/D+(2.72),Failed,Failed,Skip,2,Claude Code,1
