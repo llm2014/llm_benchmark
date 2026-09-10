@@ -756,6 +756,31 @@ main {
   font-size: 14px;
 }
 
+/* simple 模式提高表格可读性，并突出中位分数。 */
+.table-container table.simple-mode-table th {
+  font-size: 14.5px;
+}
+
+.table-container table.simple-mode-table td {
+  font-size: 16px;
+}
+
+.table-container table.simple-mode-table td.median-score-cell {
+  font-weight: 700;
+}
+
+.table-container table.simple-mode-table th .sort-indicator {
+  font-size: 13px;
+}
+
+.table-container table.simple-mode-table .simple-delete-button {
+  font-size: 14px;
+}
+
+.table-container table.simple-mode-table .think-badge {
+  font-size: 13px;
+}
+
 .model-name-content {
   display: inline-flex;
   align-items: center;
@@ -763,6 +788,22 @@ main {
   min-width: 0;
   gap: 8px;
   vertical-align: middle;
+}
+
+.model-cell-content {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  min-width: 0;
+  vertical-align: middle;
+}
+
+.model-cell-content .model-name-content {
+  flex: 1 1 auto;
+}
+
+.model-cell-content .think-badge {
+  flex: 0 0 auto;
 }
 
 .model-logo-slot {
@@ -827,6 +868,121 @@ main {
 
 .table-container tbody tr:hover {
   background-color: var(--color-row-hover);
+}
+
+/* 桌面表格使用真实单元格内容的镜像层，完整覆盖原表格边框与间隙。 */
+.cloned-row-lens {
+  position: absolute;
+  z-index: 4;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 8px;
+  background: var(--color-panel);
+  box-shadow:
+    inset 0 0 0 1px var(--color-codev3-hover-ring),
+    0 -9px 22px rgba(20, 28, 36, 0.18),
+    0 14px 34px rgba(20, 28, 36, 0.26);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 70ms ease,
+    visibility 70ms ease;
+}
+
+.cloned-row-lens::after {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--color-accent-soft);
+  pointer-events: none;
+}
+
+.cloned-row-lens.is-visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.cloned-row-lens:not(.cloned-row-lens--agentic) {
+  z-index: 2;
+}
+
+.cloned-row-lens-content {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.cloned-row-lens-cell {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-width: 0;
+  padding: 11px 16px;
+  border: 0;
+  background-clip: border-box;
+  white-space: nowrap;
+}
+
+.cloned-row-lens-cell > .codev3-result {
+  width: 100%;
+}
+
+.cloned-row-lens-cell--center {
+  justify-content: center;
+}
+
+.cloned-row-lens--agentic .cloned-row-lens-cell.codev3-model-column {
+  z-index: 2;
+  background-color: var(--color-panel);
+  overflow: hidden;
+}
+
+/* Agentic 镜像单元格保留独立色块之间的呼吸感。 */
+.cloned-row-lens--agentic .cloned-row-lens-cell {
+  top: 2px;
+  bottom: 2px;
+  border-radius: 2px;
+}
+
+.cloned-row-lens--simple .cloned-row-lens-cell .think-badge {
+  font-size: 13.5px;
+}
+
+.cloned-row-lens--simple .cloned-row-lens-cell .simple-delete-button {
+  font-size: 14.5px;
+}
+
+.cloned-row-lens.family-lit .cloned-row-lens-cell.model-cell::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  margin-top: -4px;
+  border-radius: 50%;
+  background: var(--color-family-dot);
+}
+
+.cloned-row-lens--agentic .cloned-row-lens-cell.codev3-cell--has-insight::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-panel);
+  opacity: 0.7;
 }
 
 .table-container--codev3 th,
@@ -1311,6 +1467,7 @@ main {
 
 .think-badge {
   display: inline-block;
+  vertical-align: middle;
   margin-left: 8px;
   padding: 1px 7px;
   border: 1px solid var(--color-accent);
@@ -2008,6 +2165,10 @@ main {
 
   .codev3-table tbody td::after {
     display: none;
+  }
+
+  .cloned-row-lens {
+    transition: none;
   }
 }
 

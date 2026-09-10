@@ -2060,6 +2060,7 @@ function renderTable() {
   const container = elements.tableContainer;
   hideCodeV3InsightPopover();
   cleanupStickyTableHeader();
+  cleanupRowHoverLens();
   container.innerHTML = "";
   container.classList.remove("mobile-cards");
   container.classList.remove("table-container--codev3");
@@ -2089,6 +2090,9 @@ function renderTable() {
   const costColumnIndex = costHeader ? state.headers.indexOf(costHeader) : -1;
 
   const table = document.createElement("table");
+  if (state.simpleMode) {
+    table.classList.add("simple-mode-table");
+  }
   if (isCodeV3Table) {
     table.classList.add("codev3-table");
     container.classList.add("table-container--codev3");
@@ -2150,6 +2154,9 @@ function renderTable() {
       if (columnIndex === modelColumnIndex) {
         td.classList.add("model-cell");
       }
+      if (String(state.headers[columnIndex] ?? "").trim() === "中位分数") {
+        td.classList.add("median-score-cell");
+      }
       if (columnIndex === costColumnIndex) {
         td.classList.add("cost-cell");
         const costNumber = parseSortableNumber(cell);
@@ -2170,8 +2177,12 @@ function renderTable() {
       if (cellBackgroundClass) {
         td.classList.add(cellBackgroundClass);
       }
+      let modelCellContent = null;
       if (columnIndex === modelColumnIndex) {
-        appendModelNameContent(td, displayValue);
+        modelCellContent = document.createElement("span");
+        modelCellContent.className = "model-cell-content";
+        appendModelNameContent(modelCellContent, displayValue);
+        td.appendChild(modelCellContent);
       } else {
         appendCodeV3ValueContent(td, displayValue);
       }
@@ -2188,7 +2199,7 @@ function renderTable() {
         const badge = document.createElement("span");
         badge.className = "think-badge";
         badge.textContent = t("table.reasoningBadge");
-        td.appendChild(badge);
+        modelCellContent.appendChild(badge);
       }
 
       if (cell && /^\d+(\.\d+)?%$/.test(cell)) {
@@ -2268,7 +2279,142 @@ function renderTable() {
 
   table.appendChild(tbody);
   container.appendChild(table);
+  setupClonedRowLens(tbody, container, isCodeV3Table ? "agentic" : state.currentCategory);
   prepareStickyTableHeader();
+}
+
+function cleanupRowHoverLens() {
+  const wrapper = elements.tableContainer?.closest(".table-wrapper");
+  wrapper
+    ?.querySelectorAll(".cloned-row-lens")
+    .forEach((element) => {
+      if (typeof element.cleanupLens === "function") {
+        element.cleanupLens();
+      }
+      element.remove();
+    });
+}
+
+function setupClonedRowLens(tbody, container, variant) {
+  const wrapper = container.closest(".table-wrapper");
+  if (!wrapper) return;
+
+  const lens = document.createElement("div");
+  lens.className = `cloned-row-lens cloned-row-lens--${variant}`;
+  if (state.simpleMode) {
+    lens.classList.add("cloned-row-lens--simple");
+  }
+  lens.setAttribute("aria-hidden", "true");
+
+  const content = document.createElement("div");
+  content.className = "cloned-row-lens-content";
+  lens.appendChild(content);
+  wrapper.appendChild(lens);
+
+  let activeRow = null;
+  let activeCell = null;
+  let cellPairs = [];
+  const positionLens = () => {
+    if (!activeRow?.isConnected) return;
+
+    const rowRect = activeRow.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+    const wrapperRect = wrapper.getBoundingClientRect();
+    const verticalOverflow = 8;
+    const horizontalCellGap = variant === "agentic" ? 2 : 0;
+    const cellGeometry = cellPairs.map(({ cell, clone }) => ({
+      clone,
+      rect: cell.getBoundingClientRect(),
+    }));
+
+    lens.style.top = `${rowRect.top - wrapperRect.top - verticalOverflow}px`;
+    lens.style.left = `${containerRect.left - wrapperRect.left}px`;
+    lens.style.width = `${containerRect.width}px`;
+    lens.style.height = `${rowRect.height + verticalOverflow * 2}px`;
+
+    cellGeometry.forEach(({ clone, rect }) => {
+      const isAgenticModelColumn =
+        variant === "agentic" && clone.classList.contains("codev3-model-column");
+      const cellGap = isAgenticModelColumn ? horizontalCellGap - 1 : horizontalCellGap;
+      const horizontalOffset = variant === "agentic" && !isAgenticModelColumn ? 1 : 0;
+      clone.style.left = `${rect.left - containerRect.left + horizontalOffset}px`;
+      clone.style.width = `${Math.max(0, rect.width - cellGap)}px`;
+    });
+  };
+
+  const renderLens = () => {
+    if (!activeRow?.isConnected) return;
+
+    lens.classList.toggle("family-lit", activeRow.classList.contains("family-lit"));
+    content.replaceChildren();
+    cellPairs = [];
+
+    activeRow.querySelectorAll("td").forEach((cell) => {
+      const clone = document.createElement("div");
+      clone.className = `cloned-row-lens-cell ${Array.from(cell.classList).join(" ")}`;
+      clone.inert = true;
+
+      const cellStyle = window.getComputedStyle(cell);
+      clone.style.color = cellStyle.color;
+      clone.style.fontFamily = cellStyle.fontFamily;
+      clone.style.fontSize = state.simpleMode
+        ? `${parseFloat(cellStyle.fontSize) + 0.5}px`
+        : cellStyle.fontSize;
+      clone.style.fontWeight = cellStyle.fontWeight;
+      clone.style.paddingLeft = cellStyle.paddingLeft;
+      clone.style.paddingRight = cellStyle.paddingRight;
+      const modelContent = cell.querySelector(".model-cell-content");
+      if (modelContent) {
+        const cellRect = cell.getBoundingClientRect();
+        const modelContentRect = modelContent.getBoundingClientRect();
+        clone.style.paddingLeft = `${modelContentRect.left - cellRect.left}px`;
+      }
+      if (cellStyle.textAlign === "center") {
+        clone.classList.add("cloned-row-lens-cell--center");
+      }
+
+      Array.from(cell.childNodes).forEach((node) => clone.appendChild(node.cloneNode(true)));
+      clone.querySelectorAll("[id]").forEach((element) => element.removeAttribute("id"));
+      clone
+        .querySelectorAll("button, a, input, select, textarea, [tabindex]")
+        .forEach((element) => element.setAttribute("tabindex", "-1"));
+      content.appendChild(clone);
+      cellPairs.push({ cell, clone });
+    });
+
+    positionLens();
+    lens.classList.add("is-visible");
+  };
+
+  const handleMouseOver = (event) => {
+    const row = event.target.closest("tr");
+    const cell = event.target.closest("td");
+    if (!row || !cell || (row === activeRow && cell === activeCell)) return;
+    activeRow = row;
+    activeCell = cell;
+    renderLens();
+  };
+  const handleMouseLeave = () => {
+    activeRow = null;
+    activeCell = null;
+    cellPairs = [];
+    lens.classList.remove("is-visible");
+  };
+  const handleScroll = () => {
+    if (activeRow) positionLens();
+  };
+
+  tbody.addEventListener("mouseover", handleMouseOver);
+  tbody.addEventListener("mouseleave", handleMouseLeave);
+  container.addEventListener("scroll", handleScroll, { passive: true });
+
+  const resizeObserver =
+    typeof ResizeObserver === "function" ? new ResizeObserver(handleScroll) : null;
+  resizeObserver?.observe(container);
+  lens.cleanupLens = () => {
+    container.removeEventListener("scroll", handleScroll);
+    resizeObserver?.disconnect();
+  };
 }
 
 function prepareStickyTableHeader() {
@@ -2430,6 +2576,7 @@ function updateMeta(dataset = null) {
 function showPlaceholder(message) {
   const container = elements.tableContainer;
   cleanupStickyTableHeader();
+  cleanupRowHoverLens();
   container.classList.remove("mobile-cards");
   container.classList.remove("table-container--codev3");
   container.innerHTML = `<div class="placeholder" role="status">${message}</div>`;
