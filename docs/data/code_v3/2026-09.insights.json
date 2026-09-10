@@ -90,6 +90,19 @@
               "- The UI design is rough"
             ]
           }
+        },
+        {
+          "taskId": "K",
+          "lines": {
+            "zh-CN": [
+              "- 无法自主完成关键功能",
+              "- UI 设计粗糙"
+            ],
+            "en-US": [
+              "- Unable to complete key functions independently",
+              "- The UI design is rough"
+            ]
+          }
         }
       ]
     },
