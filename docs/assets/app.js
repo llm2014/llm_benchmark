@@ -67,7 +67,10 @@ const prefersDarkQuery =
 const MODEL_LOGO_MAP_PATH = "data/model-logo-map.json";
 const MODEL_SERIES_PATH = "data/series.json";
 const VALID_VIEWS = new Set(["board", "trends"]);
-const SIMPLE_LOGIC_HIDDEN_HEADERS = new Set(["变更", "价格(元/百万)", "发布时间"]);
+const SIMPLE_HIDDEN_HEADERS_BY_CATEGORY = {
+  logic: new Set(["变更", "价格(元/百万)", "发布时间"]),
+  code_v3: new Set(["unprompted", "scaffold"]),
+};
 const SIMPLE_MODE = new URLSearchParams(window.location.search).has("simple");
 
 // 货币本地化：数据层始终是人民币，仅展示层在英文界面按固定汇率换算。
@@ -1302,7 +1305,7 @@ function applyFiltersAndRender() {
   let rows = state.rows.slice();
   const query = state.searchQuery.toLocaleLowerCase(state.locale);
 
-  if (isSimpleLogicMode() && state.deletedRowKeys.size) {
+  if (isSimpleTableMode() && state.deletedRowKeys.size) {
     rows = rows.filter((row) => !state.deletedRowKeys.has(row.memoryKey));
   }
 
@@ -1351,12 +1354,14 @@ function isMobileViewport() {
   return window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT_PX}px)`).matches;
 }
 
-function isSimpleLogicMode() {
-  return state.simpleMode && state.currentCategory === "logic";
+function isSimpleTableMode() {
+  return state.simpleMode && Boolean(SIMPLE_HIDDEN_HEADERS_BY_CATEGORY[state.currentCategory]);
 }
 
-function isSimpleLogicHiddenHeader(header) {
-  return isSimpleLogicMode() && SIMPLE_LOGIC_HIDDEN_HEADERS.has(header);
+function isSimpleHiddenHeader(header) {
+  const hiddenHeaders = SIMPLE_HIDDEN_HEADERS_BY_CATEGORY[state.currentCategory];
+  if (!state.simpleMode || !hiddenHeaders) return false;
+  return hiddenHeaders.has(String(header ?? "").trim().toLowerCase());
 }
 
 function createSimpleDeleteButton(row, modelColumnIndex) {
@@ -1717,7 +1722,7 @@ function resolveFieldByGroup(row, fieldGroup, headerIndexMap, usedIndices) {
     if (usedIndices.has(index)) continue;
 
     const rawHeader = state.headers[index];
-    if (isSimpleLogicHiddenHeader(rawHeader)) continue;
+    if (isSimpleHiddenHeader(rawHeader)) continue;
 
     const value = normalizeCellValue(row.cells[index]);
     if (!value) continue;
@@ -1740,7 +1745,7 @@ function collectRemainingFields(row, usedIndices) {
 
   state.headers.forEach((header, index) => {
     if (usedIndices.has(index)) return;
-    if (isSimpleLogicHiddenHeader(header)) return;
+    if (isSimpleHiddenHeader(header)) return;
     const value = normalizeCellValue(row.cells[index]);
     if (!value) return;
 
@@ -1888,7 +1893,7 @@ function renderStructuredCardRows(card, row, layout, headerIndexMap, usedIndices
       rowElement.classList.add(rowConfig.className);
     }
 
-    const columns = isSimpleLogicMode()
+    const columns = isSimpleTableMode()
       ? rowMetrics.length
       : Number(rowConfig.columns) || rowMetrics.length || 1;
     const normalizedColumns = Math.max(1, columns);
@@ -1946,7 +1951,7 @@ function createMobileCard(row, layout, headerIndexMap, modelColumnIndex) {
     actions.appendChild(badge);
   }
 
-  if (isSimpleLogicMode()) {
+  if (isSimpleTableMode()) {
     actions.appendChild(createSimpleDeleteButton(row, modelColumnIndex));
   }
 
@@ -1979,7 +1984,7 @@ function createMobileCard(row, layout, headerIndexMap, modelColumnIndex) {
     if (!metrics.length) {
       state.headers.forEach((header, index) => {
         if (metrics.length >= 4 || usedIndices.has(index)) return;
-        if (isSimpleLogicHiddenHeader(header)) return;
+        if (isSimpleHiddenHeader(header)) return;
         const value = normalizeCellValue(row.cells[index]);
         if (!value) return;
         usedIndices.add(index);
@@ -2092,12 +2097,13 @@ function renderTable() {
   const headerRow = document.createElement("tr");
 
   state.headers.forEach((header, index) => {
-    if (isSimpleLogicHiddenHeader(header)) return;
+    if (isSimpleHiddenHeader(header)) return;
     const th = document.createElement("th");
     th.textContent = getHeaderLabel(header);
     if (isCodeV3Table) {
       th.classList.add(index === modelColumnIndex ? "codev3-model-column" : "codev3-fixed-column");
     }
+    th.dataset.sortColumn = String(index);
     th.addEventListener("click", () => toggleSort(index));
 
     const isActive = state.sort.columnIndex === index;
@@ -2115,7 +2121,7 @@ function renderTable() {
     headerRow.appendChild(th);
   });
 
-  if (isSimpleLogicMode()) {
+  if (isSimpleTableMode()) {
     const actionHeader = document.createElement("th");
     actionHeader.className = "simple-delete-header";
     actionHeader.textContent = t("table.header.actions");
@@ -2134,7 +2140,7 @@ function renderTable() {
       tr.dataset.family = family;
     }
     row.cells.forEach((cell, columnIndex) => {
-      if (isSimpleLogicHiddenHeader(state.headers[columnIndex])) return;
+      if (isSimpleHiddenHeader(state.headers[columnIndex])) return;
       const td = document.createElement("td");
       if (isCodeV3Table) {
         td.classList.add(
@@ -2190,7 +2196,7 @@ function renderTable() {
       }
       tr.appendChild(td);
     });
-    if (isSimpleLogicMode()) {
+    if (isSimpleTableMode()) {
       const actionCell = document.createElement("td");
       actionCell.className = "simple-delete-cell";
       actionCell.appendChild(createSimpleDeleteButton(row, modelColumnIndex));
@@ -2281,8 +2287,9 @@ function prepareStickyTableHeader() {
 
   const clonedTable = table.cloneNode(false);
   const clonedHead = thead.cloneNode(true);
-  clonedHead.querySelectorAll("th").forEach((th, index) => {
-    th.addEventListener("click", () => toggleSort(index));
+  clonedHead.querySelectorAll("th[data-sort-column]").forEach((th) => {
+    const columnIndex = Number(th.dataset.sortColumn);
+    th.addEventListener("click", () => toggleSort(columnIndex));
   });
   clonedTable.appendChild(clonedHead);
   viewport.appendChild(clonedTable);
