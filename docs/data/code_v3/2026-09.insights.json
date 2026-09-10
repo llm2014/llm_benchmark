@@ -110,6 +110,46 @@
           }
         }
       ]
+    },
+    {
+      "rowId": "DeepSeek V4.1 Flash (max)",
+      "tasks": [
+        {
+          "taskId": "I",
+          "lines": {
+            "zh-CN": [
+              "- UI 错位",
+              "- 自测不充分，主线功能异常"
+            ],
+            "en-US": [
+              "- UI misalignment",
+              "- Insufficient testing, main feature bug"
+            ]
+          }
+        },
+        {
+          "taskId": "J",
+          "lines": {
+            "zh-CN": [
+              "- 不擅长可视化类任务，充满细节问题"
+            ],
+            "en-US": [
+              "- Not good at visualization tasks, lots of detail issues"
+            ]
+          }
+        },
+        {
+          "taskId": "K",
+          "lines": {
+            "zh-CN": [
+              "- UI 粗糙"
+            ],
+            "en-US": [
+              "- The UI design is rough"
+            ]
+          }
+        }
+      ]
     }
   ]
 }
