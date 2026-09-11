@@ -16,6 +16,19 @@
               "+ Proactively implemented a feature-rich UI"
             ]
           }
+        },
+        {
+          "taskId": "M",
+          "lines": {
+            "zh-CN": [
+              "+ 效果表达准确",
+              "- 交互细节考虑不周"
+            ],
+            "en-US": [
+              "+ The effect is accurately expressed",
+              "- The interaction details are not well considered."
+            ]
+          }
         }
       ]
     },
@@ -41,6 +54,17 @@
             ],
             "en-US": [
               "- Unable to optimize to 60 fps target"
+            ]
+          }
+        },
+        {
+          "taskId": "M",
+          "lines": {
+            "zh-CN": [
+              "- 展示形态不可用"
+            ],
+            "en-US": [
+              "- Unable to design usable display content"
             ]
           }
         }
@@ -103,6 +127,19 @@
               "- The UI design is rough"
             ]
           }
+        },
+        {
+          "taskId": "M",
+          "lines": {
+            "zh-CN": [
+              "- 无法完全遵守细节要求",
+              "- 无法正确处理科学数据细节"
+            ],
+            "en-US": [
+              "- Unable to fully comply with detailed requirements",
+              "- Unable to properly handle details of scientific data"
+            ]
+          }
         }
       ]
     },
@@ -119,6 +156,19 @@
             "en-US": [
               "+ Performance fully meets requirements",
               "- Insufficient consideration of complex combination scenarios"
+            ]
+          }
+        },
+        {
+          "taskId": "M",
+          "lines": {
+            "zh-CN": [
+              "+ 超越一般科普书籍的呈现效果",
+              "+ 生产级的产物"
+            ],
+            "en-US": [
+              "+ Presentation quality surpassing that of typical popular science books",
+              "+ Production-ready product"
             ]
           }
         }

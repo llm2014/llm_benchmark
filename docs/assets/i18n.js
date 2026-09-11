@@ -560,6 +560,10 @@ const TRANSLATIONS = {
     "zh-CN": "L: Metal + 图形算法优化",
     "en-US": "L: Metal + Graphics algorithm optimization",
   },
+  "codev3Note.projectM": {
+    "zh-CN": "M: 科学细节的教学可视化展示",
+    "en-US": "M: Visual presentation of scientific details for teaching",
+  },
   "insight.task": {
     "zh-CN": "任务 {{id}}",
     "en-US": "Task {{id}}",
