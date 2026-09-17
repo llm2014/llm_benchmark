@@ -1014,7 +1014,8 @@ main {
   box-shadow: 1px 0 0 var(--color-border);
 }
 
-.table-container--codev3 td.codev3-model-column .model-name-label {
+.table-container--codev3 td.codev3-model-column .model-name-label,
+.cloned-row-lens--agentic .codev3-model-column .model-name-label {
   overflow: hidden;
   text-overflow: ellipsis;
 }
