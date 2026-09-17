@@ -213,6 +213,48 @@
           }
         }
       ]
+    },
+    {
+      "rowId": "Seed-2.1-Pro 0915 (high)",
+      "tasks": [
+        {
+          "taskId": "I",
+          "lines":{
+            "zh-CN": [
+              "- UI 错位"
+            ],
+            "en-US": [
+              "- UI misalignment"
+            ]
+          }
+        },
+        {
+          "taskId": "J",
+          "lines":{
+            "zh-CN": [
+              "- 不遵循指令",
+              "- 动画细节糟糕"
+            ],
+            "en-US": [
+              "- Not following prompts",
+              "- Poor animation details"
+            ]
+          }
+        },
+        {
+          "taskId": "K",
+          "lines":{
+            "zh-CN": [
+              "+ 自测手段丰富",
+              "- 系统特性不熟悉"
+            ],
+            "en-US": [
+              "+ Various self-testing methods",
+              "- Unfamiliarity with system features"
+            ]
+          }
+        }
+      ]
     }
   ]
 }
