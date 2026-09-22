@@ -255,6 +255,70 @@
           }
         }
       ]
+    },
+    {
+      "rowId": "MiMo-V2.6-Pro (high)",
+      "tasks": [
+        {
+          "taskId": "H",
+          "lines":{
+            "zh-CN": [
+              "- 主线功能异常，过度调试",
+              "- UI 设计粗糙"
+            ],
+            "en-US": [
+              "- Main feature bug, over debugging",
+              "- The UI design is rough"
+            ]
+          }
+        },
+        {
+          "taskId": "I",
+          "lines":{
+            "zh-CN": [
+              "- 主线功能异常"
+            ],
+            "en-US": [
+              "- Main feature bug"
+            ]
+          }
+        },
+        {
+          "taskId": "J",
+          "lines":{
+            "zh-CN": [
+              "- 轻度不遵循指令"
+            ],
+            "en-US": [
+              "- Slightly not following prompts"
+            ]
+          }
+        },
+        {
+          "taskId": "K",
+          "lines":{
+            "zh-CN": [
+              "- 主线功能不可用，无法自主解决"
+            ],
+            "en-US": [
+              "- Main feature is unavailable and cannot be resolved independently"
+            ]
+          }
+        },
+        {
+          "taskId": "M",
+          "lines": {
+            "zh-CN": [
+              "- 无法完全遵守细节要求",
+              "- 无法正确处理科学数据细节"
+            ],
+            "en-US": [
+              "- Unable to fully comply with detailed requirements",
+              "- Unable to properly handle details of scientific data"
+            ]
+          }
+        }
+      ]
     }
   ]
 }
