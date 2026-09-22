@@ -830,6 +830,7 @@ main {
   [src$="/openai.svg"],
   [src$="/glm.svg"],
   [src$="/kimi.svg"],
+  [src$="/mimo.svg"],
   [src$="/xai.svg"]
 ) {
   filter: invert(1);
@@ -842,6 +843,7 @@ main {
     [src$="/openai.svg"],
     [src$="/glm.svg"],
     [src$="/kimi.svg"],
+    [src$="/mimo.svg"],
     [src$="/xai.svg"]
   ) {
     filter: invert(1);
