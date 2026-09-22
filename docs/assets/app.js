@@ -2441,11 +2441,43 @@ function prepareStickyTableHeader() {
   viewport.appendChild(clonedTable);
   stickyHeader.appendChild(viewport);
   scope.prepend(stickyHeader);
+  syncStickyTableHeaderColumnWidths(table, clonedTable);
+
+  const resizeObserver =
+    typeof ResizeObserver === "function"
+      ? new ResizeObserver(() => syncStickyTableHeaderColumnWidths(table, clonedTable))
+      : null;
+  resizeObserver?.observe(table);
+  stickyHeader.cleanupStickyHeader = () => resizeObserver?.disconnect();
   syncStickyTableHeaderScroll();
 }
 
+function syncStickyTableHeaderColumnWidths(sourceTable, clonedTable) {
+  const sourceHeaders = sourceTable.querySelectorAll("thead th");
+  const clonedHeaders = clonedTable.querySelectorAll("thead th");
+  if (!sourceHeaders.length || sourceHeaders.length !== clonedHeaders.length) return;
+
+  const tableWidth = sourceTable.getBoundingClientRect().width;
+  clonedTable.style.width = `${tableWidth}px`;
+  clonedTable.style.minWidth = `${tableWidth}px`;
+
+  sourceHeaders.forEach((sourceHeader, index) => {
+    const width = sourceHeader.getBoundingClientRect().width;
+    const clonedHeader = clonedHeaders[index];
+    clonedHeader.style.boxSizing = "border-box";
+    clonedHeader.style.width = `${width}px`;
+    clonedHeader.style.minWidth = `${width}px`;
+    clonedHeader.style.maxWidth = `${width}px`;
+  });
+}
+
 function cleanupStickyTableHeader() {
-  elements.tableStickyScope?.querySelector(".sticky-table-header")?.remove();
+  const stickyHeader = elements.tableStickyScope?.querySelector(".sticky-table-header");
+  if (!stickyHeader) return;
+  if (typeof stickyHeader.cleanupStickyHeader === "function") {
+    stickyHeader.cleanupStickyHeader();
+  }
+  stickyHeader.remove();
 }
 
 function syncStickyTableHeaderScroll() {

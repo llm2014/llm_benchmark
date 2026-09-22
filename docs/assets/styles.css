@@ -668,6 +668,15 @@ main {
   position: static;
 }
 
+/* Agentic 表头除模型列外统一居中；模型名仍按正文阅读方向左对齐。 */
+.table-container--codev3 thead th {
+  text-align: center;
+}
+
+.table-container--codev3 thead th.codev3-model-column {
+  text-align: left;
+}
+
 .sticky-table-header {
   position: sticky;
   /* 抵消容器边框，让实际 th 在吸顶后恰好位于 viewport 顶部。 */
