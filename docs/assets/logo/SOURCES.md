@@ -14,7 +14,8 @@ The local filenames map to these upstream icon slugs:
 | `bytedance.svg` | `bytedance-color` |
 | `deepseek.svg` | `deepseek-color` |
 | `glm.svg` | `zai` |
-| `google.svg` | `google-color` |
+| `gemma.svg` | `gemma-color` |
+| `google.svg` | `gemini-color` |
 | `huawei.svg` | `huawei-color` |
 | `hy.svg` | `hunyuan-color` |
 | `kimi.svg` | `kimi` |
