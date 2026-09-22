@@ -319,6 +319,33 @@
           }
         }
       ]
+    },
+    {
+      "rowId": "Grok 4.7 (high)",
+      "tasks": [
+        {
+          "taskId": "H",
+          "lines":{
+            "zh-CN": [
+              "- 主线功能异常"
+            ],
+            "en-US": [
+              "- Main feature bug"
+            ]
+          }
+        },
+        {
+          "taskId": "J",
+          "lines":{
+            "zh-CN": [
+              "- 大量动画细节问题"
+            ],
+            "en-US": [
+              "- Lots of animation detail issues"
+            ]
+          }
+        }
+      ]
     }
   ]
 }
