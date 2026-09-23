@@ -17,6 +17,7 @@
         "GPT-5.4 (high)",
         "GPT-5.5 (xhigh)",
         "GPT-5.6 Sol (xhigh)",
+        "GPT-6 Sol (xhigh)",
         "GPT-6 Astra (xhigh)"
       ],
       "GPT Mini": [
@@ -27,7 +28,8 @@
         "GPT-5.4 Mini (high)"
       ],
       "GPT Luna": [
-        "GPT-5.6 Luna (xhigh)"
+        "GPT-5.6 Luna (xhigh)",
+        "GPT-6 Luna (xhigh)"
       ],
       "GPT OSS 120B": [
         "gpt-oss-120b (high)"
