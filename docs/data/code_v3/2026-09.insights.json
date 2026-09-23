@@ -346,6 +346,35 @@
           }
         }
       ]
+    },
+    {
+      "rowId": "GPT-6 Sol (max)",
+      "tasks": [
+        {
+          "taskId": "K",
+          "lines":{
+            "zh-CN": [
+              "- 多处不同源性能问题，闪退等"
+            ],
+            "en-US": [
+              "- Multiple performance issues from different sources, including crashes, etc"
+            ]
+          }
+        },
+        {
+          "taskId": "M",
+          "lines":{
+            "zh-CN": [
+              "+ UI 部分精致，丰富",
+              "- 科学内容粗糙"
+            ],
+            "en-US": [
+              "+ The UI part is polished",
+              "- The scientific content is rough"
+            ]
+          }
+        }
+      ]
     }
   ]
 }
