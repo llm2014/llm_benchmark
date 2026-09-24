@@ -35,6 +35,7 @@ export const CODE_V3_AUXILIARY_HEADERS = new Set([
 ]);
 
 const CODE_V3_GRADE_ORDER = new Map([
+  ["Perfect", 10],
   ["A+", 8],
   ["A", 7],
   ["B+", 6],
@@ -210,6 +211,15 @@ export function isCodeV3ProjectColumn(headers, currentCategory, columnIndex) {
 export function parseCodeV3RankGrade(value) {
   const normalized = String(value ?? "").trim();
   if (!normalized) return null;
+  const perfect = normalized.match(/^Perfect(?:\(\s*(\d+(?:\.\d+)?)\s*\))?$/i);
+  if (perfect) {
+    return {
+      rank: null,
+      grade: "Perfect",
+      gradeBase: "Perfect",
+      priceCny: perfect[1] || null,
+    };
+  }
   const match = normalized.match(/^(.+?)\/([ABCD])([+-]?)(?:\(\s*(\d+(?:\.\d+)?)\s*\))?$/i);
   if (!match) return null;
   return {
@@ -294,7 +304,7 @@ export function parseCodeV3SortKey(value) {
   if (/^failed/i.test(normalized)) return { gradeOrder: 0, errorCount: 0 };
   const parsed = parseCodeV3RankGrade(normalized);
   if (parsed) {
-    const errorCount = Number(parsed.rank);
+    const errorCount = parsed.rank === null ? 0 : Number(parsed.rank);
     if (!Number.isNaN(errorCount)) {
       return {
         gradeOrder: CODE_V3_GRADE_ORDER.get(parsed.grade),

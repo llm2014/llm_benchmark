@@ -65,6 +65,15 @@
   --color-grade-bg-b: rgba(195, 145, 0, 0.38);
   --color-grade-bg-c: rgba(235, 130, 30, 0.26);
   --color-grade-bg-d: rgba(225, 85, 55, 0.24);
+  --color-grade-bg-perfect: linear-gradient(
+    110deg,
+    rgba(243, 91, 112, 0.4),
+    rgba(250, 164, 72, 0.4),
+    rgba(246, 217, 77, 0.4),
+    rgba(74, 190, 144, 0.4),
+    rgba(83, 159, 224, 0.4),
+    rgba(173, 116, 217, 0.4)
+  );
   --color-status-bg-pass: rgba(27, 142, 76, 0.15);
   --color-status-bg-failed: rgba(230, 105, 95, 0.2);
   --color-status-bg-pending: rgba(111, 108, 101, 0.13);
@@ -1792,6 +1801,10 @@ main {
   color: var(--color-grade-d);
 }
 
+.codev3-grade--perfect {
+  color: var(--color-text);
+}
+
 /* 新格式在等级后附带人民币价格；展示层按当前语言添加币种并换算。 */
 .codev3-price {
   margin-left: 0;
@@ -1804,6 +1817,10 @@ main {
 }
 
 /* 档位单元格整格底色 */
+.codev3-cell--perfect {
+  background: var(--color-grade-bg-perfect);
+}
+
 .codev3-cell--a {
   background-color: var(--color-grade-bg-a);
 }
@@ -1833,6 +1850,10 @@ main {
 }
 
 /* 移动端指标块整块底色（覆盖卡片自带底色） */
+.mobile-card-row-metric.codev3-cell--perfect {
+  background: var(--color-grade-bg-perfect);
+}
+
 .mobile-card-row-metric.codev3-cell--a {
   background-color: var(--color-grade-bg-a);
 }
@@ -1937,6 +1958,11 @@ main {
 .table-note .grade-chip--d {
   color: var(--color-grade-d);
   background-color: var(--color-grade-bg-d);
+}
+
+.table-note .grade-chip--perfect {
+  color: var(--color-text);
+  background: var(--color-grade-bg-perfect);
 }
 
 .table-note .grade-chip--failed {

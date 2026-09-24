@@ -485,6 +485,10 @@ const TRANSLATIONS = {
     "zh-CN": "档位说明",
     "en-US": "Grade Guide",
   },
+  "codev3Note.perfect": {
+    "zh-CN": "：完整实现所有要求。",
+    "en-US": ": fully implements all requirements.",
+  },
   "codev3Note.gradeA": {
     "zh-CN": "档：几乎不犯错，只犯微小的 UI、交互类错误。",
     "en-US": "Grade: almost never makes mistakes — only minor UI or interaction errors.",

@@ -6,7 +6,7 @@ import {
   onLocaleChange,
   setLocale,
   t,
-} from "./i18n.js?v=20260910-simple-mode";
+} from "./i18n.js?v=20260924-perfect-grade";
 import {
   CATEGORY_CHART_CONFIG,
   CATEGORY_ORDER,
@@ -33,7 +33,7 @@ import {
   parseSortableNumber,
   resolveCodeV3Insight,
   sortRows as sortBenchmarkRows,
-} from "./benchmark-domain.js?v=20260903-thinking-series";
+} from "./benchmark-domain.js?v=20260924-perfect-grade";
 import { createCharts } from "./charts.js?v=20260910-simple-mode";
 
 const DATASET_TITLE_KEYS = {
@@ -1469,10 +1469,12 @@ function appendCodeV3ValueContent(target, value) {
   const score = document.createElement("span");
   score.className = "codev3-score";
 
-  const rank = document.createElement("span");
-  rank.className = "codev3-rank";
-  rank.textContent = `${parsed.rank}/`;
-  score.appendChild(rank);
+  if (parsed.rank !== null) {
+    const rank = document.createElement("span");
+    rank.className = "codev3-rank";
+    rank.textContent = `${parsed.rank}/`;
+    score.appendChild(rank);
+  }
 
   const grade = document.createElement("span");
   grade.className = `codev3-grade codev3-grade--${parsed.gradeBase.toLowerCase()}`;
@@ -2492,10 +2494,7 @@ function renderTableNote() {
   const isCodeV3 = state.currentCategory === "code_v3" && state.headers.length > 0;
   const hasNewMode = isCodeV3 && state.headers.some((header) => /\(H\)|\(I\)/.test(header));
   const hasGradeValues =
-    isCodeV3 &&
-    state.rows.some((row) =>
-      row.cells.some((cell) => /^.+?\/[ABCD][+-]?$/i.test(String(cell ?? "").trim()))
-    );
+    isCodeV3 && state.rows.some((row) => row.cells.some((cell) => parseCodeV3RankGrade(cell)));
 
   if (!hasNewMode && !hasGradeValues) {
     note.hidden = true;
@@ -2506,6 +2505,7 @@ function renderTableNote() {
   note.hidden = false;
 
   const gradeItems = [
+    ["perfect", t("codev3Note.perfect")],
     ["a", t("codev3Note.gradeA")],
     ["b", t("codev3Note.gradeB")],
     ["c", t("codev3Note.gradeC")],
