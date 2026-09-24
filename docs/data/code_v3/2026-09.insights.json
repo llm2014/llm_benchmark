@@ -375,6 +375,26 @@
           }
         }
       ]
+    },
+    {
+      "rowId": "Opus 5.5 (max)",
+      "tasks": [
+        {
+          "taskId": "M",
+          "lines":{
+            "zh-CN": [
+              "+ 影视级的画面表现",
+              "+ 详细考证，丰富的表现形式",
+              "+ 完美遵循原始要求的各项细节"
+            ],
+            "en-US": [
+              "+ Cinematic-level visual presentation",
+              "+ Detailed research and rich expressive forms",
+              "+ Perfect adherence to every detail of the original prompt"
+            ]
+          }
+        }
+      ]
     }
   ]
 }
