@@ -1,0 +1,400 @@
+{
+  "schemaVersion": 1,
+  "datasetKey": "code_v3|2026-08|0",
+  "defaultLocale": "zh-CN",
+  "rows": [
+    {
+      "rowId": "Opus 5 (max)",
+      "tasks": [
+        {
+          "taskId": "L",
+          "lines": {
+            "zh-CN": [
+              "+ 主动发挥做了功能丰富的 UI"
+            ],
+            "en-US": [
+              "+ Proactively implemented a feature-rich UI"
+            ]
+          }
+        },
+        {
+          "taskId": "M",
+          "lines": {
+            "zh-CN": [
+              "+ 效果表达准确",
+              "- 交互细节考虑不周"
+            ],
+            "en-US": [
+              "+ The effect is accurately expressed",
+              "- The interaction details are not well considered."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "rowId": "GLM-5.3 (max)",
+      "tasks": [
+        {
+          "taskId": "K",
+          "lines": {
+            "zh-CN": [
+              "- 鸿蒙 API 不熟，而且不会主动搜文档"
+            ],
+            "en-US": [
+              "- Not familiar with the HarmonyOS API and won't search for documentation."
+            ]
+          }
+        },
+        {
+          "taskId": "L",
+          "lines": {
+            "zh-CN": [
+              "- 最终无法优化到 60 fps 目标"
+            ],
+            "en-US": [
+              "- Unable to optimize to 60 fps target"
+            ]
+          }
+        },
+        {
+          "taskId": "M",
+          "lines": {
+            "zh-CN": [
+              "- 展示形态不可用"
+            ],
+            "en-US": [
+              "- Unable to design usable display content"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "rowId": "Kimi-K3 (max)",
+      "tasks": [
+        {
+          "taskId": "L",
+          "lines": {
+            "zh-CN": [
+              "- 最终无法优化到 60 fps 目标"
+            ],
+            "en-US": [
+              "- Unable to optimize to 60 fps target"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "rowId": "Qwen3.8-Max-0902 (max)",
+      "tasks": [
+        {
+          "taskId": "J",
+          "lines": {
+            "zh-CN": [
+              "+ 审美改进明显，UI 细致",
+              "- 动画逻辑多处错误"
+            ],
+            "en-US": [
+              "+ Significantly improved aesthetics, refined UI",
+              "- Multiple errors in animation logic"
+            ]
+          }
+        },
+        {
+          "taskId": "I",
+          "lines": {
+            "zh-CN": [
+              "- 界面上留有大量调试文案",
+              "- UI 设计粗糙"
+            ],
+            "en-US": [
+              "- The UI contains a lot of debugging text",
+              "- The UI design is rough"
+            ]
+          }
+        },
+        {
+          "taskId": "K",
+          "lines": {
+            "zh-CN": [
+              "- 无法自主完成关键功能",
+              "- UI 设计粗糙"
+            ],
+            "en-US": [
+              "- Unable to complete key functions independently",
+              "- The UI design is rough"
+            ]
+          }
+        },
+        {
+          "taskId": "M",
+          "lines": {
+            "zh-CN": [
+              "- 无法完全遵守细节要求",
+              "- 无法正确处理科学数据细节"
+            ],
+            "en-US": [
+              "- Unable to fully comply with detailed requirements",
+              "- Unable to properly handle details of scientific data"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "rowId": "GPT-6 Astra (max)",
+      "tasks": [
+        {
+          "taskId": "L",
+          "lines": {
+            "zh-CN": [
+              "+ 性能完全满足要求",
+              "- 复杂组合场景考虑不周"
+            ],
+            "en-US": [
+              "+ Performance fully meets requirements",
+              "- Insufficient consideration of complex combination scenarios"
+            ]
+          }
+        },
+        {
+          "taskId": "M",
+          "lines": {
+            "zh-CN": [
+              "+ 超越一般科普书籍的呈现效果",
+              "+ 生产级的产物"
+            ],
+            "en-US": [
+              "+ Presentation quality surpassing that of typical popular science books",
+              "+ Production-ready product"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "rowId": "DeepSeek V4.1 Flash (max)",
+      "tasks": [
+        {
+          "taskId": "I",
+          "lines": {
+            "zh-CN": [
+              "- UI 错位",
+              "- 自测不充分，主线功能异常"
+            ],
+            "en-US": [
+              "- UI misalignment",
+              "- Insufficient testing, main feature bug"
+            ]
+          }
+        },
+        {
+          "taskId": "J",
+          "lines": {
+            "zh-CN": [
+              "- 不擅长可视化类任务，充满细节问题"
+            ],
+            "en-US": [
+              "- Not good at visualization tasks, lots of detail issues"
+            ]
+          }
+        },
+        {
+          "taskId": "K",
+          "lines": {
+            "zh-CN": [
+              "- UI 粗糙"
+            ],
+            "en-US": [
+              "- The UI design is rough"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "rowId": "Seed-2.1-Pro 0915 (high)",
+      "tasks": [
+        {
+          "taskId": "I",
+          "lines":{
+            "zh-CN": [
+              "- UI 错位"
+            ],
+            "en-US": [
+              "- UI misalignment"
+            ]
+          }
+        },
+        {
+          "taskId": "J",
+          "lines":{
+            "zh-CN": [
+              "- 不遵循指令",
+              "- 动画细节糟糕"
+            ],
+            "en-US": [
+              "- Not following prompts",
+              "- Poor animation details"
+            ]
+          }
+        },
+        {
+          "taskId": "K",
+          "lines":{
+            "zh-CN": [
+              "+ 自测手段丰富",
+              "- 系统特性不熟悉"
+            ],
+            "en-US": [
+              "+ Various self-testing methods",
+              "- Unfamiliarity with system features"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "rowId": "MiMo-V2.6-Pro (high)",
+      "tasks": [
+        {
+          "taskId": "H",
+          "lines":{
+            "zh-CN": [
+              "- 主线功能异常，过度调试",
+              "- UI 设计粗糙"
+            ],
+            "en-US": [
+              "- Main feature bug, over debugging",
+              "- The UI design is rough"
+            ]
+          }
+        },
+        {
+          "taskId": "I",
+          "lines":{
+            "zh-CN": [
+              "- 主线功能异常"
+            ],
+            "en-US": [
+              "- Main feature bug"
+            ]
+          }
+        },
+        {
+          "taskId": "J",
+          "lines":{
+            "zh-CN": [
+              "- 轻度不遵循指令"
+            ],
+            "en-US": [
+              "- Slightly not following prompts"
+            ]
+          }
+        },
+        {
+          "taskId": "K",
+          "lines":{
+            "zh-CN": [
+              "- 主线功能不可用，无法自主解决"
+            ],
+            "en-US": [
+              "- Main feature is unavailable and cannot be resolved independently"
+            ]
+          }
+        },
+        {
+          "taskId": "M",
+          "lines": {
+            "zh-CN": [
+              "- 无法完全遵守细节要求",
+              "- 无法正确处理科学数据细节"
+            ],
+            "en-US": [
+              "- Unable to fully comply with detailed requirements",
+              "- Unable to properly handle details of scientific data"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "rowId": "Grok 4.7 (high)",
+      "tasks": [
+        {
+          "taskId": "H",
+          "lines":{
+            "zh-CN": [
+              "- 主线功能异常"
+            ],
+            "en-US": [
+              "- Main feature bug"
+            ]
+          }
+        },
+        {
+          "taskId": "J",
+          "lines":{
+            "zh-CN": [
+              "- 大量动画细节问题"
+            ],
+            "en-US": [
+              "- Lots of animation detail issues"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "rowId": "GPT-6 Sol (max)",
+      "tasks": [
+        {
+          "taskId": "K",
+          "lines":{
+            "zh-CN": [
+              "- 多处不同源性能问题，闪退等"
+            ],
+            "en-US": [
+              "- Multiple performance issues from different sources, including crashes, etc"
+            ]
+          }
+        },
+        {
+          "taskId": "M",
+          "lines":{
+            "zh-CN": [
+              "+ UI 部分精致，丰富",
+              "- 科学内容粗糙"
+            ],
+            "en-US": [
+              "+ The UI part is polished",
+              "- The scientific content is rough"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "rowId": "Opus 5.5 (max)",
+      "tasks": [
+        {
+          "taskId": "M",
+          "lines":{
+            "zh-CN": [
+              "+ 影视级的画面表现",
+              "+ 详细考证，丰富的表现形式",
+              "+ 完美遵循原始要求的各项细节"
+            ],
+            "en-US": [
+              "+ Cinematic-level visual presentation",
+              "+ Detailed research and rich expressive forms",
+              "+ Perfect adherence to every detail of the original prompt"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
