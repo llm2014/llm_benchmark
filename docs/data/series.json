@@ -81,6 +81,11 @@
         "Sonnet 5 (xhigh)",
         "Sonnet 5.5 (xhigh)"
       ],
+      "Mistral": [
+        "Magistral Medium 2506 (Think)",
+        "Mistral Medium 3.5",
+        "Mistral Large 4 (high)"
+      ],
       "DeepSeek": [
         "DeepSeek V3.1 (Think)",
         "DeepSeek V3.2 (Think)",
