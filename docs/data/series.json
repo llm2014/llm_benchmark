@@ -32,12 +32,6 @@
         "GPT-5.6 Luna (xhigh)",
         "GPT-6 Luna (xhigh)"
       ],
-      "GPT OSS 120B": [
-        "gpt-oss-120b (high)"
-      ],
-      "GPT OSS 20B": [
-        "gpt-oss-20b (high)"
-      ],
       "Gemini Pro": [
         "Gemini 2.5 Pro 0325",
         "Gemini 2.5 Pro 0506",
@@ -45,9 +39,6 @@
         "Gemini 3.1 Pro (high)"
       ],
       "Gemini Flash": [
-        "Gemini 3.7 Flash (low)"
-      ],
-      "Gemini Flash (reasoning)": [
         "gemini-2.0-flash-thinking-exp-1219",
         "gemini-2.0-flash-thinking-exp-0121",
         "Gemini 2.5 Flash (Think)",
@@ -112,14 +103,6 @@
         "GLM-5.2 (max)",
         "GLM-5.3 (max)"
       ],
-      "GLM Air": [
-        "GLM-4.5-Air (Think)"
-      ],
-      "GLM Flash": [
-        "GLM Zero preview",
-        "GLM-Z1-Flash",
-        "GLM-5.3-Flash (max)"
-      ],
       "Qwen Max": [
         "Qwen3-Max (Think)",
         "Qwen3-Max Preview (Think)",
@@ -134,33 +117,18 @@
         "Qwen3.6-Plus (Think)",
         "Qwen3.7-Plus (high)"
       ],
-      "Qwen 235B": [
-        "Qwen3-235B-A22B (Think)",
-        "Qwen3-235B-A22B-2507 (Think)"
-      ],
-      "Qwen 30B/32B": [
-        "Qwen3-30B-A3B (Think)",
-        "Qwen3-32B (Think)",
-        "Qwen3-30B-A3B-2507 (Think)"
-      ],
       "Qwen 27B": [
         "Qwen3.5-27B",
         "Qwen3.5-27B (Think)",
         "Qwen3.8-27B (xhigh)"
       ],
-      "Qwen Flash": [
-        "Qwen3.5-Flash (Think)",
-        "Qwen3.8-Flash (xhigh)"
-      ],
       "ERNIE": [
+        "ERNIE X1",
+        "ERNIE X1 Turbo",
+        "ERNIE X1.1",
         "ERNIE 5.0",
         "ERNIE 5.0 Preview",
         "ERNIE 5.1"
-      ],
-      "ERNIE X1": [
-        "ERNIE X1",
-        "ERNIE X1 Turbo",
-        "ERNIE X1.1"
       ],
       "Kimi": [
         "Kimi k1",
