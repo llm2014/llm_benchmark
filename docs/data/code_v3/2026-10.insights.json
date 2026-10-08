@@ -395,6 +395,33 @@
           }
         }
       ]
+    },
+    {
+      "rowId": "Haiku 5.5 (xhigh)",
+      "tasks": [
+        {
+          "taskId": "H",
+          "lines":{
+            "zh-CN":[
+              "- 效果粗糙，细节潦草"
+            ],
+            "en-US":[
+              "- The results are poorly presented and the details are sloppy"
+            ]
+          }
+        },
+        {
+          "taskId": "K",
+          "lines":{
+            "zh-CN":[
+              "- 修复 Bug 会改坏其他功能"
+            ],
+            "en-US":[
+              "- Fixing bugs may break other features"
+            ]
+          }
+        }
+      ]
     }
   ]
 }

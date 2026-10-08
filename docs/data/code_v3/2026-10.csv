@@ -11,6 +11,7 @@ Qwen3.8-Max-0902 (max),8/B(28.26),7/A(109.76),21/C(102.71),13/D(211.18),Skip,26/
 Gemini 3.7 Flash (high),14/B(9.38),8/B(16.84),14/B(14.28),34/D(28.93),Skip,Skip,4,OpenCode CLI,1
 MiMo-V2.6-Pro (high),16/C(10.11),5/B+(1.55),14/B(7.23),Failed,Skip,Failed,0,Claude Code,1
 DeepSeek V4.1 Flash (max),12/B(2.79),7/B(2.92),Failed,20/C(5.88),Skip,Skip,0,Claude Code,1
+Haiku 5.5 (xhigh),14/B(9.36),1/A+(18.81),Failed,28/D+(24.43),Skip,Skip,0,Claude Code,1
 Seed-2.1-Pro 0915 (high),11/B(20.89),5/A(50.68),Failed,30/D(71.77),Skip,Skip,0,Claude Code,1
 GLM-5.3-Flash (max),9/B(4.21),13/B(6.63),Failed,Skip,Skip,Skip,0,Claude Code,1
 Muse Spark 1.2 (xhigh),26/C(15.82),11/B(17.76),Failed,Skip,Skip,Skip,0,Claude Code,1
