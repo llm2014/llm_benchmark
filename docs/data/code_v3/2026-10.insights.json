@@ -422,6 +422,50 @@
           }
         }
       ]
+    },
+    {
+      "rowId": "Gemini 4 Argon (high)",
+      "tasks": [
+        {
+          "taskId": "H",
+          "lines":{
+            "zh-CN":[
+              "+ 高效验证",
+              "- 模型纹理粗糙"
+            ],
+            "en-US":[
+              "+ Efficient verification",
+              "- Coarse model textures"  
+            ]
+          }
+        },
+        {
+          "taskId": "J",
+          "lines":{
+            "zh-CN":[
+              "+ 高效验证",
+              "- 动画细节错误较多"
+            ],
+            "en-US":[
+              "+ Efficient verification",
+              "- Numerous errors in animation details"
+            ]
+          }
+        },
+        {
+          "taskId": "L",
+          "lines":{
+            "zh-CN":[
+              "+ 关键性能部分一次到位",
+              "- UI 细节不讲究"
+            ],
+            "en-US":[
+              "+ Key performance meets all requirements at once",
+              "- Bad UI details"
+            ]
+          }
+        }
+      ]
     }
   ]
 }
