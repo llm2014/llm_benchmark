@@ -568,6 +568,10 @@ const TRANSLATIONS = {
     "zh-CN": "M: 科学细节的教学可视化展示",
     "en-US": "M: Visual presentation of scientific details for teaching",
   },
+  "codev3Note.projectN":{
+    "zh-CN": "N: Rust 桌面 App",
+    "en-US": "N: Rust Desktop App"
+  },
   "insight.task": {
     "zh-CN": "任务 {{id}}",
     "en-US": "Task {{id}}",

@@ -2527,15 +2527,16 @@ function renderTableNote() {
   const projectGuide = hasNewMode
     ? [
         `<h3>${t("codev3Note.projectsTitle")}</h3>`,
-        `<p>${t("codev3Note.projectC")}</p>`,
-        `<p>${t("codev3Note.projectE")}</p>`,
-        `<p>${t("codev3Note.projectF")}</p>`,
+        `<p>${t("codev3Note.projectC")} (Deprecated)</p>`,
+        `<p>${t("codev3Note.projectE")} (Deprecated)</p>`,
+        `<p>${t("codev3Note.projectF")} (Deprecated)</p>`,
         `<p>${t("codev3Note.projectH")}</p>`,
-        `<p>${t("codev3Note.projectI")}</p>`,
+        `<p>${t("codev3Note.projectI")} (Deprecated)</p>`,
         `<p>${t("codev3Note.projectJ")}</p>`,
         `<p>${t("codev3Note.projectK")}</p>`,
         `<p>${t("codev3Note.projectL")}</p>`,
         `<p>${t("codev3Note.projectM")}</p>`,
+        `<p>${t("codev3Note.projectN")}</p>`,
       ].join("")
     : "";
 
