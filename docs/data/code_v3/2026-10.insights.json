@@ -466,6 +466,48 @@
           }
         }
       ]
+    },
+    {
+      "rowId": "DeepSeek V4.1 Flash 1017 (max)",
+      "tasks": [
+        {
+          "taskId": "H",
+          "lines":{
+            "zh-CN":[
+              "+ 优秀外围 UI",
+              "+ 模型纹理精致"
+            ],
+            "en-US":[
+              "+ Excellent UI",
+              "+ Exquisite model textures"
+            ]
+          }
+        },
+        {
+          "taskId": "L",
+          "lines":{
+            "zh-CN":[
+              "+ 优秀外围 UI",
+              "- 核心功能需要多轮打磨"
+            ],
+            "en-US":[
+              "+ Excellent UI",
+              "- Core features require multiple rounds of refinement"
+            ]
+          }
+        },
+        {
+          "taskId": "M",
+          "lines":{
+            "zh-CN":[
+              "- 大量细节错误"
+            ],
+            "en-US":[
+              "- Numerous detail errors"
+            ]
+          }
+        }
+      ]
     }
   ]
 }
