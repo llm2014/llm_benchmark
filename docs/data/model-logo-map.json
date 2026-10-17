@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generatedFrom": "data/**/*.csv",
   "scanSummary": {
-    "csvFiles": 51,
-    "uniqueModelNames": 397,
+    "csvFiles": 55,
+    "uniqueModelNames": 431,
     "versionIndependentPrefixes": 31,
     "matchedPrefixes": 31,
     "unmatchedPrefixes": 0
@@ -137,8 +137,8 @@
     "Mistral": [
       "Mistral"
     ],
-    "Muse Spark": [
-      "Muse Spark"
+    "Muse": [
+      "Muse"
     ],
     "OpenAI o-series": [
       "OpenAI o",
