@@ -484,6 +484,19 @@
           }
         },
         {
+          "taskId": "K",
+          "lines":{
+            "zh-CN":[
+              "+ 严密自测",
+              "+ 性能表现优秀"
+            ],
+            "en-US":[
+              "+ Rigorously tested",
+              "+ Excellent performance"
+            ]
+          }
+        },
+        {
           "taskId": "L",
           "lines":{
             "zh-CN":[
