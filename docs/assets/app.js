@@ -2311,6 +2311,13 @@ function setupClonedRowLens(tbody, container, variant) {
   const content = document.createElement("div");
   content.className = "cloned-row-lens-content";
   lens.appendChild(content);
+
+  // 上下投影独立成层：水平两端由 mask 淡出，中段最深，形成离地感。
+  ["top", "bottom"].forEach((side) => {
+    const shadow = document.createElement("div");
+    shadow.className = `cloned-row-lens-shadow cloned-row-lens-shadow--${side}`;
+    lens.appendChild(shadow);
+  });
   wrapper.appendChild(lens);
 
   let activeRow = null;
@@ -2322,17 +2329,21 @@ function setupClonedRowLens(tbody, container, variant) {
     const rowRect = activeRow.getBoundingClientRect();
     const containerRect = container.getBoundingClientRect();
     const wrapperRect = wrapper.getBoundingClientRect();
-    const verticalOverflow = 8;
     const horizontalCellGap = variant === "agentic" ? 2 : 0;
     const cellGeometry = cellPairs.map(({ cell, clone }) => ({
       clone,
       rect: cell.getBoundingClientRect(),
     }));
 
-    lens.style.top = `${rowRect.top - wrapperRect.top - verticalOverflow}px`;
+    lens.style.top = `${rowRect.top - wrapperRect.top}px`;
     lens.style.left = `${containerRect.left - wrapperRect.left}px`;
     lens.style.width = `${containerRect.width}px`;
-    lens.style.height = `${rowRect.height + verticalOverflow * 2}px`;
+    lens.style.height = `${rowRect.height}px`;
+
+    // 末行下方没有内容承接投影，关闭下阴影，避免灰带越过卡片底边。
+    lens
+      .querySelector(".cloned-row-lens-shadow--bottom")
+      ?.classList.toggle("is-hidden", activeRow === tbody.lastElementChild);
 
     cellGeometry.forEach(({ clone, rect }) => {
       const isAgenticModelColumn =
@@ -2359,9 +2370,7 @@ function setupClonedRowLens(tbody, container, variant) {
       const cellStyle = window.getComputedStyle(cell);
       clone.style.color = cellStyle.color;
       clone.style.fontFamily = cellStyle.fontFamily;
-      clone.style.fontSize = state.simpleMode
-        ? `${parseFloat(cellStyle.fontSize) + 0.5}px`
-        : cellStyle.fontSize;
+      clone.style.fontSize = cellStyle.fontSize;
       clone.style.fontWeight = cellStyle.fontWeight;
       clone.style.paddingLeft = cellStyle.paddingLeft;
       clone.style.paddingRight = cellStyle.paddingRight;

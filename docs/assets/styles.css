@@ -62,9 +62,9 @@
   --color-grade-c: #c25a1d;
   --color-grade-d: #b83a24;
   --color-grade-bg-a: rgba(12, 122, 64, 0.58);
-  --color-grade-bg-b: rgba(195, 145, 0, 0.38);
+  --color-grade-bg-b: rgba(240, 200, 0, 0.38);
   --color-grade-bg-c: rgba(235, 130, 30, 0.26);
-  --color-grade-bg-d: rgba(225, 85, 55, 0.24);
+  --color-grade-bg-d: rgba(200, 48, 42, 0.24);
   --color-grade-bg-perfect: linear-gradient(
     110deg,
     rgba(243, 91, 112, 0.4),
@@ -77,12 +77,25 @@
   --color-status-bg-pass: rgba(27, 142, 76, 0.15);
   --color-status-bg-failed: rgba(230, 105, 95, 0.2);
   --color-status-bg-pending: rgba(111, 108, 101, 0.13);
+  --color-grade-bg-a-muted: rgba(12, 122, 64, 0.42);
+  --color-grade-bg-b-muted: rgba(240, 200, 0, 0.27);
+  --color-grade-bg-c-muted: rgba(235, 130, 30, 0.19);
+  --color-grade-bg-d-muted: rgba(200, 48, 42, 0.17);
+  --color-status-bg-pass-muted: rgba(27, 142, 76, 0.11);
+  --color-status-bg-failed-muted: rgba(230, 105, 95, 0.14);
+  --color-status-bg-pending-muted: rgba(111, 108, 101, 0.09);
   --color-status-pending: #6f6c65;
   --color-status-failed: #c62828;
   --color-status-skip: #a09c90;
   --color-family-dot: #d97c2b;
   --color-codev3-hover-ring: rgba(31, 78, 121, 0.3);
   --color-codev3-hover-sheen: rgba(255, 255, 255, 0.48);
+  --color-lens-shadow-top-strong: rgba(20, 28, 36, 0.5);
+  --color-lens-shadow-top-soft: rgba(20, 28, 36, 0.17);
+  --color-lens-shadow-bottom-strong: rgba(20, 28, 36, 0.56);
+  --color-lens-shadow-bottom-soft: rgba(20, 28, 36, 0.2);
+  --color-row-lens-tint-edge: rgba(31, 78, 121, 0.16);
+  --color-row-lens-tint-center: rgba(31, 78, 121, 0.02);
   --color-insight-panel: rgba(255, 255, 255, 0.98);
   --color-insight-border: rgba(42, 45, 51, 0.16);
   --color-insight-shadow: rgba(25, 38, 52, 0.2);
@@ -151,18 +164,31 @@
   --color-grade-c: #f29a52;
   --color-grade-d: #f28e72;
   --color-grade-bg-a: rgba(100, 222, 148, 0.46);
-  --color-grade-bg-b: rgba(255, 215, 95, 0.36);
+  --color-grade-bg-b: rgba(255, 210, 60, 0.36);
   --color-grade-bg-c: rgba(255, 165, 85, 0.28);
-  --color-grade-bg-d: rgba(255, 125, 105, 0.26);
+  --color-grade-bg-d: rgba(245, 90, 82, 0.26);
   --color-status-bg-pass: rgba(100, 222, 148, 0.16);
   --color-status-bg-failed: rgba(255, 145, 135, 0.2);
   --color-status-bg-pending: rgba(160, 156, 144, 0.2);
+  --color-grade-bg-a-muted: rgba(100, 222, 148, 0.33);
+  --color-grade-bg-b-muted: rgba(255, 210, 60, 0.26);
+  --color-grade-bg-c-muted: rgba(255, 165, 85, 0.2);
+  --color-grade-bg-d-muted: rgba(245, 90, 82, 0.19);
+  --color-status-bg-pass-muted: rgba(100, 222, 148, 0.12);
+  --color-status-bg-failed-muted: rgba(255, 145, 135, 0.14);
+  --color-status-bg-pending-muted: rgba(160, 156, 144, 0.14);
   --color-status-pending: #a09c90;
   --color-status-failed: #ff7a6e;
   --color-status-skip: #6f6c65;
   --color-family-dot: #e89a52;
   --color-codev3-hover-ring: rgba(147, 184, 220, 0.42);
   --color-codev3-hover-sheen: rgba(255, 255, 255, 0.14);
+  --color-lens-shadow-top-strong: rgba(0, 0, 0, 0.75);
+  --color-lens-shadow-top-soft: rgba(0, 0, 0, 0.25);
+  --color-lens-shadow-bottom-strong: rgba(0, 0, 0, 0.83);
+  --color-lens-shadow-bottom-soft: rgba(0, 0, 0, 0.29);
+  --color-row-lens-tint-edge: rgba(147, 184, 220, 0.2);
+  --color-row-lens-tint-center: rgba(147, 184, 220, 0.02);
   --color-insight-panel: rgba(32, 31, 27, 0.98);
   --color-insight-border: rgba(231, 229, 222, 0.18);
   --color-insight-shadow: rgba(0, 0, 0, 0.55);
@@ -233,18 +259,31 @@
     --color-grade-c: #f29a52;
     --color-grade-d: #f28e72;
     --color-grade-bg-a: rgba(100, 222, 148, 0.46);
-    --color-grade-bg-b: rgba(255, 215, 95, 0.36);
+    --color-grade-bg-b: rgba(255, 210, 60, 0.36);
     --color-grade-bg-c: rgba(255, 165, 85, 0.28);
-    --color-grade-bg-d: rgba(255, 125, 105, 0.26);
+    --color-grade-bg-d: rgba(245, 90, 82, 0.26);
     --color-status-bg-pass: rgba(100, 222, 148, 0.16);
     --color-status-bg-failed: rgba(255, 145, 135, 0.2);
     --color-status-bg-pending: rgba(160, 156, 144, 0.2);
+    --color-grade-bg-a-muted: rgba(100, 222, 148, 0.33);
+    --color-grade-bg-b-muted: rgba(255, 210, 60, 0.26);
+    --color-grade-bg-c-muted: rgba(255, 165, 85, 0.2);
+    --color-grade-bg-d-muted: rgba(245, 90, 82, 0.19);
+    --color-status-bg-pass-muted: rgba(100, 222, 148, 0.12);
+    --color-status-bg-failed-muted: rgba(255, 145, 135, 0.14);
+    --color-status-bg-pending-muted: rgba(160, 156, 144, 0.14);
     --color-status-pending: #a09c90;
     --color-status-failed: #ff7a6e;
     --color-status-skip: #6f6c65;
     --color-family-dot: #e89a52;
     --color-codev3-hover-ring: rgba(147, 184, 220, 0.42);
     --color-codev3-hover-sheen: rgba(255, 255, 255, 0.14);
+    --color-lens-shadow-top-strong: rgba(0, 0, 0, 0.75);
+    --color-lens-shadow-top-soft: rgba(0, 0, 0, 0.25);
+    --color-lens-shadow-bottom-strong: rgba(0, 0, 0, 0.83);
+    --color-lens-shadow-bottom-soft: rgba(0, 0, 0, 0.29);
+  --color-row-lens-tint-edge: rgba(147, 184, 220, 0.2);
+  --color-row-lens-tint-center: rgba(147, 184, 220, 0.02);
     --color-insight-panel: rgba(32, 31, 27, 0.98);
     --color-insight-border: rgba(231, 229, 222, 0.18);
     --color-insight-shadow: rgba(0, 0, 0, 0.55);
@@ -890,18 +929,13 @@ main {
   background-color: var(--color-row-hover);
 }
 
-/* 桌面表格使用真实单元格内容的镜像层，完整覆盖原表格边框与间隙。 */
+/* 桌面表格使用真实单元格内容的镜像层，完整覆盖原表格边框与间隙。
+   不加描边、不做圆角，行边界只由上下投影定义。 */
 .cloned-row-lens {
   position: absolute;
   z-index: 4;
   box-sizing: border-box;
-  border: 0;
-  border-radius: 8px;
   background: var(--color-panel);
-  box-shadow:
-    inset 0 0 0 1px var(--color-codev3-hover-ring),
-    0 -9px 22px rgba(20, 28, 36, 0.18),
-    0 14px 34px rgba(20, 28, 36, 0.26);
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
@@ -910,13 +944,75 @@ main {
     visibility 70ms ease;
 }
 
+/* 悬浮投影：镜像层高度与行高严格一致，不放大字形也不撑高行，
+   只靠上下两片渐变影子制造离地感。垂直方向由背景渐变淡出，
+   水平方向由 mask 收窄，形成中间深、两端浅的投影。 */
+.cloned-row-lens-shadow {
+  position: absolute;
+  z-index: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  opacity: 0.48;
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.24) 7%,
+    #000 15%,
+    #000 85%,
+    rgba(0, 0, 0, 0.24) 93%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.24) 7%,
+    #000 15%,
+    #000 85%,
+    rgba(0, 0, 0, 0.24) 93%,
+    transparent 100%
+  );
+}
+
+.cloned-row-lens-shadow.is-hidden {
+  display: none;
+}
+
+.cloned-row-lens-shadow--top {
+  bottom: 100%;
+  height: 36px;
+  background: linear-gradient(
+    to top,
+    var(--color-lens-shadow-top-strong) 0%,
+    var(--color-lens-shadow-top-soft) 52%,
+    transparent 100%
+  );
+}
+
+.cloned-row-lens-shadow--bottom {
+  top: 100%;
+  height: 40px;
+  background: linear-gradient(
+    to bottom,
+    var(--color-lens-shadow-bottom-strong) 0%,
+    var(--color-lens-shadow-bottom-soft) 52%,
+    transparent 100%
+  );
+}
+
 .cloned-row-lens::after {
   content: "";
   position: absolute;
   z-index: 3;
   inset: 0;
-  border-radius: inherit;
-  background: var(--color-accent-soft);
+  /* 行内底色：两端深、中间浅，让视线自然落在行中部。 */
+  background: linear-gradient(
+    90deg,
+    var(--color-row-lens-tint-edge) 0%,
+    var(--color-row-lens-tint-center) 38%,
+    var(--color-row-lens-tint-center) 62%,
+    var(--color-row-lens-tint-edge) 100%
+  );
   pointer-events: none;
 }
 
@@ -933,7 +1029,6 @@ main {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  border-radius: inherit;
 }
 
 .cloned-row-lens-cell {
@@ -969,15 +1064,16 @@ main {
 .cloned-row-lens--agentic .cloned-row-lens-cell {
   top: 2px;
   bottom: 2px;
-  border-radius: 2px;
 }
 
+/* simple 模式的徽章字号：与真实表格的 13px / 14px 对齐，
+   避免镜像行比原行多出 0.5px 的视觉放大。 */
 .cloned-row-lens--simple .cloned-row-lens-cell .think-badge {
-  font-size: 13.5px;
+  font-size: 13px;
 }
 
 .cloned-row-lens--simple .cloned-row-lens-cell .simple-delete-button {
-  font-size: 14.5px;
+  font-size: 14px;
 }
 
 .cloned-row-lens.family-lit .cloned-row-lens-cell.model-cell::before {
@@ -1847,6 +1943,36 @@ main {
 
 .codev3-cell--pending {
   background-color: var(--color-status-bg-pending);
+}
+
+/* Agentic 表：非悬停行的档位色块统一降饱和 15%，把对比度让给行投影。
+   悬停行由镜像层克隆，仍取原变量，饱和度保持不变。 */
+.table-container--codev3 tbody td.codev3-cell--a {
+  background-color: var(--color-grade-bg-a-muted);
+}
+
+.table-container--codev3 tbody td.codev3-cell--b {
+  background-color: var(--color-grade-bg-b-muted);
+}
+
+.table-container--codev3 tbody td.codev3-cell--c {
+  background-color: var(--color-grade-bg-c-muted);
+}
+
+.table-container--codev3 tbody td.codev3-cell--d {
+  background-color: var(--color-grade-bg-d-muted);
+}
+
+.table-container--codev3 tbody td.codev3-cell--pass {
+  background-color: var(--color-status-bg-pass-muted);
+}
+
+.table-container--codev3 tbody td.codev3-cell--failed {
+  background-color: var(--color-status-bg-failed-muted);
+}
+
+.table-container--codev3 tbody td.codev3-cell--pending {
+  background-color: var(--color-status-bg-pending-muted);
 }
 
 /* 移动端指标块整块底色（覆盖卡片自带底色） */
