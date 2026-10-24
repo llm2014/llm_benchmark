@@ -521,6 +521,54 @@
           }
         }
       ]
+    },
+    {
+      "rowId": "Kimi-K3.1-Pro (max)",
+      "tasks": [
+        {
+          "taskId": "H",
+          "lines":{
+            "zh-CN":[
+              "+ UI 精致",
+              "- 纹理粗糙",
+              "- 一处核心功能不遵循 Prompt"
+            ],
+            "en-US":[
+              "+ Exquisite UI",
+              "- Rough textures",
+              "- One core function does not follow the prompt"
+            ]
+          }
+        },
+        {
+          "taskId": "M",
+          "lines":{
+            "zh-CN":[
+              "+ UI 精致",
+              "- 模型细节粗糙",
+              "- 缺少必要的动态元素"
+            ],
+            "en-US":[
+              "+ Exquisite UI",
+              "- Poor model details",
+              "- Missing essential dynamic elements"
+            ]
+          }
+        },
+        {
+          "taskId": "N",
+          "lines":{
+            "zh-CN":[
+              "- 不断查资料，开发效率低",
+              "- 低效自测"
+            ],
+            "en-US":[
+              "- Low development efficiency",
+              "- Inefficient self-testing"
+            ]
+          }
+        }
+      ]
     }
   ]
 }
