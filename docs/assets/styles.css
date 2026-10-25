@@ -677,6 +677,10 @@ main:has(#tableContainer.table-container--codev3) {
 
 .table-sticky-scope {
   display: grid;
+}
+
+/* 仅约束支持内部横向滚动的 Agentic 表格，其他榜单保持原有溢出行为。 */
+.table-sticky-scope:has(> .table-container--codev3) {
   grid-template-columns: minmax(0, 1fr);
 }
 
