@@ -463,6 +463,11 @@ main {
   margin: 0 auto;
 }
 
+/* Agentic 主体容纳完整模型名及所有列即可，宽屏仍居中留白。 */
+main:has(#tableContainer.table-container--codev3) {
+  max-width: 1560px;
+}
+
 /* ---------------- 视图切换（榜单 / 趋势） ---------------- */
 
 .view-tabs {
@@ -672,6 +677,11 @@ main {
 
 .table-sticky-scope {
   display: grid;
+}
+
+/* 仅约束支持内部横向滚动的 Agentic 表格，其他榜单保持原有溢出行为。 */
+.table-sticky-scope:has(> .table-container--codev3) {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .table-sticky-scope > .table-container,
@@ -1159,6 +1169,23 @@ main {
   min-width: 130px;
   width: 130px;
   max-width: 130px;
+}
+
+/* 宽屏按完整模型名分配列宽；窄屏仍使用 250px 冻结列和横向滚动。 */
+@media (min-width: 1350px) {
+  #tableContainer.table-container--codev3 table {
+    table-layout: auto;
+  }
+
+  #tableContainer.table-container--codev3 .codev3-model-column {
+    width: auto;
+    max-width: none;
+  }
+
+  #tableContainer.table-container--codev3 .model-cell-content {
+    width: max-content;
+    max-width: none;
+  }
 }
 
 /* Code V3 单元格微交互：单元格保持原位，分数、档位、价格同步原地放大。 */
