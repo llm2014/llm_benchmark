@@ -567,6 +567,19 @@
               "- Inefficient self-testing"
             ]
           }
+        },
+        {
+          "taskId": "L",
+          "lines": {
+            "zh-CN": [
+              "- UI 错位",
+              "- 最终无法优化到 60 fps 目标"
+            ],
+            "en-US": [
+              "- UI misalignment",
+              "- Unable to optimize to 60 fps target"
+            ]
+          }
         }
       ]
     }
