@@ -1957,15 +1957,35 @@ main {
   align-items: baseline;
 }
 
+/* 桌面表格：评级在上、价格在下，两行整体水平居中。
+   移动端卡片是「标签 + 数值」结构，保持原来的左右紧凑排布，不跟随堆叠。
+   悬停镜像层不在 td 内，需单独列出以保持与真实行一致。 */
+.table-container--codev3 tbody td .codev3-result,
+.cloned-row-lens-cell .codev3-result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+
+/* 改成两行后行高被撑到 58px，纵向内边距从 11px 收到 6px，
+   行高回到 48px —— 与堆叠之前的单行高度一致。 */
+.table-container--codev3 tbody td {
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
 .codev3-score {
   min-width: 0;
   white-space: nowrap;
 }
 
+/* 评级整体改为居中后，行内不再需要 3ch 占位来对齐等级，
+   「4/A+」作为一整串参与居中，否则左侧会多出一段空白把内容推向右边。
+   仍保留 inline-block，hover 缩放需要独立盒子。 */
 .codev3-rank {
   display: inline-block;
-  min-width: 3ch;
-  text-align: right;
 }
 
 .codev3-grade {
@@ -2001,6 +2021,12 @@ main {
   font-size: 0.68em;
   font-weight: 500;
   letter-spacing: 0;
+}
+
+/* 堆叠布局下价格独占一行，收紧行高，避免把单元格撑得太高。 */
+.table-container--codev3 tbody td .codev3-price,
+.cloned-row-lens-cell .codev3-price {
+  line-height: 1.2;
 }
 
 /* 档位单元格整格底色 */
