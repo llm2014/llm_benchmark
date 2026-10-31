@@ -2546,6 +2546,7 @@ function renderTableNote() {
         `<p>${t("codev3Note.projectL")}</p>`,
         `<p>${t("codev3Note.projectM")}</p>`,
         `<p>${t("codev3Note.projectN")}</p>`,
+        `<p>${t("codev3Note.projectO")}</p>`,
       ].join("")
     : "";
 

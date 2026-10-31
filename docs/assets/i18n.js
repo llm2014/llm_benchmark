@@ -572,6 +572,10 @@ const TRANSLATIONS = {
     "zh-CN": "N: Rust 桌面 App",
     "en-US": "N: Rust Desktop App"
   },
+  "codev3Note.projectO":{
+    "zh-CN": "O: 无提示修复破损工程",
+    "en-US": "O: Fix broken codebase without hint"
+  },
   "insight.task": {
     "zh-CN": "任务 {{id}}",
     "en-US": "Task {{id}}",
