@@ -463,11 +463,6 @@ main {
   margin: 0 auto;
 }
 
-/* Agentic 主体容纳完整模型名及所有列即可，宽屏仍居中留白。 */
-main:has(#tableContainer.table-container--codev3) {
-  max-width: 1560px;
-}
-
 /* ---------------- 视图切换（榜单 / 趋势） ---------------- */
 
 .view-tabs {
@@ -745,9 +740,14 @@ main:has(#tableContainer.table-container--codev3) {
   pointer-events: none;
 }
 
+/* 这个容器复用了 .table-container 的 4px 圆角（它带着 table-container 类），
+   会把表头下方两个角裁成圆角、黑线也随之内缩，而「推理」表头是直角。
+   这里只去掉下方两个圆角，保留顶部圆角与边框（边框参与定位，去掉会让镜像表头左移 1px）。 */
 .sticky-table-header-viewport {
   overflow: hidden;
   pointer-events: auto;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 .table-container th,
@@ -823,13 +823,15 @@ main:has(#tableContainer.table-container--codev3) {
   font-size: 14px;
 }
 
-/* simple 模式提高表格可读性，并突出中位分数。 */
+/* simple 模式提高表格可读性，并突出中位分数。
+   以下字号是在原 simple 模式取值的基础上整体 +20%（×1.2），
+   倍数写在各条声明旁，便于以后继续按比例调整。 */
 .table-container table.simple-mode-table th {
-  font-size: 14.5px;
+  font-size: 17.4px; /* 14.5 × 1.2 */
 }
 
 .table-container table.simple-mode-table td {
-  font-size: 16px;
+  font-size: 19.2px; /* 16 × 1.2 */
 }
 
 .table-container table.simple-mode-table td.median-score-cell {
@@ -837,15 +839,33 @@ main:has(#tableContainer.table-container--codev3) {
 }
 
 .table-container table.simple-mode-table th .sort-indicator {
-  font-size: 13px;
+  font-size: 15.6px; /* 13 × 1.2 */
 }
 
 .table-container table.simple-mode-table .simple-delete-button {
-  font-size: 14px;
+  font-size: 16.8px; /* 14 × 1.2 */
 }
 
 .table-container table.simple-mode-table .think-badge {
-  font-size: 13px;
+  font-size: 15.6px; /* 13 × 1.2 */
+}
+
+/* Agentic 表在 simple 模式下只放大正文：表头与价格沿用常规模式的字号。
+   任务列只有 100px，表头放大到 17.4px 会让 iOS+Server(I) 与 Animation(J)
+   互相叠压；价格是 0.68em，跟着正文放大会把格子撑爆。 */
+.table-container table.simple-mode-table.codev3-table th:not(.codev3-task-column) {
+  font-size: 12.5px;
+}
+
+.table-container table.simple-mode-table.codev3-table .codev3-price {
+  font-size: 9.52px; /* 0.68 × 14px，与常规模式的价格字号一致 */
+}
+
+/* simple 模式下「推理」表头是 17.4px × 1.6 行高 + 11px 上下内边距 + 1px 分隔线，
+   实际行高 50px；Agentic 表头字号保持 12px，用固定高度补齐同样的 50px，
+   切换 tab 时表头band 高度才不会跳（常规模式下两边本就都是 43px）。 */
+.table-container table.simple-mode-table.codev3-table thead th {
+  height: 50px;
 }
 
 .model-name-content {
@@ -1076,14 +1096,19 @@ main:has(#tableContainer.table-container--codev3) {
   bottom: 2px;
 }
 
-/* simple 模式的徽章字号：与真实表格的 13px / 14px 对齐，
-   避免镜像行比原行多出 0.5px 的视觉放大。 */
+/* simple 模式的徽章字号：与真实表格的 15.6px / 16.8px 对齐，
+   避免镜像行与原行的字形大小不一致。 */
 .cloned-row-lens--simple .cloned-row-lens-cell .think-badge {
-  font-size: 13px;
+  font-size: 15.6px; /* 13 × 1.2，随 simple 表格同步放大 */
 }
 
 .cloned-row-lens--simple .cloned-row-lens-cell .simple-delete-button {
-  font-size: 14px;
+  font-size: 16.8px; /* 14 × 1.2 */
+}
+
+/* Agentic 的价格在 simple 表里不随正文放大，镜像行需同步，否则 hover 时字会跳大。 */
+.cloned-row-lens--simple .cloned-row-lens-cell .codev3-price {
+  font-size: 9.52px;
 }
 
 .cloned-row-lens.family-lit .cloned-row-lens-cell.model-cell::before {
@@ -1171,7 +1196,46 @@ main:has(#tableContainer.table-container--codev3) {
   max-width: 130px;
 }
 
-/* 宽屏按完整模型名分配列宽；窄屏仍使用 250px 冻结列和横向滚动。 */
+/* 任务列（Simple Model(H)、iOS+Server(I) 等带任务编号的列）固定 100px，
+   即 Retina 2 倍屏上量到的 200 物理像素。左右内边距同步收到 4px：
+   100 - 4(透明边框) - 8(padding) = 88px 内容区，恰好容下「4/A+ ¥341.72」。 */
+.table-container--codev3 .codev3-task-column {
+  min-width: 100px;
+  width: 100px;
+  max-width: 100px;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+/* 表头基线与「推理」对齐：顶部不留边框、底部换成 1px 深色分隔线，
+   行高因此回到 11 + 20 + 11 + 1 = 43px，与「推理」表头一致。 */
+.table-container--codev3 thead th {
+  border-top: 0;
+  border-bottom: 1px solid var(--color-rule);
+}
+
+/* 100px 任务列放不下 12.5px / 0.05em 的「Simple Model(H)」（需 108px），
+   收到 12px 并取消字距后可单行放下，避免表头折成两行把行高撑到 57px。 */
+.table-container--codev3 thead th.codev3-task-column {
+  white-space: nowrap;
+  letter-spacing: 0;
+  font-size: 12px;
+  padding-left: 2px;
+  padding-right: 2px;
+}
+
+/* 纯状态文字（Pass / Failed / Skip / Pending）在单元格内居中显示；
+   带「排名·等级 + 价格」的评分格仍走 .codev3-result 的两端排布，不受影响。 */
+.table-container--codev3 tbody td.codev3-cell--pass,
+.table-container--codev3 tbody td.codev3-cell--failed,
+.table-container--codev3 tbody td.codev3-cell--pending,
+.table-container--codev3 tbody td.codev3-status--skip {
+  text-align: center;
+}
+
+/* 宽屏按完整模型名分配列宽；窄屏仍使用 250px 冻结列和横向滚动。
+   版面宽度已与「推理」统一到 main 的 1350px，任务列定宽后表格会略宽于版面
+   （2026-11 有 8 个任务列时约 1384px > 1302px），仍由容器内横向滚动承接。 */
 @media (min-width: 1350px) {
   #tableContainer.table-container--codev3 table {
     table-layout: auto;

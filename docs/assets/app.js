@@ -72,6 +72,9 @@ const SIMPLE_HIDDEN_HEADERS_BY_CATEGORY = {
   code_v3: new Set(["unprompted", "scaffold"]),
 };
 const SIMPLE_MODE = new URLSearchParams(window.location.search).has("simple");
+// Agentic 榜单中带任务编号的列（如 Simple Model(H)）才是任务列，
+// Unprompted / Scaffold 属于辅助信息列，不参与任务列定宽。
+const CODEV3_TASK_HEADER_PATTERN = /\([A-Z]\)$/;
 
 // 货币本地化：数据层始终是人民币，仅展示层在英文界面按固定汇率换算。
 function formatUsd(usd) {
@@ -1436,6 +1439,16 @@ function getCodeV3GradeCellClass(value) {
   return `codev3-cell--${parsed.gradeBase.toLowerCase()}`;
 }
 
+// Agentic 表格的列分类：模型列 / 任务列（带任务编号）/ 辅助信息列。
+function getCodeV3ColumnClasses(header, columnIndex, modelColumnIndex) {
+  if (columnIndex === modelColumnIndex) return ["codev3-model-column"];
+  const classes = ["codev3-fixed-column"];
+  if (CODEV3_TASK_HEADER_PATTERN.test(String(header ?? "").trim())) {
+    classes.push("codev3-task-column");
+  }
+  return classes;
+}
+
 function getCodeV3CellBackgroundClass(value) {
   if (state.currentCategory !== "code_v3") return null;
   const normalized = String(value ?? "").trim().toLowerCase();
@@ -2107,7 +2120,7 @@ function renderTable() {
     const th = document.createElement("th");
     th.textContent = getHeaderLabel(header);
     if (isCodeV3Table) {
-      th.classList.add(index === modelColumnIndex ? "codev3-model-column" : "codev3-fixed-column");
+      th.classList.add(...getCodeV3ColumnClasses(header, index, modelColumnIndex));
     }
     th.dataset.sortColumn = String(index);
     th.addEventListener("click", () => toggleSort(index));
@@ -2150,7 +2163,11 @@ function renderTable() {
       const td = document.createElement("td");
       if (isCodeV3Table) {
         td.classList.add(
-          columnIndex === modelColumnIndex ? "codev3-model-column" : "codev3-fixed-column"
+          ...getCodeV3ColumnClasses(
+            state.headers[columnIndex],
+            columnIndex,
+            modelColumnIndex
+          )
         );
       }
       if (columnIndex === modelColumnIndex) {
