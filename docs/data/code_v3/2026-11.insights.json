@@ -582,6 +582,72 @@
           }
         }
       ]
+    },
+    {
+      "rowId": "Hy4 (high)",
+      "tasks": [
+        {
+          "taskId": "J",
+          "lines":{
+            "zh-CN":[
+              "- 动画细节错误较多"
+            ],
+            "en-US":[
+              "- Numerous errors in animation details"
+            ]
+          }
+        },
+        {
+          "taskId": "M",
+          "lines":{
+            "zh-CN":[
+              "- 模型细节粗糙",
+              "- 无法把控全部细节"
+            ],
+            "en-US":[
+              "- Poor model details",
+              "- Can’t keep track of all the details"
+            ]
+          }
+        },
+        {
+          "taskId": "N",
+          "lines":{
+            "zh-CN":[
+              "- 大量细节错误"
+            ],
+            "en-US":[
+              "- Numerous detail errors"
+            ]
+          }
+        },
+        {
+          "taskId": "L",
+          "lines": {
+            "zh-CN": [
+              "+ 核心性能一次满足",
+              "- 核心功能需要多轮打磨"
+            ],
+            "en-US": [
+              "+ Core performance meets requirements in the first round",
+              "- Core features require multiple rounds of refinement"
+            ]
+          }
+        },
+        {
+          "taskId": "O",
+          "lines": {
+            "zh-CN": [
+              "# 基本只在原地改，不会推翻重写",
+              "- 无提示修复率偏低，有提示可一次改对"
+            ],
+            "en-US": [
+              "# Mostly edits in place, never rewritten from scratch",  
+              "- Fix rate without prompts is low, but can fix most of bugs with prompts"
+            ]
+          }
+        }
+      ]
     }
   ]
 }
