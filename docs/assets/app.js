@@ -2075,7 +2075,7 @@ function renderTable() {
   const container = elements.tableContainer;
   hideCodeV3InsightPopover();
   cleanupStickyTableHeader();
-  cleanupRowHoverLens();
+  cleanupRowFocusOverlay();
   container.innerHTML = "";
   container.classList.remove("mobile-cards");
   container.classList.remove("table-container--codev3");
@@ -2298,139 +2298,77 @@ function renderTable() {
 
   table.appendChild(tbody);
   container.appendChild(table);
-  setupClonedRowLens(tbody, container, isCodeV3Table ? "agentic" : state.currentCategory);
+  setupRowFocusOverlay(tbody, container, isCodeV3Table);
   prepareStickyTableHeader();
 }
 
-function cleanupRowHoverLens() {
+function cleanupRowFocusOverlay() {
   const wrapper = elements.tableContainer?.closest(".table-wrapper");
-  wrapper
-    ?.querySelectorAll(".cloned-row-lens")
-    .forEach((element) => {
-      if (typeof element.cleanupLens === "function") {
-        element.cleanupLens();
-      }
-      element.remove();
-    });
+  wrapper?.querySelectorAll(".row-focus-overlay").forEach((element) => {
+    if (typeof element.cleanupOverlay === "function") {
+      element.cleanupOverlay();
+    }
+    element.remove();
+  });
 }
 
-function setupClonedRowLens(tbody, container, variant) {
+// 悬停行的装饰层：行内视觉（白底、档位色块、文字）交给真实 tr/td，
+// 这里只画横贯整行的底色渐变与行上下方的投影 —— 这两样在行内做不出来。
+// 装饰层透明且不承载内容，所以不会盖住文本选区高亮。
+function setupRowFocusOverlay(tbody, container, agentic) {
   const wrapper = container.closest(".table-wrapper");
   if (!wrapper) return;
 
-  const lens = document.createElement("div");
-  lens.className = `cloned-row-lens cloned-row-lens--${variant}`;
-  if (state.simpleMode) {
-    lens.classList.add("cloned-row-lens--simple");
-  }
-  lens.setAttribute("aria-hidden", "true");
-
-  const content = document.createElement("div");
-  content.className = "cloned-row-lens-content";
-  lens.appendChild(content);
+  const overlay = document.createElement("div");
+  overlay.className = `row-focus-overlay${agentic ? " row-focus-overlay--agentic" : ""}`;
+  overlay.setAttribute("aria-hidden", "true");
 
   // 上下投影独立成层：水平两端由 mask 淡出，中段最深，形成离地感。
   ["top", "bottom"].forEach((side) => {
     const shadow = document.createElement("div");
-    shadow.className = `cloned-row-lens-shadow cloned-row-lens-shadow--${side}`;
-    lens.appendChild(shadow);
+    shadow.className = `row-focus-overlay-shadow row-focus-overlay-shadow--${side}`;
+    overlay.appendChild(shadow);
   });
-  wrapper.appendChild(lens);
+  wrapper.appendChild(overlay);
 
   let activeRow = null;
-  let activeCell = null;
-  let cellPairs = [];
-  const positionLens = () => {
+
+  const positionOverlay = () => {
     if (!activeRow?.isConnected) return;
 
     const rowRect = activeRow.getBoundingClientRect();
     const containerRect = container.getBoundingClientRect();
     const wrapperRect = wrapper.getBoundingClientRect();
-    const horizontalCellGap = variant === "agentic" ? 2 : 0;
-    const cellGeometry = cellPairs.map(({ cell, clone }) => ({
-      clone,
-      rect: cell.getBoundingClientRect(),
-    }));
 
-    lens.style.top = `${rowRect.top - wrapperRect.top}px`;
-    lens.style.left = `${containerRect.left - wrapperRect.left}px`;
-    lens.style.width = `${containerRect.width}px`;
-    lens.style.height = `${rowRect.height}px`;
+    overlay.style.top = `${rowRect.top - wrapperRect.top}px`;
+    overlay.style.left = `${containerRect.left - wrapperRect.left}px`;
+    overlay.style.width = `${containerRect.width}px`;
+    overlay.style.height = `${rowRect.height}px`;
 
-    // 末行下方没有内容承接投影，关闭下阴影，避免灰带越过卡片底边。
-    lens
-      .querySelector(".cloned-row-lens-shadow--bottom")
+    // 末行下方没有内容承接投影，关闭下阴影，避免灰带越过表格底边。
+    overlay
+      .querySelector(".row-focus-overlay-shadow--bottom")
       ?.classList.toggle("is-hidden", activeRow === tbody.lastElementChild);
-
-    cellGeometry.forEach(({ clone, rect }) => {
-      const isAgenticModelColumn =
-        variant === "agentic" && clone.classList.contains("codev3-model-column");
-      const cellGap = isAgenticModelColumn ? horizontalCellGap - 1 : horizontalCellGap;
-      const horizontalOffset = variant === "agentic" && !isAgenticModelColumn ? 1 : 0;
-      clone.style.left = `${rect.left - containerRect.left + horizontalOffset}px`;
-      clone.style.width = `${Math.max(0, rect.width - cellGap)}px`;
-    });
   };
 
-  const renderLens = () => {
-    if (!activeRow?.isConnected) return;
-
-    lens.classList.toggle("family-lit", activeRow.classList.contains("family-lit"));
-    content.replaceChildren();
-    cellPairs = [];
-
-    activeRow.querySelectorAll("td").forEach((cell) => {
-      const clone = document.createElement("div");
-      clone.className = `cloned-row-lens-cell ${Array.from(cell.classList).join(" ")}`;
-      clone.inert = true;
-
-      const cellStyle = window.getComputedStyle(cell);
-      clone.style.color = cellStyle.color;
-      clone.style.fontFamily = cellStyle.fontFamily;
-      clone.style.fontSize = cellStyle.fontSize;
-      clone.style.fontWeight = cellStyle.fontWeight;
-      clone.style.paddingLeft = cellStyle.paddingLeft;
-      clone.style.paddingRight = cellStyle.paddingRight;
-      const modelContent = cell.querySelector(".model-cell-content");
-      if (modelContent) {
-        const cellRect = cell.getBoundingClientRect();
-        const modelContentRect = modelContent.getBoundingClientRect();
-        clone.style.paddingLeft = `${modelContentRect.left - cellRect.left}px`;
-      }
-      if (cellStyle.textAlign === "center") {
-        clone.classList.add("cloned-row-lens-cell--center");
-      }
-
-      Array.from(cell.childNodes).forEach((node) => clone.appendChild(node.cloneNode(true)));
-      clone.querySelectorAll("[id]").forEach((element) => element.removeAttribute("id"));
-      clone
-        .querySelectorAll("button, a, input, select, textarea, [tabindex]")
-        .forEach((element) => element.setAttribute("tabindex", "-1"));
-      content.appendChild(clone);
-      cellPairs.push({ cell, clone });
-    });
-
-    positionLens();
-    lens.classList.add("is-visible");
+  const showOverlay = (row) => {
+    if (!row || row === activeRow) return;
+    activeRow = row;
+    positionOverlay();
+    overlay.classList.add("is-visible");
+  };
+  const hideOverlay = () => {
+    activeRow = null;
+    overlay.classList.remove("is-visible");
   };
 
   const handleMouseOver = (event) => {
     const row = event.target.closest("tr");
-    const cell = event.target.closest("td");
-    if (!row || !cell || (row === activeRow && cell === activeCell)) return;
-    activeRow = row;
-    activeCell = cell;
-    renderLens();
+    if (!row || row.parentElement !== tbody) return;
+    showOverlay(row);
   };
-  const handleMouseLeave = () => {
-    activeRow = null;
-    activeCell = null;
-    cellPairs = [];
-    lens.classList.remove("is-visible");
-  };
-  const handleScroll = () => {
-    if (activeRow) positionLens();
-  };
+  const handleMouseLeave = hideOverlay;
+  const handleScroll = positionOverlay;
 
   tbody.addEventListener("mouseover", handleMouseOver);
   tbody.addEventListener("mouseleave", handleMouseLeave);
@@ -2439,7 +2377,9 @@ function setupClonedRowLens(tbody, container, variant) {
   const resizeObserver =
     typeof ResizeObserver === "function" ? new ResizeObserver(handleScroll) : null;
   resizeObserver?.observe(container);
-  lens.cleanupLens = () => {
+  overlay.cleanupOverlay = () => {
+    tbody.removeEventListener("mouseover", handleMouseOver);
+    tbody.removeEventListener("mouseleave", handleMouseLeave);
     container.removeEventListener("scroll", handleScroll);
     resizeObserver?.disconnect();
   };
@@ -2637,7 +2577,7 @@ function updateMeta(dataset = null) {
 function showPlaceholder(message) {
   const container = elements.tableContainer;
   cleanupStickyTableHeader();
-  cleanupRowHoverLens();
+  cleanupRowFocusOverlay();
   container.classList.remove("mobile-cards");
   container.classList.remove("table-container--codev3");
   container.innerHTML = `<div class="placeholder" role="status">${message}</div>`;

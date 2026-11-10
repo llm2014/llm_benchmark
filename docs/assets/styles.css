@@ -22,8 +22,6 @@
   --color-disabled-bg: #efede7;
   --color-table-head: #ffffff;
   --color-row-even: #ffffff;
-  --color-row-hover: rgba(31, 78, 121, 0.1);
-  --color-row-hover-solid: #e8edf4;
   --color-badge-bg: transparent;
   --color-button-focus: rgba(31, 78, 121, 0.16);
   --color-control-focus: rgba(31, 78, 121, 0.14);
@@ -90,12 +88,12 @@
   --color-family-dot: #d97c2b;
   --color-codev3-hover-ring: rgba(31, 78, 121, 0.3);
   --color-codev3-hover-sheen: rgba(255, 255, 255, 0.48);
-  --color-lens-shadow-top-strong: rgba(20, 28, 36, 0.5);
-  --color-lens-shadow-top-soft: rgba(20, 28, 36, 0.17);
-  --color-lens-shadow-bottom-strong: rgba(20, 28, 36, 0.56);
-  --color-lens-shadow-bottom-soft: rgba(20, 28, 36, 0.2);
-  --color-row-lens-tint-edge: rgba(31, 78, 121, 0.16);
-  --color-row-lens-tint-center: rgba(31, 78, 121, 0.02);
+  --color-row-focus-shadow-top-strong: rgba(20, 28, 36, 0.5);
+  --color-row-focus-shadow-top-soft: rgba(20, 28, 36, 0.17);
+  --color-row-focus-shadow-bottom-strong: rgba(20, 28, 36, 0.56);
+  --color-row-focus-shadow-bottom-soft: rgba(20, 28, 36, 0.2);
+  --color-row-focus-tint-edge: rgba(31, 78, 121, 0.16);
+  --color-row-focus-tint-center: rgba(31, 78, 121, 0.02);
   --color-insight-panel: rgba(255, 255, 255, 0.98);
   --color-insight-border: rgba(42, 45, 51, 0.16);
   --color-insight-shadow: rgba(25, 38, 52, 0.2);
@@ -124,8 +122,6 @@
   --color-disabled-bg: #2a2924;
   --color-table-head: #201f1b;
   --color-row-even: #201f1b;
-  --color-row-hover: rgba(147, 184, 220, 0.14);
-  --color-row-hover-solid: #333a42;
   --color-badge-bg: transparent;
   --color-button-focus: rgba(147, 184, 220, 0.22);
   --color-control-focus: rgba(147, 184, 220, 0.18);
@@ -183,12 +179,12 @@
   --color-family-dot: #e89a52;
   --color-codev3-hover-ring: rgba(147, 184, 220, 0.42);
   --color-codev3-hover-sheen: rgba(255, 255, 255, 0.14);
-  --color-lens-shadow-top-strong: rgba(0, 0, 0, 0.75);
-  --color-lens-shadow-top-soft: rgba(0, 0, 0, 0.25);
-  --color-lens-shadow-bottom-strong: rgba(0, 0, 0, 0.83);
-  --color-lens-shadow-bottom-soft: rgba(0, 0, 0, 0.29);
-  --color-row-lens-tint-edge: rgba(147, 184, 220, 0.2);
-  --color-row-lens-tint-center: rgba(147, 184, 220, 0.02);
+  --color-row-focus-shadow-top-strong: rgba(0, 0, 0, 0.75);
+  --color-row-focus-shadow-top-soft: rgba(0, 0, 0, 0.25);
+  --color-row-focus-shadow-bottom-strong: rgba(0, 0, 0, 0.83);
+  --color-row-focus-shadow-bottom-soft: rgba(0, 0, 0, 0.29);
+  --color-row-focus-tint-edge: rgba(147, 184, 220, 0.2);
+  --color-row-focus-tint-center: rgba(147, 184, 220, 0.02);
   --color-insight-panel: rgba(32, 31, 27, 0.98);
   --color-insight-border: rgba(231, 229, 222, 0.18);
   --color-insight-shadow: rgba(0, 0, 0, 0.55);
@@ -221,8 +217,6 @@
     --color-disabled-bg: #2a2924;
     --color-table-head: #201f1b;
     --color-row-even: #201f1b;
-    --color-row-hover: rgba(147, 184, 220, 0.14);
-    --color-row-hover-solid: #333a42;
     --color-badge-bg: transparent;
     --color-button-focus: rgba(147, 184, 220, 0.22);
     --color-control-focus: rgba(147, 184, 220, 0.18);
@@ -278,12 +272,12 @@
     --color-family-dot: #e89a52;
     --color-codev3-hover-ring: rgba(147, 184, 220, 0.42);
     --color-codev3-hover-sheen: rgba(255, 255, 255, 0.14);
-    --color-lens-shadow-top-strong: rgba(0, 0, 0, 0.75);
-    --color-lens-shadow-top-soft: rgba(0, 0, 0, 0.25);
-    --color-lens-shadow-bottom-strong: rgba(0, 0, 0, 0.83);
-    --color-lens-shadow-bottom-soft: rgba(0, 0, 0, 0.29);
-  --color-row-lens-tint-edge: rgba(147, 184, 220, 0.2);
-  --color-row-lens-tint-center: rgba(147, 184, 220, 0.02);
+    --color-row-focus-shadow-top-strong: rgba(0, 0, 0, 0.75);
+    --color-row-focus-shadow-top-soft: rgba(0, 0, 0, 0.25);
+    --color-row-focus-shadow-bottom-strong: rgba(0, 0, 0, 0.83);
+    --color-row-focus-shadow-bottom-soft: rgba(0, 0, 0, 0.29);
+  --color-row-focus-tint-edge: rgba(147, 184, 220, 0.2);
+  --color-row-focus-tint-center: rgba(147, 184, 220, 0.02);
     --color-insight-panel: rgba(32, 31, 27, 0.98);
     --color-insight-border: rgba(231, 229, 222, 0.18);
     --color-insight-shadow: rgba(0, 0, 0, 0.55);
@@ -955,17 +949,31 @@ main {
   background-color: var(--color-row-even);
 }
 
+/* 悬停行压成一块干净的面板：档位色块与文字浮在白底之上。
+   白底是 tr 自己的背景，位于文本选区高亮之下，拖选文字不会被遮住。 */
 .table-container tbody tr:hover {
-  background-color: var(--color-row-hover);
+  background-color: var(--color-panel);
 }
 
-/* 桌面表格使用真实单元格内容的镜像层，完整覆盖原表格边框与间隙。
-   不加描边、不做圆角，行边界只由上下投影定义。 */
-.cloned-row-lens {
+/* 悬停行的底部分隔线交给上下投影接管（原先被不透明镜像层整片盖住）。 */
+.table-container tbody tr:hover td {
+  border-bottom-color: transparent;
+}
+
+/* ---------------- 悬停行的装饰层 ---------------- */
+
+/* 悬停突出显示拆成两层：
+   1) 行内视觉（白底、档位色块、文字）由真实 tr/td 自己绘制 —— 元素背景天然
+      位于文本选区高亮之下，因此拖选文字时选区照常可见。
+   2) 装饰层就是下面这个 .row-focus-overlay：完全透明、不承载任何内容，只画
+      「横贯整行的底色渐变」和「行上下方的投影」——这两样在行内做不出来。
+   好处是悬停效果与文本选区互不遮挡，也不再需要克隆行内容（原有克隆层必须
+   逐格同步字号/内边距/对齐方式，任何一处不同步都会让 hover 时文字跳位）。
+   后续要给突出显示加动画（扫光、位移、缩放），都只需作用在这一层上。 */
+.row-focus-overlay {
   position: absolute;
-  z-index: 4;
+  z-index: 2;
   box-sizing: border-box;
-  background: var(--color-panel);
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
@@ -974,10 +982,35 @@ main {
     visibility 70ms ease;
 }
 
-/* 悬浮投影：镜像层高度与行高严格一致，不放大字形也不撑高行，
-   只靠上下两片渐变影子制造离地感。垂直方向由背景渐变淡出，
-   水平方向由 mask 收窄，形成中间深、两端浅的投影。 */
-.cloned-row-lens-shadow {
+/* Agentic 表的冻结列是 z-index: 2、吸顶表头是 5，
+   装饰层要高于行内所有层、低于吸顶表头。 */
+.row-focus-overlay--agentic {
+  z-index: 4;
+}
+
+.row-focus-overlay.is-visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.row-focus-overlay::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* 行内底色：两端深、中间浅，让视线自然落在行中部。 */
+  background: linear-gradient(
+    90deg,
+    var(--color-row-focus-tint-edge) 0%,
+    var(--color-row-focus-tint-center) 38%,
+    var(--color-row-focus-tint-center) 62%,
+    var(--color-row-focus-tint-edge) 100%
+  );
+  pointer-events: none;
+}
+
+/* 悬浮投影：高度与行高严格一致，垂直方向由背景渐变淡出，
+   水平方向由 mask 收窄，形成中间深、两端浅的离地感。 */
+.row-focus-overlay-shadow {
   position: absolute;
   z-index: 0;
   left: 0;
@@ -1004,136 +1037,30 @@ main {
   );
 }
 
-.cloned-row-lens-shadow.is-hidden {
+.row-focus-overlay-shadow.is-hidden {
   display: none;
 }
 
-.cloned-row-lens-shadow--top {
+.row-focus-overlay-shadow--top {
   bottom: 100%;
   height: 36px;
   background: linear-gradient(
     to top,
-    var(--color-lens-shadow-top-strong) 0%,
-    var(--color-lens-shadow-top-soft) 52%,
+    var(--color-row-focus-shadow-top-strong) 0%,
+    var(--color-row-focus-shadow-top-soft) 52%,
     transparent 100%
   );
 }
 
-.cloned-row-lens-shadow--bottom {
+.row-focus-overlay-shadow--bottom {
   top: 100%;
   height: 40px;
   background: linear-gradient(
     to bottom,
-    var(--color-lens-shadow-bottom-strong) 0%,
-    var(--color-lens-shadow-bottom-soft) 52%,
+    var(--color-row-focus-shadow-bottom-strong) 0%,
+    var(--color-row-focus-shadow-bottom-soft) 52%,
     transparent 100%
   );
-}
-
-.cloned-row-lens::after {
-  content: "";
-  position: absolute;
-  z-index: 3;
-  inset: 0;
-  /* 行内底色：两端深、中间浅，让视线自然落在行中部。 */
-  background: linear-gradient(
-    90deg,
-    var(--color-row-lens-tint-edge) 0%,
-    var(--color-row-lens-tint-center) 38%,
-    var(--color-row-lens-tint-center) 62%,
-    var(--color-row-lens-tint-edge) 100%
-  );
-  pointer-events: none;
-}
-
-.cloned-row-lens.is-visible {
-  opacity: 1;
-  visibility: visible;
-}
-
-.cloned-row-lens:not(.cloned-row-lens--agentic) {
-  z-index: 2;
-}
-
-.cloned-row-lens-content {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-}
-
-.cloned-row-lens-cell {
-  position: absolute;
-  z-index: 1;
-  top: 0;
-  bottom: 0;
-  display: flex;
-  align-items: center;
-  box-sizing: border-box;
-  min-width: 0;
-  padding: 11px 16px;
-  border: 0;
-  background-clip: border-box;
-  white-space: nowrap;
-}
-
-.cloned-row-lens-cell > .codev3-result {
-  width: 100%;
-}
-
-.cloned-row-lens-cell--center {
-  justify-content: center;
-}
-
-.cloned-row-lens--agentic .cloned-row-lens-cell.codev3-model-column {
-  z-index: 2;
-  background-color: var(--color-panel);
-  overflow: hidden;
-}
-
-/* Agentic 镜像单元格保留独立色块之间的呼吸感。 */
-.cloned-row-lens--agentic .cloned-row-lens-cell {
-  top: 2px;
-  bottom: 2px;
-}
-
-/* simple 模式的徽章字号：与真实表格的 15.6px / 16.8px 对齐，
-   避免镜像行与原行的字形大小不一致。 */
-.cloned-row-lens--simple .cloned-row-lens-cell .think-badge {
-  font-size: 15.6px; /* 13 × 1.2，随 simple 表格同步放大 */
-}
-
-.cloned-row-lens--simple .cloned-row-lens-cell .simple-delete-button {
-  font-size: 16.8px; /* 14 × 1.2 */
-}
-
-/* Agentic 的价格在 simple 表里不随正文放大，镜像行需同步，否则 hover 时字会跳大。 */
-.cloned-row-lens--simple .cloned-row-lens-cell .codev3-price {
-  font-size: 9.52px;
-}
-
-.cloned-row-lens.family-lit .cloned-row-lens-cell.model-cell::before {
-  content: "";
-  position: absolute;
-  left: 4px;
-  top: 50%;
-  width: 8px;
-  height: 8px;
-  margin-top: -4px;
-  border-radius: 50%;
-  background: var(--color-family-dot);
-}
-
-.cloned-row-lens--agentic .cloned-row-lens-cell.codev3-cell--has-insight::before {
-  content: "";
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--color-accent);
-  box-shadow: 0 0 0 2px var(--color-panel);
-  opacity: 0.7;
 }
 
 .table-container--codev3 th,
@@ -1165,8 +1092,7 @@ main {
   box-shadow: 1px 0 0 var(--color-border);
 }
 
-.table-container--codev3 td.codev3-model-column .model-name-label,
-.cloned-row-lens--agentic .codev3-model-column .model-name-label {
+.table-container--codev3 td.codev3-model-column .model-name-label {
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -1185,9 +1111,10 @@ main {
   background-color: var(--color-row-even);
 }
 
-/* 冻结列的 hover 底色必须不透明，否则横向滚动时下层文字会透出来 */
+/* 冻结列的 hover 底色必须不透明，否则横向滚动时下层文字会透出来；
+   与悬停行白底（--color-panel）保持一致。 */
 .table-container--codev3 tbody tr:hover .codev3-model-column {
-  background-color: var(--color-row-hover-solid);
+  background-color: var(--color-panel);
 }
 
 .table-container--codev3 .codev3-fixed-column {
@@ -1259,10 +1186,25 @@ main {
   overflow: hidden;
 }
 
+.codev3-table .codev3-rank,
+.codev3-table .codev3-price {
+  font-variant-numeric: tabular-nums;
+}
+
+.codev3-table .codev3-grade {
+  display: inline-block;
+}
+
+/* Code V3 单元格微交互：单元格本身不位移，分数/档位/价格原地放大。
+   与行级突出显示（白底 + 横向渐变 + 上下投影）叠加工作：
+   行负责「整行浮起来」，单元格负责「指针落在哪一格」。 */
 .codev3-table tbody td::after {
   content: "";
   position: absolute;
-  z-index: 0;
+  /* 负 z-index：td 有 isolation: isolate，流光被关在单元格自己的层叠上下文里，
+     画在档位色块之上、单元格文字之下 —— 状态栏（Pass / Skip）是裸文本节点，
+     这样流光才不会把字一起冲白。 */
+  z-index: -1;
   inset: 0;
   pointer-events: none;
   background: linear-gradient(
@@ -1275,45 +1217,16 @@ main {
   transform: translate3d(-115%, 0, 0) skewX(-10deg);
 }
 
-.codev3-table tbody td > * {
-  position: relative;
-  z-index: 1;
-}
-
-.codev3-table .codev3-rank,
-.codev3-table .codev3-grade,
-.codev3-table .codev3-price {
-  transition:
-    transform 180ms cubic-bezier(0.2, 0.75, 0.25, 1),
-    color 180ms ease;
-}
-
-.codev3-table .codev3-rank,
-.codev3-table .codev3-price {
-  font-variant-numeric: tabular-nums;
-}
-
-.codev3-table .codev3-rank {
-  transform-origin: 100% 55%;
-}
-
-.codev3-table .codev3-grade {
-  display: inline-block;
-  transform-origin: 0 55%;
-}
-
-.codev3-table .codev3-price {
-  transform-origin: 100% 55%;
-}
-
 .codev3-table tbody td {
   transition:
     box-shadow 180ms ease,
     filter 190ms ease;
 }
 
+/* 悬停格：1px 内描边 + 轻微提亮。
+   这里刻意不抬 z-index —— 冻结列是 z-index: 2，抬高后横向滚动时悬停格
+   会盖到冻结列上面。 */
 .codev3-table tbody td:hover {
-  z-index: 3;
   box-shadow: inset 0 0 0 1px var(--color-codev3-hover-ring);
   filter: saturate(1.06) brightness(1.015);
 }
@@ -1326,15 +1239,27 @@ main {
     opacity 140ms ease;
 }
 
-.codev3-table tbody td:hover .codev3-rank,
-.codev3-table tbody td:hover .codev3-grade {
-  color: var(--color-text);
-  transform: scale(1.07);
-  transition-delay: 20ms;
+/* 评级与价格现在是「上下两行」的堆叠布局，按整块缩放（而不是分开放大
+   评级与价格）才不会让两行互相错位；缩放中心默认在块中心。 */
+.codev3-table .codev3-rank,
+.codev3-table .codev3-grade,
+.codev3-table .codev3-price {
+  transition: color 180ms ease;
 }
 
+.codev3-table .codev3-result {
+  transition:
+    transform 180ms cubic-bezier(0.2, 0.75, 0.25, 1),
+    color 180ms ease;
+}
+
+.codev3-table tbody td:hover .codev3-rank,
+.codev3-table tbody td:hover .codev3-grade,
 .codev3-table tbody td:hover .codev3-price {
   color: var(--color-text);
+}
+
+.codev3-table tbody td:hover .codev3-result {
   transform: scale(1.07);
   transition-delay: 20ms;
 }
@@ -1958,10 +1883,8 @@ main {
 }
 
 /* 桌面表格：评级在上、价格在下，两行整体水平居中。
-   移动端卡片是「标签 + 数值」结构，保持原来的左右紧凑排布，不跟随堆叠。
-   悬停镜像层不在 td 内，需单独列出以保持与真实行一致。 */
-.table-container--codev3 tbody td .codev3-result,
-.cloned-row-lens-cell .codev3-result {
+   移动端卡片是「标签 + 数值」结构，保持原来的左右紧凑排布，不跟随堆叠。 */
+.table-container--codev3 tbody td .codev3-result {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2024,8 +1947,7 @@ main {
 }
 
 /* 堆叠布局下价格独占一行，收紧行高，避免把单元格撑得太高。 */
-.table-container--codev3 tbody td .codev3-price,
-.cloned-row-lens-cell .codev3-price {
+.table-container--codev3 tbody td .codev3-price {
   line-height: 1.2;
 }
 
@@ -2437,9 +2359,7 @@ main {
 
   .codev3-table tbody td,
   .codev3-table tbody td:hover,
-  .codev3-table tbody td:hover .codev3-rank,
-  .codev3-table tbody td:hover .codev3-grade,
-  .codev3-table tbody td:hover .codev3-price {
+  .codev3-table tbody td:hover .codev3-result {
     transform: none;
     filter: none;
   }
@@ -2448,7 +2368,7 @@ main {
     display: none;
   }
 
-  .cloned-row-lens {
+  .row-focus-overlay {
     transition: none;
   }
 }
