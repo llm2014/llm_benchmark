@@ -14,6 +14,7 @@ Hy4 preview (high),12/B(4.23),5/B+(15.32),18/C+(37.80),20/D(33.23),Failed,Skip,S
 MiMo-V2.6-Pro (high),16/C(10.11),5/B+(1.55),14/B(7.23),Failed,Skip,Failed,Skip,Skip,Claude Code,1
 Haiku 5.5 (xhigh),14/B(9.36),1/A+(18.81),Failed,28/D+(24.43),Skip,Skip,Skip,Skip,Claude Code,1
 Seed-2.1-Pro 0915 (high),11/B(20.89),5/A(50.68),Failed,30/D(71.77),Skip,Skip,Skip,Skip,Claude Code,1
+ERNIE-5.5-Flash-Preview (max),8/B(6.91),8/B(4.23),Failed,Skip,Skip,Skip,Skip,Skip,Claude Code,1
 Step 5 Preview,8/B(31.46),11/B(44.80),Failed,Skip,Skip,Skip,Skip,20/C(54.37),Claude Code,1
 GLM-5.3-Flash (max),9/B(4.21),13/B(6.63),Failed,Skip,Skip,Skip,Skip,Skip,Claude Code,1
 MiniMax-M3.1-Flash (max),15/C(3.84),Skip,Failed,Skip,Skip,Skip,Failed,Skip,Claude Code,1
