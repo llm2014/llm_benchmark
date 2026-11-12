@@ -56,10 +56,6 @@
         "Gemini 3.1 Flash Lite (high)",
         "Gemini 3.5 Flash Lite (high)"
       ],
-      "Gemma": [
-        "Gemma 4 31B (Think)",
-        "Gemma 4 31B"
-      ],
       "Claude Opus": [
         "Opus 4.6 (Think)",
         "Opus 4.6 (high)",
