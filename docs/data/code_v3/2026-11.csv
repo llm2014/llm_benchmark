@@ -2,6 +2,7 @@ Model,Simple Model(H),iOS+Server(I),Animation(J),Data Process(K),Metal(L),Scienc
 Opus 5.5 (max),Pass,Pass,4/A+(341.72),Perfect(211.83),6/A(290.08),2/A+(1365.55),Skip,6/A(179.93),Claude Code,1
 GPT-6 Astra (max),5/A+(41.53),3/A+(64.74),4/A+(75.84),5/A(61.32),8/B+(114.59),10/A(91.22),Skip,Skip,Codex CLI,1
 GPT-6.1 Sol (max),Pass,Pass,10/A(16.90),6/A(46.00),Skip,9/A(18.70),16/B(70.74),12/B(15.94),Codex CLI,1
+Gemini 4 Hydrogen (high),6/B+(6.12),Skip,10/B(8.46),Skip,Skip,10/B(8.51),Pending,13/B(23.75),OpenCode CLI,1
 Gemini 4 Argon (high),10/B(5.87),Skip,11/B(8.46),5/A(20.88),13/C+(33.58),Skip,13/B(24.52),Skip,OpenCode CLI,1
 DeepSeek V4.1 Flash 1017 (max),10/B+(5.88),Skip,17/B(10.77),4/A+(21.83),14/C+(12.01),13/B(6.21),12/B(12.32),19/D+(6.07),DSH,1
 Hy4 (high),10/B(11.21),Skip,14/B(21.38),3/A+(41.46),13/C(37.37),18/B(65.68),15/C+(88.78),18/C(31.23),Claude Code,1
