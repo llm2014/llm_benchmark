@@ -6,7 +6,7 @@ import {
   onLocaleChange,
   setLocale,
   t,
-} from "./i18n.js?v=20260924-perfect-grade";
+} from "./i18n.js?v=20261113-tier-link-6";
 import {
   CATEGORY_CHART_CONFIG,
   CATEGORY_ORDER,
@@ -33,8 +33,8 @@ import {
   parseSortableNumber,
   resolveCodeV3Insight,
   sortRows as sortBenchmarkRows,
-} from "./benchmark-domain.js?v=20260924-perfect-grade";
-import { createCharts } from "./charts.js?v=20260910-simple-mode";
+} from "./benchmark-domain.js?v=20261113-tier-link-6";
+import { createCharts } from "./charts.js?v=20261113-tier-link-6";
 
 const DATASET_TITLE_KEYS = {
   月榜: "dataset.title.monthly",
@@ -234,6 +234,7 @@ const elements = {
   chartSection: document.getElementById("chartSection"),
   chartCanvas: document.getElementById("benchmarkChart"),
   chartCaption: document.getElementById("chartCaption"),
+  chartReadout: document.getElementById("chartReadout"),
   yAxisSelect: document.getElementById("yAxisSelect"),
   yAxisLabel: document.getElementById("yAxisLabel"),
   viewTabs: document.getElementById("viewTabs"),

@@ -1,11 +1,12 @@
-import { t } from "./i18n.js?v=20260910-simple-mode";
+import { t } from "./i18n.js?v=20261113-tier-link-6";
 import {
   CATEGORY_CHART_CONFIG,
   CNY_PER_USD,
   TRENDS_SUPPORTED,
+  buildModelTierGroups,
   median,
   parseSortableNumber,
-} from "./benchmark-domain.js?v=20260903-thinking-series";
+} from "./benchmark-domain.js?v=20261113-tier-link-6";
 
 const MODEL_LOGO_POINT_SIZE = 17;
 const SERIES_PALETTE_LIGHT = [
@@ -92,6 +93,32 @@ const quadrantPlugin = {
   },
 };
 
+// While a point is hovered, keep its tier group at full strength and dim the
+// other icons/labels. The focus set is shared with the drawing plugins that
+// run later in the same frame.
+const hoverFocusPlugin = {
+  id: "hoverFocus",
+  beforeDatasetsDraw(chart, args, opts) {
+    if (!opts || opts.display === false) {
+      chart.$hoverFocus = null;
+      return;
+    }
+    const active = chart.getActiveElements ? chart.getActiveElements() : [];
+    if (!active.length) {
+      chart.$hoverFocus = null;
+      return;
+    }
+    const hoveredIndex = active[0].index;
+    const group = chart.$modelTierGroups?.[hoveredIndex];
+    chart.$hoverFocus = {
+      indices: group
+        ? new Set(group.members.map((member) => member.index))
+        : new Set([hoveredIndex]),
+      dimAlpha: opts.dimAlpha ?? 0.5,
+    };
+  },
+};
+
 // Draw high-resolution logo assets directly on Chart.js' high-DPI canvas.
 const modelLogoPointsPlugin = {
   id: "modelLogoPoints",
@@ -114,6 +141,8 @@ const modelLogoPointsPlugin = {
       const image = point?.logoImage;
       if (!element || !image) return;
 
+      const focus = chart.$hoverFocus;
+      ctx.globalAlpha = focus && !focus.indices.has(index) ? focus.dimAlpha : 1;
       const radius = size / 2;
       ctx.beginPath();
       ctx.arc(element.x, element.y, radius - 0.5, 0, Math.PI * 2);
@@ -139,6 +168,75 @@ const modelLogoPointsPlugin = {
       ctx.stroke();
     });
 
+    ctx.restore();
+  },
+};
+
+// When one effort tier of a multi-tier model is hovered, link all tiers of
+// that model. Registered before modelLogoPointsPlugin so the logos and labels
+// stay on top of the connector line. Group indices live on the chart instance
+// ($modelTierGroups) to bypass Chart.js' scriptable-option resolver.
+const modelTierLinksPlugin = {
+  id: "modelTierLinks",
+  afterDatasetsDraw(chart, args, opts) {
+    if (!opts || opts.display === false) return;
+    const groups = chart.$modelTierGroups;
+    if (!groups) return;
+
+    const active = chart.getActiveElements ? chart.getActiveElements() : [];
+    const activeElements = active.length ? active : chart.tooltip?.getActiveElements?.() || [];
+    if (!activeElements.length) return;
+    const hovered = activeElements[0];
+    const group = groups[hovered.index];
+    if (!group || !group.members || group.members.length < 2) return;
+
+    const meta = chart.getDatasetMeta(hovered.datasetIndex ?? 0);
+    const { ctx, chartArea } = chart;
+    if (!meta || !chartArea) return;
+
+    const inside = (element) =>
+      element.x >= chartArea.left - 2 &&
+      element.x <= chartArea.right + 2 &&
+      element.y >= chartArea.top - 2 &&
+      element.y <= chartArea.bottom + 2;
+    const points = group.members
+      .map((member) => {
+        const element = meta.data[member.index];
+        if (!element || element.skip || !Number.isFinite(element.x) || !Number.isFinite(element.y)) {
+          return null;
+        }
+        return inside(element) ? { x: element.x, y: element.y } : null;
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.x - b.x || a.y - b.y);
+    if (points.length < 2) return;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(
+      chartArea.left,
+      chartArea.top,
+      chartArea.right - chartArea.left,
+      chartArea.bottom - chartArea.top
+    );
+    ctx.clip();
+
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, points[0].y);
+    for (let i = 1; i < points.length; i += 1) {
+      ctx.lineTo(points[i].x, points[i].y);
+    }
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+    ctx.setLineDash([]);
+    ctx.strokeStyle = opts.lineOutline;
+    ctx.lineWidth = 4.5;
+    ctx.stroke();
+    ctx.setLineDash([6, 4]);
+    ctx.strokeStyle = opts.lineColor;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.setLineDash([]);
     ctx.restore();
   },
 };
@@ -175,6 +273,8 @@ const pointLabelsPlugin = {
     dataset.data.forEach((point, index) => {
       const element = meta.data[index];
       if (!element || !point || !point.label) return;
+      const focus = chart.$hoverFocus;
+      ctx.globalAlpha = focus && !focus.indices.has(index) ? focus.dimAlpha : 1;
       const boxW = ctx.measureText(point.label).width + padX * 2;
       const offset = point.logoImage ? MODEL_LOGO_POINT_SIZE / 2 + 4 : defaultOffset;
       const candidates = [
@@ -351,6 +451,14 @@ export function createCharts({
 }) {
   let chartInstance = null;
   let trendsChartInstance = null;
+
+  // onHover only fires inside the chart area; clear the readout when the
+  // pointer leaves the canvas entirely.
+  if (elements.chartCanvas && elements.chartReadout) {
+    elements.chartCanvas.addEventListener("mouseleave", () => {
+      elements.chartReadout.textContent = "";
+    });
+  }
 
   function getCssVariable(name, fallback = "") {
     if (typeof window === "undefined") return fallback;
@@ -612,6 +720,8 @@ export function createCharts({
 
   function renderChart() {
     if (!elements.chartCanvas || !elements.chartSection) return;
+    // Re-render invalidates any readout left over from the previous dataset/axis.
+    if (elements.chartReadout) elements.chartReadout.textContent = "";
 
     const config = CATEGORY_CHART_CONFIG[state.currentCategory];
     if (state.view !== "board" || !config || state.filteredRows.length === 0) {
@@ -686,6 +796,9 @@ export function createCharts({
       })
       .filter((item) => item !== null);
 
+    // Recomputed per axis/filter so links always reflect the points actually visible.
+    const tierGroups = buildModelTierGroups(chartData.map((point) => point.label)).byIndex;
+
     if (chartData.length === 0) {
       if (chartInstance) {
         chartInstance.destroy();
@@ -708,11 +821,34 @@ export function createCharts({
     const ctx = elements.chartCanvas.getContext("2d");
     const chartTextColor = getCssVariable("--color-text", "#212428");
     const chartGridColor = getCssVariable("--color-border", "#e3e1d9");
-    const chartPanelColor = getCssVariable("--color-panel", "#ffffff");
     const chartThinkBg = getCssVariable("--color-chart-think-bg", "rgba(158, 59, 50, 0.62)");
     const chartThinkBorder = getCssVariable("--color-chart-think-border", "rgba(158, 59, 50, 1)");
     const chartDefaultBg = getCssVariable("--color-chart-default-bg", "rgba(31, 78, 121, 0.58)");
     const chartDefaultBorder = getCssVariable("--color-chart-default-border", "rgba(31, 78, 121, 1)");
+
+    // The hover readout reuses the former tooltip lines verbatim, but lives
+    // outside the data area so nothing ever covers the points or their links.
+    const formatPointLines = (point) => {
+      const metricValue = swapped ? point.x : point.y;
+      const metricText =
+        yAxisType === "cost"
+          ? state.locale === "en-US"
+            ? formatUsd(metricValue)
+            : `¥${metricValue}`
+          : yAxisType === "token"
+            ? Number(metricValue).toLocaleString("en-US")
+            : `${metricValue}`;
+      return [
+        `${t("chart.tooltip.model")}: ${point.label}`,
+        `${chartXLabel}: ${swapped ? metricText : point.x}`,
+        `${chartYLabel}: ${swapped ? point.y : metricText}`,
+      ];
+    };
+    const setReadout = (lines) => {
+      if (elements.chartReadout) {
+        elements.chartReadout.textContent = lines ? lines.join(" · ") : "";
+      }
+    };
 
     if (chartInstance) chartInstance.destroy();
     chartInstance = new Chart(ctx, {
@@ -743,42 +879,31 @@ export function createCharts({
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        onHover: (event, activeElements, chart) => {
+          const hovered = activeElements?.[0];
+          const point = hovered ? chartData[hovered.index] : null;
+          setReadout(point ? formatPointLines(point) : null);
+        },
         plugins: {
           legend: { display: false },
-          tooltip: {
-            backgroundColor: chartPanelColor,
-            titleColor: chartTextColor,
-            bodyColor: chartTextColor,
-            borderColor: chartGridColor,
-            borderWidth: 1,
-            callbacks: {
-              label: (context) => {
-                const point = context.raw;
-                const metricValue = swapped ? point.x : point.y;
-                const metricText =
-                  yAxisType === "cost"
-                    ? state.locale === "en-US"
-                      ? formatUsd(metricValue)
-                      : `¥${metricValue}`
-                    : yAxisType === "token"
-                      ? Number(metricValue).toLocaleString("en-US")
-                      : `${metricValue}`;
-                return [
-                  `${t("chart.tooltip.model")}: ${point.label}`,
-                  `${chartXLabel}: ${swapped ? metricText : point.x}`,
-                  `${chartYLabel}: ${swapped ? point.y : metricText}`,
-                ];
-              },
-            },
+          // No canvas tooltip: the readout above the chart carries the same text.
+          tooltip: { enabled: false },
+          hoverFocus: { display: true, dimAlpha: 0.6 },
+          modelTierLinks: {
+            display: true,
+            lineColor: getCssVariable("--color-chart-tier-link", "rgba(194, 104, 14, 0.95)"),
+            lineOutline: getCssVariable(
+              "--color-chart-tier-link-outline",
+              "rgba(255, 255, 255, 0.9)"
+            ),
           },
           quadrants: {
             medianX: quadrantX,
             medianY: quadrantY,
             sweetBg: getCssVariable("--color-chart-quadrant-sweet", "rgba(58, 107, 79, 0.05)"),
-            secondBg:
-              yAxisType === "cost" || yAxisType === "token"
-                ? getCssVariable("--color-chart-quadrant-second", "rgba(34, 197, 94, 0.14)")
-                : null,
+            // Top-left is the "good" quadrant on every metric: strong score with
+            // low cost / low latency / few tokens.
+            secondBg: getCssVariable("--color-chart-quadrant-second", "rgba(34, 197, 94, 0.14)"),
             lineColor: getCssVariable("--color-chart-median-line", "rgba(111, 108, 101, 0.75)"),
             labelColor: getCssVariable("--color-chart-quadrant-label", "rgba(111, 108, 101, 0.9)"),
             labels: swapped
@@ -844,8 +969,15 @@ export function createCharts({
           },
         },
       },
-      plugins: [quadrantPlugin, modelLogoPointsPlugin, pointLabelsPlugin],
+      plugins: [
+        quadrantPlugin,
+        hoverFocusPlugin,
+        modelTierLinksPlugin,
+        modelLogoPointsPlugin,
+        pointLabelsPlugin,
+      ],
     });
+    chartInstance.$modelTierGroups = tierGroups;
 
     if (elements.chartCaption) {
       elements.chartCaption.textContent = t(`chart.caption.${yAxisType}`);

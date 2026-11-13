@@ -189,6 +189,56 @@ export function getModelFamily(name) {
   return match ? match[0].toLowerCase() : "";
 }
 
+// The same model can be evaluated at several reasoning-effort tiers; the tier
+// is carried by a trailing parenthesised value, e.g. "GLM-5.3 (max)" vs
+// "GLM-5.3 (low)". A row without parentheses is the implicit default tier.
+const TRAILING_MODEL_TIER_PATTERN = /^(.*?)\s*\(([^()]*)\)\s*$/;
+
+export function parseModelTier(modelName) {
+  const name = String(modelName ?? "").trim();
+  const match = TRAILING_MODEL_TIER_PATTERN.exec(name);
+  if (!match) return { base: name, tier: "", tierLabel: "" };
+  const base = match[1].trim();
+  const tierLabel = match[2].trim();
+  if (!base || !tierLabel) return { base: name, tier: "", tierLabel: "" };
+  return { base, tier: tierLabel.toLowerCase(), tierLabel };
+}
+
+/**
+ * Group visible rows that share a model base but differ in effort tier.
+ * Indices refer back to the caller's array so the result can be joined with
+ * Chart.js dataset points. Plain duplicate rows (identical names, no tier)
+ * are intentionally excluded: there is no tier ladder to draw.
+ *
+ * @param {string[]} labels model names in dataset order
+ * @returns {{ byIndex: Record<string, object>, groups: object[] }}
+ */
+export function buildModelTierGroups(labels) {
+  const byBase = new Map();
+  labels.forEach((label, index) => {
+    const { base, tier, tierLabel } = parseModelTier(label);
+    if (!base) return;
+    const member = { index, label: String(label ?? ""), tier, tierLabel };
+    const members = byBase.get(base);
+    if (members) members.push(member);
+    else byBase.set(base, [member]);
+  });
+
+  const byIndex = {};
+  const groups = [];
+  byBase.forEach((members, base) => {
+    if (members.length < 2) return;
+    if (!members.some((member) => member.tier)) return;
+    if (new Set(members.map((member) => member.tier)).size < 2) return;
+    const group = { base, members };
+    groups.push(group);
+    members.forEach((member) => {
+      byIndex[member.index] = group;
+    });
+  });
+  return { byIndex, groups };
+}
+
 export function normalizeHeaderKey(header) {
   return String(header ?? "").trim().toLowerCase();
 }
