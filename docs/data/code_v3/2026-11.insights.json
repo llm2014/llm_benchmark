@@ -648,6 +648,46 @@
           }
         }
       ]
+    },
+    {
+      "rowId": "Hy4 flash (high)",
+      "tasks": [
+        {
+          "taskId": "J",
+          "lines":{
+            "zh-CN":[
+              "- 动画细节错误较多"
+            ],
+            "en-US":[
+              "- Numerous errors in animation details"
+            ]
+          }
+        },
+        {
+          "taskId": "M",
+          "lines":{
+            "zh-CN":[
+              "- 模型粗糙",
+              "- UI 过于简单且不易用"
+            ],
+            "en-US":[
+              "- Poor model details",
+              "- The UI is far too basic and not user-friendly"
+            ]
+          }
+        },
+        {
+          "taskId": "O",
+          "lines": {
+            "zh-CN": [
+              "- 改好一个问题，冒出另一个问题"
+            ],
+            "en-US": [
+              "- Fix one issue, another pops up"
+            ]
+          }
+        }
+      ]
     }
   ]
 }

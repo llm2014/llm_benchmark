@@ -13,6 +13,7 @@ Qwen3.8-Max-0902 (xhigh),8/B(28.26),7/A(109.76),21/C(102.71),13/D(211.18),Skip,2
 Gemini 3.7 Flash (high),14/B(9.38),8/B(16.84),14/B(14.28),34/D(28.93),Skip,Skip,Skip,Skip,OpenCode CLI,1
 Hy4 preview (high),12/B(4.23),5/B+(15.32),18/C+(37.80),20/D(33.23),Failed,Skip,Skip,Skip,Claude Code,1
 MiMo-V2.6-Pro (high),16/C(10.11),5/B+(1.55),14/B(7.23),Failed,Skip,Failed,Skip,Skip,Claude Code,1
+Hy4 flash (high),8/B(0.37),Skip,22/C(0.94),Skip,Skip,21/C(2.18),Skip,Failed,Claude Code,1
 Haiku 5.5 (xhigh),14/B(9.36),1/A+(18.81),Failed,28/D+(24.43),Skip,Skip,Skip,Skip,Claude Code,1
 Seed-2.1-Pro 0915 (high),11/B(20.89),5/A(50.68),Failed,30/D(71.77),Skip,Skip,Skip,Skip,Claude Code,1
 ERNIE-5.5-Flash-Preview (high),8/B(6.91),8/B(4.23),Failed,Skip,Skip,Skip,Skip,Skip,Claude Code,1
