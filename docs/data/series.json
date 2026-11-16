@@ -107,7 +107,8 @@
         "Qwen3-Max 0123 (Think)",
         "Qwen3.6-Max-Preview (Think)",
         "Qwen3.7-Max (xhigh)",
-        "Qwen3.8-Max (xhigh)"
+        "Qwen3.8-Max (xhigh)",
+        "Qwen4-Max (xhigh)"
       ],
       "Qwen Plus": [
         "Qwen3.5-Plus (Think)",
