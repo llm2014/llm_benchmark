@@ -688,6 +688,26 @@
           }
         }
       ]
+    },
+    {
+      "rowId": "GPT-6.2 Astra (max)",
+      "tasks": [
+        {
+          "taskId": "M",
+          "lines":{
+            "zh-CN":[
+              "+ 局部效果呈现精美",
+              "- 但不同部分之间缺乏逻辑联系",
+              "- 部分模型明显粗糙"
+            ],
+            "en-US":[
+              "+ Local details are rendered with exquisite precision",
+              "- Yet there’s a lack of logical connection between different parts",
+              "- Some models are noticeably crude"
+            ]
+          }
+        }
+      ]
     }
   ]
 }

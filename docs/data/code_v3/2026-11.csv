@@ -1,5 +1,6 @@
 Model,Simple Model(H),iOS+Server(I),Animation(J),Data Process(K),Metal(L),Science(M),Rust App(N),Debug(O),Scaffold,Think
 Opus 5.5 (max),Pass,Pass,4/A+(369.62),Perfect(230.70),6/A(320.75),2/A+(1448.79),Skip,6/A(201.71),Claude Code,1
+GPT-6.2 Astra (max),Pass,Pass,Pass,Pass,8/B+(53.22),10/A(58.11),Skip,8/B+(39.61),Codex CLI,1
 GPT-6 Astra (max),5/A+(41.53),3/A+(64.74),4/A+(75.84),5/A(61.32),8/B+(114.59),10/A(91.22),Skip,Skip,Codex CLI,1
 GPT-6.1 Sol (max),Pass,Pass,10/A(16.90),6/A(46.00),Skip,9/A(18.70),16/B(70.74),12/B(15.94),Codex CLI,1
 Gemini 4 Hydrogen (high),6/B+(6.12),Skip,10/B(8.46),Pass,Skip,10/B(8.51),13/B(16.43),13/B(23.75),OpenCode CLI,1
