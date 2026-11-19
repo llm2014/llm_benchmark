@@ -1,4 +1,4 @@
-import { t } from "./i18n.js?v=20261113-tier-link-6";
+import { t } from "./i18n.js?v=20261119-radar-3";
 import {
   CATEGORY_CHART_CONFIG,
   CNY_PER_USD,
@@ -6,9 +6,52 @@ import {
   buildModelTierGroups,
   median,
   parseSortableNumber,
-} from "./benchmark-domain.js?v=20261113-tier-link-6";
+} from "./benchmark-domain.js?v=20261119-radar-3";
 
 const MODEL_LOGO_POINT_SIZE = 17;
+// Each metric owns its own canvas/figure; renderChart walks them in this order.
+const CHART_METRICS = ["cost", "time", "token"];
+const FIGURE_ORDER = ["cost", "time", "token", "radar"];
+
+// Radar axes. Scores are better when high, the other three when low.
+// Header variants cover logic and vision datasets of different months.
+const RADAR_DIMENSIONS = [
+  {
+    key: "peak",
+    labelKey: "chart.radar.dim.peak",
+    headers: ["极限分数"],
+    higherIsBetter: true,
+  },
+  {
+    key: "median",
+    labelKey: "chart.radar.dim.median",
+    headers: ["中位分数"],
+    higherIsBetter: true,
+  },
+  {
+    key: "time",
+    labelKey: "chart.radar.dim.time",
+    headers: ["平均耗时(秒)", "平均耗时/s"],
+    higherIsBetter: false,
+  },
+  {
+    key: "token",
+    labelKey: "chart.radar.dim.token",
+    headers: ["Token", "平均Token"],
+    higherIsBetter: false,
+  },
+  {
+    key: "cost",
+    labelKey: "chart.radar.dim.cost",
+    headers: ["测试成本(元)", "成本"],
+    higherIsBetter: false,
+  },
+];
+// Origin of every axis = 80% of that dimension's worst value in the current
+// dataset, so profiles stay visible instead of collapsing near the rim.
+const RADAR_WORST_ORIGIN_RATIO = 0.8;
+const RADAR_DEFAULT_MODELS = 3;
+const RADAR_MAX_MODELS = 6;
 const SERIES_PALETTE_LIGHT = [
   "#1f4e79", "#9e3b32", "#3a6b4f", "#8a6d1f",
   "#6b4f8a", "#2f6b6b", "#a2543a", "#5a5f6b",
@@ -26,6 +69,32 @@ function formatUsd(usd) {
 function formatTokenTick(value) {
   const thousands = Number(value) / 1000;
   return `${Number.isInteger(thousands) ? thousands : thousands.toFixed(1)}K`;
+}
+
+function clamp01(value) {
+  return Math.min(1, Math.max(0, value));
+}
+
+function withAlpha(hex, alpha) {
+  const match = /^#([\da-f]{6})$/i.exec(hex);
+  if (!match) return hex;
+  const number = parseInt(match[1], 16);
+  return `rgba(${(number >> 16) & 255}, ${(number >> 8) & 255}, ${number & 255}, ${alpha})`;
+}
+
+function escapeHtml(value) {
+  const entities = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+  return String(value).replace(/[&<>"']/g, (char) => entities[char]);
+}
+
+function resolveRadarColumns(headers) {
+  return RADAR_DIMENSIONS.map((dimension) => ({
+    ...dimension,
+    columnIndex: dimension.headers.reduce(
+      (found, header) => (found !== -1 ? found : headers.indexOf(header)),
+      -1
+    ),
+  }));
 }
 
 // Chart.js plugin: quadrant backgrounds, median lines, and region labels.
@@ -449,15 +518,67 @@ export function createCharts({
   findModelColumnIndex,
   getModelLogoImage,
 }) {
-  let chartInstance = null;
+  const chartInstances = new Map();
   let trendsChartInstance = null;
+  const radarState = {
+    selected: new Set(),
+    // Stable palette slots: adding/removing a model never recolors the others.
+    colorSlots: new Map(),
+    datasetKey: "",
+    listSignature: "",
+    chartSignature: "",
+    model: null,
+  };
 
-  // onHover only fires inside the chart area; clear the readout when the
-  // pointer leaves the canvas entirely.
-  if (elements.chartCanvas && elements.chartReadout) {
-    elements.chartCanvas.addEventListener("mouseleave", () => {
-      elements.chartReadout.textContent = "";
+  // onHover only fires inside the chart area; clear that figure's readout when
+  // the pointer leaves its canvas entirely.
+  FIGURE_ORDER.forEach((metric) => {
+    const figure = elements.chartFigures?.[metric];
+    if (!figure?.canvas || !figure?.readout) return;
+    figure.canvas.addEventListener("mouseleave", () => {
+      figure.readout.textContent = "";
     });
+  });
+
+  // Selection changes are applied incrementally: no list rebuild, no chart
+  // teardown. A newly checked model fades/grows in; removing one is instant.
+  const radarPickerList = elements.chartFigures?.radar?.pickerList;
+  if (radarPickerList) {
+    radarPickerList.addEventListener("change", (event) => {
+      const input = event.target;
+      if (!(input instanceof HTMLInputElement) || input.type !== "checkbox") return;
+      const adding = input.checked;
+      if (adding) {
+        if (radarState.selected.size >= RADAR_MAX_MODELS) {
+          input.checked = false;
+          return;
+        }
+        radarState.selected.add(input.value);
+      } else {
+        radarState.selected.delete(input.value);
+        radarState.colorSlots.delete(input.value);
+      }
+      applyRadarSelection({ animate: adding });
+    });
+  }
+
+  function destroyChart(metric) {
+    const instance = chartInstances.get(metric);
+    if (instance) instance.destroy();
+    chartInstances.delete(metric);
+  }
+
+  function clearFigure(figure) {
+    if (!figure) return;
+    ["readout", "axes", "sample", "tag", "title"].forEach((key) => {
+      if (figure[key]) figure[key].textContent = "";
+    });
+  }
+
+  function hideFigure(metric, figure) {
+    destroyChart(metric);
+    clearFigure(figure);
+    if (figure?.figure) figure.figure.style.display = "none";
   }
 
   function getCssVariable(name, fallback = "") {
@@ -719,23 +840,67 @@ export function createCharts({
   }
 
   function renderChart() {
-    if (!elements.chartCanvas || !elements.chartSection) return;
-    // Re-render invalidates any readout left over from the previous dataset/axis.
-    if (elements.chartReadout) elements.chartReadout.textContent = "";
+    if (!elements.chartSection || !elements.chartFigures) return;
 
     const config = CATEGORY_CHART_CONFIG[state.currentCategory];
-    if (state.view !== "board" || !config || state.filteredRows.length === 0) {
-      if (chartInstance) {
-        chartInstance.destroy();
-        chartInstance = null;
-      }
-      if (elements.chartCaption) {
-        elements.chartCaption.textContent = "";
-      }
-      return;
+    const canRender =
+      state.view === "board" && !!config && state.filteredRows.length > 0;
+    const headers = new Set(state.headers || []);
+    const hasAxes =
+      canRender &&
+      headers.has(config.score) &&
+      findModelColumnIndex(state.headers) >= 0;
+    // A metric is only drawn when its column exists in the loaded dataset
+    // (e.g. vision data has no Token column, so only two figures appear).
+    const activeMetrics =
+      hasAxes
+        ? CHART_METRICS.filter((metric) => config[metric] && headers.has(config[metric]))
+        : [];
+
+    if (elements.chartSectionHeading) {
+      elements.chartSectionHeading.textContent = t("chart.section.title");
     }
 
-    const yAxisType = elements.yAxisSelect ? elements.yAxisSelect.value : "cost";
+    // Re-render invalidates every readout left over from the previous dataset.
+    FIGURE_ORDER.forEach((metric) => {
+      const readout = elements.chartFigures[metric]?.readout;
+      if (readout) readout.textContent = "";
+    });
+
+    CHART_METRICS.forEach((metric) => {
+      const figure = elements.chartFigures[metric];
+      if (!figure) return;
+      if (!activeMetrics.includes(metric)) {
+        hideFigure(metric, figure);
+        return;
+      }
+      if (figure.figure) figure.figure.style.display = "";
+      renderMetricChart({ metric, config, figure });
+    });
+
+    // The radar figure resolves its own five columns and shows itself only
+    // when every dimension exists in the loaded dataset.
+    renderRadarChart();
+
+    // Number only the figures that actually rendered, so hidden metrics never
+    // leave gaps and the section count matches what the reader sees.
+    const visibleMetrics = FIGURE_ORDER.filter((metric) => {
+      const figure = elements.chartFigures[metric];
+      return figure?.figure && figure.figure.style.display !== "none";
+    });
+    visibleMetrics.forEach((metric, index) => {
+      const tag = elements.chartFigures[metric]?.tag;
+      if (tag) tag.textContent = t("chart.figure.number", { n: index + 1 });
+    });
+    if (elements.chartSectionNote) {
+      elements.chartSectionNote.textContent = visibleMetrics.length
+        ? t("chart.section.count", { n: visibleMetrics.length })
+        : "";
+    }
+  }
+
+  function renderMetricChart({ metric: yAxisType, config, figure }) {
+    if (!figure.canvas) return;
     const metricColumns = {
       cost: config.cost,
       time: config.time,
@@ -761,13 +926,7 @@ export function createCharts({
     const modelIndex = findModelColumnIndex(state.headers);
 
     if (scoreIndex === -1 || metricIndex === -1 || modelIndex === -1) {
-      if (chartInstance) {
-        chartInstance.destroy();
-        chartInstance = null;
-      }
-      if (elements.chartCaption) {
-        elements.chartCaption.textContent = "";
-      }
+      hideFigure(yAxisType, figure);
       return;
     }
 
@@ -800,12 +959,22 @@ export function createCharts({
     const tierGroups = buildModelTierGroups(chartData.map((point) => point.label)).byIndex;
 
     if (chartData.length === 0) {
-      if (chartInstance) {
-        chartInstance.destroy();
-        chartInstance = null;
-      }
-      if (elements.chartCaption) elements.chartCaption.textContent = "";
+      hideFigure(yAxisType, figure);
       return;
+    }
+
+    // Academic figure head: title, axis definitions and sample size.
+    if (figure.title) {
+      figure.title.textContent = t(`chart.figure.title.${yAxisType}`);
+    }
+    if (figure.axes) {
+      figure.axes.textContent = t("chart.figure.axes", {
+        x: chartXLabel,
+        y: chartYLabel,
+      });
+    }
+    if (figure.sample) {
+      figure.sample.textContent = t("chart.figure.sample", { n: chartData.length });
     }
 
     const metricValues = chartData.map((point) => (swapped ? point.x : point.y));
@@ -818,7 +987,7 @@ export function createCharts({
     const quadrantX = yAxisType === "cost" && !swapped ? 40 : medianX;
     const quadrantY = yAxisType === "cost" && swapped ? 40 : medianY;
 
-    const ctx = elements.chartCanvas.getContext("2d");
+    const ctx = figure.canvas.getContext("2d");
     const chartTextColor = getCssVariable("--color-text", "#212428");
     const chartGridColor = getCssVariable("--color-border", "#e3e1d9");
     const chartThinkBg = getCssVariable("--color-chart-think-bg", "rgba(158, 59, 50, 0.62)");
@@ -845,13 +1014,13 @@ export function createCharts({
       ];
     };
     const setReadout = (lines) => {
-      if (elements.chartReadout) {
-        elements.chartReadout.textContent = lines ? lines.join(" · ") : "";
+      if (figure.readout) {
+        figure.readout.textContent = lines ? lines.join(" · ") : "";
       }
     };
 
-    if (chartInstance) chartInstance.destroy();
-    chartInstance = new Chart(ctx, {
+    destroyChart(yAxisType);
+    const instance = new Chart(ctx, {
       type: "scatter",
       data: {
         datasets: [
@@ -977,15 +1146,324 @@ export function createCharts({
         pointLabelsPlugin,
       ],
     });
-    chartInstance.$modelTierGroups = tierGroups;
+    instance.$modelTierGroups = tierGroups;
+    chartInstances.set(yAxisType, instance);
+  }
 
-    if (elements.chartCaption) {
-      elements.chartCaption.textContent = t(`chart.caption.${yAxisType}`);
+  function formatRadarRaw(dimensionKey, raw) {
+    if (raw === null || raw === undefined || !Number.isFinite(raw)) return "—";
+    if (dimensionKey === "token") return Number(raw).toLocaleString("en-US");
+    if (dimensionKey === "cost") {
+      return state.locale === "en-US" ? formatUsd(raw / CNY_PER_USD) : `¥${raw}`;
     }
+    if (dimensionKey === "time") return `${raw} s`;
+    return `${raw}`;
+  }
+
+  function radarPalette() {
+    return isDarkThemeActive() ? SERIES_PALETTE_DARK : SERIES_PALETTE_LIGHT;
+  }
+
+  function styleRadarDataset(dataset, color) {
+    dataset.borderColor = color;
+    dataset.backgroundColor = withAlpha(color, 0.1);
+    dataset.pointBackgroundColor = color;
+    dataset.pointBorderColor = color;
+  }
+
+  function buildRadarDataset(model, color) {
+    const dataset = {
+      label: model.name,
+      data: model.values,
+      $raw: model.raw,
+      borderWidth: 2,
+      pointRadius: 3,
+      pointHoverRadius: 5,
+      fill: true,
+    };
+    styleRadarDataset(dataset, color);
+    return dataset;
+  }
+
+  // Stable palette slots: adding/removing a model never recolors the others.
+  function ensureRadarColorSlots(names, palette) {
+    const used = new Set(
+      [...radarState.colorSlots]
+        .filter(([name]) => names.has(name))
+        .map(([, slot]) => slot)
+    );
+    names.forEach((name) => {
+      if (radarState.colorSlots.has(name)) return;
+      let slot = 0;
+      while (slot < palette.length - 1 && used.has(slot)) slot += 1;
+      radarState.colorSlots.set(name, slot);
+      used.add(slot);
+    });
+  }
+
+  // Build the option list once per dataset. Re-renders reuse the same nodes,
+  // so the scroll position and focus are preserved.
+  function buildRadarPicker(figure, models) {
+    if (figure.pickerLabel) {
+      figure.pickerLabel.textContent = t("chart.radar.picker.label");
+    }
+    if (!figure.pickerList) return false;
+    figure.pickerList.setAttribute("aria-label", t("chart.radar.picker.aria"));
+    const signature = models.map((model) => model.name).join("\u0000");
+    if (radarState.listSignature === signature && figure.pickerList.childElementCount) {
+      return false;
+    }
+    radarState.listSignature = signature;
+    figure.pickerList.innerHTML = models
+      .map((model) => {
+        const name = escapeHtml(model.name);
+        return (
+          `<label class="radar-option">` +
+          `<input type="checkbox" value="${name}" />` +
+          `<span class="radar-option-swatch"></span>` +
+          `<span class="radar-option-name" title="${name}">${name}</span>` +
+          `</label>`
+        );
+      })
+      .join("");
+    return true;
+  }
+
+  // Incremental selection sync: the list DOM and the Chart instance stay put.
+  // Only a genuinely new dataset animates in from the centre; existing ones
+  // keep their object identity and indices, so nothing else is replayed.
+  function applyRadarSelection({ animate = false } = {}) {
+    const figure = elements.chartFigures?.radar;
+    const model = radarState.model;
+    if (!figure || !model) return;
+
+    const palette = radarPalette();
+    ensureRadarColorSlots(radarState.selected, palette);
+    const selectedModels = model.byMedian
+      .filter((item) => radarState.selected.has(item.name))
+      .slice(0, RADAR_MAX_MODELS);
+    const colorByName = new Map(
+      selectedModels.map((item) => [
+        item.name,
+        palette[radarState.colorSlots.get(item.name) % palette.length],
+      ])
+    );
+
+    if (figure.pickerCount) {
+      figure.pickerCount.textContent = t("chart.radar.picker.count", {
+        n: selectedModels.length,
+        max: RADAR_MAX_MODELS,
+      });
+    }
+    const atLimit = selectedModels.length >= RADAR_MAX_MODELS;
+    figure.pickerList?.querySelectorAll("input[type=checkbox]").forEach((input) => {
+      const checked = colorByName.has(input.value);
+      input.checked = checked;
+      input.disabled = !checked && atLimit;
+      const option = input.closest(".radar-option");
+      if (!option) return;
+      option.classList.toggle("is-disabled", !checked && atLimit);
+      const swatch = option.querySelector(".radar-option-swatch");
+      if (swatch) {
+        swatch.style.background = checked ? colorByName.get(input.value) : "transparent";
+      }
+    });
+
+    const chart = chartInstances.get("radar");
+    if (!chart) return;
+    const signature = [
+      model.labels.join("|"),
+      isDarkThemeActive() ? "dark" : "light",
+      ...selectedModels.map((item) => `${item.name}:${radarState.colorSlots.get(item.name)}`),
+    ].join("~");
+    if (radarState.chartSignature === signature) return;
+    radarState.chartSignature = signature;
+
+    const datasets = chart.data.datasets;
+    const desired = new Set(selectedModels.map((item) => item.name));
+    let added = false;
+    for (let i = datasets.length - 1; i >= 0; i -= 1) {
+      if (!desired.has(datasets[i].label)) datasets.splice(i, 1);
+    }
+    selectedModels.forEach((item) => {
+      const color = colorByName.get(item.name);
+      const existing = datasets.find((dataset) => dataset.label === item.name);
+      if (existing) {
+        existing.data = item.values;
+        existing.$raw = item.raw;
+        styleRadarDataset(existing, color);
+        return;
+      }
+      datasets.push(buildRadarDataset(item, color));
+      added = true;
+    });
+
+    // Chart.js only interpolates changed element properties, so the appended
+    // polygon animates while the untouched ones remain exactly where they are.
+    if (animate && added) chart.update();
+    else chart.update("none");
+  }
+
+  function renderRadarChart() {
+    const figure = elements.chartFigures?.radar;
+    if (!figure?.canvas) return;
+
+    const headers = state.headers || [];
+    const columns = resolveRadarColumns(headers);
+    const modelIndex = findModelColumnIndex(headers);
+    const ready =
+      state.view === "board" &&
+      modelIndex >= 0 &&
+      state.rows.length > 0 &&
+      columns.every((column) => column.columnIndex >= 0);
+    if (!ready) {
+      hideFigure("radar", figure);
+      radarState.model = null;
+      radarState.listSignature = "";
+      radarState.chartSignature = "";
+      return;
+    }
+    if (figure.figure) figure.figure.style.display = "";
+
+    // Reference values come from the whole current dataset, not the filtered
+    // rows, so switching a filter never reshapes every other model's profile.
+    const models = state.rows.map((row) => ({
+      name: String(row.cells[modelIndex] ?? "").trim() || "Unknown",
+      raw: columns.map((column) => parseSortableNumber(row.cells[column.columnIndex])),
+    }));
+
+    const scales = columns.map((dimension, index) => {
+      const values = models
+        .map((model) => model.raw[index])
+        .filter((value) => value !== null && Number.isFinite(value));
+      if (!values.length) return { best: 0, worst: 0, origin: 0 };
+      const min = Math.min(...values);
+      const max = Math.max(...values);
+      const best = dimension.higherIsBetter ? max : min;
+      const worst = dimension.higherIsBetter ? min : max;
+      return { best, worst, origin: worst * RADAR_WORST_ORIGIN_RATIO };
+    });
+
+    const normalized = models.map((model) => ({
+      name: model.name,
+      raw: model.raw,
+      values: model.raw.map((value, index) => {
+        if (value === null || !Number.isFinite(value)) return 0;
+        const span = scales[index].best - scales[index].origin;
+        if (Math.abs(span) < 1e-9) return 0.5;
+        return clamp01((value - scales[index].origin) / span);
+      }),
+    }));
+
+    // List order follows the leaderboard's median score (dimension index 1).
+    const byMedian = [...normalized].sort(
+      (a, b) => (b.raw[1] ?? -Infinity) - (a.raw[1] ?? -Infinity)
+    );
+    const datasetKey = state.currentDatasetKey || state.currentCategory || "";
+    if (radarState.datasetKey !== datasetKey) {
+      radarState.datasetKey = datasetKey;
+      radarState.selected = new Set(
+        byMedian.slice(0, RADAR_DEFAULT_MODELS).map((model) => model.name)
+      );
+      radarState.colorSlots.clear();
+      radarState.listSignature = "";
+    } else {
+      const available = new Set(normalized.map((model) => model.name));
+      radarState.selected = new Set(
+        [...radarState.selected].filter((name) => available.has(name))
+      );
+      [...radarState.colorSlots.keys()].forEach((name) => {
+        if (!available.has(name)) radarState.colorSlots.delete(name);
+      });
+    }
+
+    const labels = RADAR_DIMENSIONS.map((dimension) => t(dimension.labelKey));
+    radarState.model = { byMedian, columns, labels };
+
+    if (figure.title) figure.title.textContent = t("chart.figure.title.radar");
+    if (figure.axes) figure.axes.textContent = t("chart.radar.axes");
+    if (figure.sample) {
+      figure.sample.textContent = t("chart.figure.sample", { n: normalized.length });
+    }
+    const listChanged = buildRadarPicker(figure, byMedian);
+
+    const chartTextColor = getCssVariable("--color-text", "#212428");
+    const chartGridColor = getCssVariable("--color-border", "#e3e1d9");
+    const labelFontFamily = getCssVariable("--font-family-serif", "serif");
+    const setReadout = (text) => {
+      if (figure.readout) figure.readout.textContent = text || "";
+    };
+
+    // One radar instance for the lifetime of the view. Full re-renders only
+    // refresh labels/theme colors; selection toggles never reach this path.
+    let instance = chartInstances.get("radar");
+    const created = !instance;
+    if (!instance) {
+      radarState.chartSignature = "";
+      instance = new Chart(figure.canvas.getContext("2d"), {
+        type: "radar",
+        data: { labels, datasets: [] },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          // Only newly added elements have a start/end difference, so this
+          // transition applies to the incoming polygon, not the existing ones.
+          animation: { duration: 550, easing: "easeOutQuart" },
+          onHover: (event, activeElements, chart) => {
+            const hit = activeElements?.[0];
+            if (!hit) {
+              setReadout(null);
+              return;
+            }
+            const dataset = chart.data.datasets[hit.datasetIndex];
+            const model = radarState.model;
+            if (!dataset || !model) return;
+            const dimension = model.columns[hit.index];
+            setReadout(
+              `${dataset.label} · ${model.labels[hit.index]}: ${formatRadarRaw(
+                dimension.key,
+                dataset.$raw?.[hit.index]
+              )}`
+            );
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: { enabled: false },
+          },
+          scales: {
+            r: {
+              min: 0,
+              max: 1,
+              beginAtZero: true,
+              angleLines: { color: chartGridColor },
+              grid: { color: chartGridColor, circular: false, lineWidth: 1 },
+              ticks: { display: false, stepSize: 0.25 },
+              pointLabels: {
+                color: chartTextColor,
+                padding: 14,
+                font: { size: 13, family: labelFontFamily, weight: "600" },
+              },
+            },
+          },
+        },
+      });
+      chartInstances.set("radar", instance);
+    } else {
+      instance.data.labels = labels;
+      instance.options.scales.r.angleLines.color = chartGridColor;
+      instance.options.scales.r.grid.color = chartGridColor;
+      instance.options.scales.r.pointLabels.color = chartTextColor;
+      instance.options.scales.r.pointLabels.font.family = labelFontFamily;
+    }
+
+    // Animate only when models genuinely appear for the first time (initial
+    // load or a dataset switch); filter/theme/locale changes stay static.
+    applyRadarSelection({ animate: created || listChanged });
   }
 
   return {
     renderChart,
+    renderRadarChart,
     renderTrends,
     renderTrendsChart,
     renderTrendsStatus,

@@ -6,7 +6,7 @@ import {
   onLocaleChange,
   setLocale,
   t,
-} from "./i18n.js?v=20261113-tier-link-6";
+} from "./i18n.js?v=20261119-radar-3";
 import {
   CATEGORY_CHART_CONFIG,
   CATEGORY_ORDER,
@@ -33,8 +33,8 @@ import {
   parseSortableNumber,
   resolveCodeV3Insight,
   sortRows as sortBenchmarkRows,
-} from "./benchmark-domain.js?v=20261113-tier-link-6";
-import { createCharts } from "./charts.js?v=20261113-tier-link-6";
+} from "./benchmark-domain.js?v=20261119-radar-3";
+import { createCharts } from "./charts.js?v=20261119-radar-3";
 
 const DATASET_TITLE_KEYS = {
   月榜: "dataset.title.monthly",
@@ -212,6 +212,23 @@ const state = {
 const csvCache = new Map();
 const insightCache = new Map();
 
+function collectChartFigure(metric) {
+  const suffix = metric.charAt(0).toUpperCase() + metric.slice(1);
+  const figure = document.getElementById(`chartFigure${suffix}`);
+  return {
+    figure,
+    tag: document.getElementById(`chartTag${suffix}`),
+    title: document.getElementById(`chartTitle${suffix}`),
+    axes: document.getElementById(`chartAxes${suffix}`),
+    sample: document.getElementById(`chartSample${suffix}`),
+    readout: document.getElementById(`chartReadout${suffix}`),
+    canvas: document.getElementById(`benchmarkChart${suffix}`),
+    pickerLabel: document.getElementById("radarPickerLabel"),
+    pickerCount: document.getElementById("radarPickerCount"),
+    pickerList: document.getElementById("radarPickerList"),
+  };
+}
+
 const elements = {
   categoryNav: document.getElementById("viewTabsCategories"),
   datasetSelect: document.getElementById("datasetSelect"),
@@ -232,11 +249,14 @@ const elements = {
   languageToggle: document.getElementById("languageToggle"),
   footerNote: document.getElementById("footerNote"),
   chartSection: document.getElementById("chartSection"),
-  chartCanvas: document.getElementById("benchmarkChart"),
-  chartCaption: document.getElementById("chartCaption"),
-  chartReadout: document.getElementById("chartReadout"),
-  yAxisSelect: document.getElementById("yAxisSelect"),
-  yAxisLabel: document.getElementById("yAxisLabel"),
+  chartSectionHeading: document.getElementById("chartSectionHeading"),
+  chartSectionNote: document.getElementById("chartSectionNote"),
+  chartFigures: {
+    cost: collectChartFigure("cost"),
+    time: collectChartFigure("time"),
+    token: collectChartFigure("token"),
+    radar: collectChartFigure("radar"),
+  },
   viewTabs: document.getElementById("viewTabs"),
   viewTabBoard: document.getElementById("viewTabBoard"),
   viewTabTrends: document.getElementById("viewTabTrends"),
@@ -411,10 +431,6 @@ function updateStaticCopy() {
     elements.searchInput.setAttribute("aria-label", t("controls.search.aria"));
     elements.searchInput.placeholder = t("controls.search.placeholder");
   }
-  if (elements.yAxisLabel) {
-    updateMetricAxisLabel();
-  }
-  updateChartMetricOptions();
   if (elements.footerNote) {
     elements.footerNote.textContent = t("footer.note");
   }
@@ -454,37 +470,6 @@ function updateStaticCopy() {
   }
   buildTrendsCategoryOptions();
   updateThemeToggle();
-}
-
-function updateMetricAxisLabel() {
-  if (!elements.yAxisLabel) return;
-  const swapped =
-    state.currentCategory && CATEGORY_CHART_CONFIG[state.currentCategory]?.swapAxes;
-  elements.yAxisLabel.textContent = swapped
-    ? t("chart.xAxis.label")
-    : t("chart.yAxis.label");
-}
-
-function updateChartMetricOptions() {
-  if (!elements.yAxisSelect) return;
-  const config = state.currentCategory
-    ? CATEGORY_CHART_CONFIG[state.currentCategory]
-    : null;
-  const ariaKey = config?.swapAxes ? "chart.xAxis.aria" : "chart.yAxis.aria";
-  const options = [
-    { value: "cost", label: t("chart.yAxis.option.cost") },
-    { value: "time", label: t("chart.yAxis.option.time") },
-  ];
-  if (config?.token) {
-    options.push({ value: "token", label: t("chart.yAxis.option.token") });
-  }
-
-  elements.yAxisSelect.setAttribute("aria-label", t(ariaKey));
-  setSelectOptions(
-    elements.yAxisSelect,
-    options,
-    elements.yAxisSelect.value || "cost"
-  );
 }
 
 function updateLanguageToggle() {
@@ -1004,12 +989,6 @@ function bindEventHandlers() {
     syncHashFromState();
   });
 
-  if (elements.yAxisSelect) {
-    elements.yAxisSelect.addEventListener("change", () => {
-      charts.renderChart();
-    });
-  }
-
   if (elements.viewTabBoard) {
     elements.viewTabBoard.addEventListener("click", () => {
       setView("board");
@@ -1087,8 +1066,6 @@ function bindEventHandlers() {
 async function handleCategoryChange(category, options = {}) {
   const { preferredDatasetKey = null } = options;
   state.currentCategory = category;
-  updateMetricAxisLabel();
-  updateChartMetricOptions();
   state.currentDatasetKey = null;
   state.currentDatasetDirectory = null;
   elements.datasetSelect.disabled = true;

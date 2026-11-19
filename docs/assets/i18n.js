@@ -289,33 +289,77 @@ const TRANSLATIONS = {
     "zh-CN": "深色",
     "en-US": "Dark",
   },
-  "chart.yAxis.label": {
-    "zh-CN": "纵轴指标",
-    "en-US": "Y-Axis Metric",
+  "chart.section.title": {
+    "zh-CN": "图表",
+    "en-US": "Figures",
   },
-  "chart.xAxis.label": {
-    "zh-CN": "横轴指标",
-    "en-US": "X-Axis Metric",
+  "chart.section.count": {
+    "zh-CN": "共 {{n}} 幅",
+    "en-US": "{{n}} figures",
   },
-  "chart.yAxis.aria": {
-    "zh-CN": "选择纵轴指标",
-    "en-US": "Select Y-axis metric",
+  "chart.figure.number": {
+    "zh-CN": "图 {{n}}",
+    "en-US": "FIG. {{n}}",
   },
-  "chart.xAxis.aria": {
-    "zh-CN": "选择横轴指标",
-    "en-US": "Select X-axis metric",
+  "chart.figure.title.cost": {
+    "zh-CN": "性能 × 成本象限分布",
+    "en-US": "Performance × Cost Quadrants",
   },
-  "chart.yAxis.option.cost": {
+  "chart.figure.title.time": {
+    "zh-CN": "性能 × 耗时象限分布",
+    "en-US": "Performance × Latency Quadrants",
+  },
+  "chart.figure.title.token": {
+    "zh-CN": "Token 效率象限分布",
+    "en-US": "Token-Efficiency Quadrants",
+  },
+  "chart.figure.axes": {
+    "zh-CN": "横轴 {{x}} ／ 纵轴 {{y}}",
+    "en-US": "X: {{x}} · Y: {{y}}",
+  },
+  "chart.figure.sample": {
+    "zh-CN": "N = {{n}}",
+    "en-US": "N = {{n}}",
+  },
+  "chart.figure.title.radar": {
+    "zh-CN": "模型五维表现雷达图",
+    "en-US": "Five-Dimension Model Profile",
+  },
+  "chart.radar.axes": {
+    "zh-CN": "极限分 · 中位分 · 平均耗时 · Token · 成本",
+    "en-US": "Peak · Median · Time · Tokens · Cost",
+  },
+  "chart.radar.dim.peak": {
+    "zh-CN": "极限分",
+    "en-US": "Peak Score",
+  },
+  "chart.radar.dim.median": {
+    "zh-CN": "中位分",
+    "en-US": "Median Score",
+  },
+  "chart.radar.dim.time": {
+    "zh-CN": "平均耗时",
+    "en-US": "Avg. Time",
+  },
+  "chart.radar.dim.token": {
+    "zh-CN": "Token",
+    "en-US": "Tokens",
+  },
+  "chart.radar.dim.cost": {
     "zh-CN": "成本",
     "en-US": "Cost",
   },
-  "chart.yAxis.option.time": {
-    "zh-CN": "平均耗时",
-    "en-US": "Average Time",
+  "chart.radar.picker.label": {
+    "zh-CN": "对比模型",
+    "en-US": "Models",
   },
-  "chart.yAxis.option.token": {
-    "zh-CN": "Token 效率",
-    "en-US": "Token Efficiency",
+  "chart.radar.picker.count": {
+    "zh-CN": "已选 {{n}} / {{max}}",
+    "en-US": "{{n}} / {{max}} selected",
+  },
+  "chart.radar.picker.aria": {
+    "zh-CN": "选择要对比的模型",
+    "en-US": "Select models to compare",
   },
   "chart.axis.medianScore": {
     "zh-CN": "中位分数",
@@ -340,20 +384,6 @@ const TRANSLATIONS = {
   "chart.axis.cost": {
     "zh-CN": "成本(元)",
     "en-US": "Cost (USD)",
-  },
-  "chart.caption.cost": {
-    "zh-CN": "性能 × 成本象限分布（性能分界固定为 40 分，成本分界为当月中位数）",
-    "en-US":
-      "Performance vs. cost quadrants (performance threshold fixed at 40; cost threshold marks the monthly median; CNY converted to USD at 6.9)",
-  },
-  "chart.caption.time": {
-    "zh-CN": "性能 × 耗时象限分布（虚线为当月中位数）",
-    "en-US": "Performance vs. latency quadrants (dashed lines mark medians)",
-  },
-  "chart.caption.token": {
-    "zh-CN": "Token 效率象限分布（虚线为当月中位数）",
-    "en-US":
-      "Token-efficiency quadrants (dashed lines mark medians)",
   },
   "chart.quad.cost.tr": {
     "zh-CN": "高价旗舰",

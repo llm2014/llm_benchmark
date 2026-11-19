@@ -2218,46 +2218,157 @@ main {
   padding: 20px 24px 24px;
 }
 
-.chart-controls {
+/* Section heading: small serif label + hairline rule + figure count. */
+.chart-section-head {
   display: flex;
-  gap: 16px;
-  margin-bottom: 20px;
-  padding-bottom: 14px;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 2px;
+}
+
+.chart-section-heading {
+  margin: 0;
+  font-family: var(--font-family-serif);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.chart-section-head-rule {
+  flex: 1;
+  border-top: 1px solid var(--color-border);
+}
+
+.chart-section-head-note {
+  font-family: var(--font-family-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+
+.chart-section-head-note:empty {
+  display: none;
+}
+
+.chart-figures {
+  margin-top: 4px;
+}
+
+.chart-figure {
+  margin: 0;
+}
+
+.chart-figure + .chart-figure {
+  margin-top: 34px;
+}
+
+/* Academic figure head: booktabs double rule, numbered tag, serif title,
+   mono axis definition, sample size and an inline hover readout. */
+.chart-figure-head {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) minmax(200px, 40%);
+  column-gap: 18px;
+  align-items: center;
+  padding: 13px 2px 12px;
+  margin-bottom: 16px;
+  border-top: 3px double var(--color-rule);
   border-bottom: 1px solid var(--color-border);
 }
 
-/* Hover readout lives outside the data area so it can never cover the chart.
-   Match the select control's height and bottom edge so both sit on one line. */
-.chart-readout {
-  margin-left: auto;
-  align-self: flex-end;
-  box-sizing: border-box;
-  height: 38px;
-  max-width: min(76%, 900px);
-  padding: 0 12px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  background: var(--color-bg);
+.chart-figure-tag {
+  font-family: var(--font-family-serif);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--color-accent);
+  white-space: nowrap;
+}
+
+.chart-figure-tag::after {
+  content: "";
+  display: block;
+  width: 22px;
+  margin-top: 6px;
+  border-top: 1px solid var(--color-accent);
+  opacity: 0.7;
+}
+
+.chart-figure-heading {
+  min-width: 0;
+}
+
+.chart-figure-title {
+  margin: 0;
+  font-family: var(--font-family-serif);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: 0.02em;
   color: var(--color-text);
-  font-size: 12px;
-  line-height: 36px;
+}
+
+.chart-figure-axes {
+  margin: 5px 0 0;
+  font-family: var(--font-family-mono);
+  font-size: 11px;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  color: var(--color-muted);
+  overflow-wrap: anywhere;
+}
+
+.chart-figure-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+  min-height: 44px;
+}
+
+.chart-figure-sample {
+  font-family: var(--font-family-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+
+/* The readout keeps a fixed height even when empty: hovering a point can
+   never shift the plot. It sits outside the data area, never covering points. */
+.chart-readout {
+  box-sizing: border-box;
+  width: 100%;
+  height: 24px;
+  padding: 0 8px;
+  border-left: 2px solid var(--color-accent);
+  background: var(--color-accent-soft);
+  color: var(--color-text);
+  font-family: var(--font-family-mono);
+  font-size: 11px;
+  line-height: 24px;
+  text-align: right;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .chart-readout:empty {
-  display: none;
+  visibility: hidden;
 }
 
 .chart-container {
   position: relative;
   width: 100%;
-  height: 500px;
+  height: 460px;
 }
 
 .chart-container canvas {
-  max-height: 500px;
+  max-height: 460px;
 }
 
 .chart-caption {
@@ -2266,6 +2377,123 @@ main {
   line-height: 1.5;
   color: var(--color-muted);
   text-align: center;
+}
+
+/* ---------------- 雷达图：左侧模型选项 / 右侧图 ---------------- */
+
+.radar-layout {
+  display: grid;
+  grid-template-columns: minmax(200px, 250px) minmax(0, 1fr);
+  gap: 22px;
+  align-items: stretch;
+}
+
+.radar-picker {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 460px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  overflow: hidden;
+}
+
+.radar-picker-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.radar-picker-label {
+  font-family: var(--font-family-serif);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.radar-picker-count {
+  font-family: var(--font-family-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+
+.radar-picker-list {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 1px;
+  min-height: 0;
+  padding: 6px;
+  overflow-y: auto;
+}
+
+.radar-picker-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.radar-picker-list::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+.radar-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 5px 7px;
+  border-radius: 3px;
+  color: var(--color-text);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.radar-option:hover {
+  background: var(--color-accent-soft);
+}
+
+.radar-option input {
+  flex: none;
+  width: 13px;
+  height: 13px;
+  margin: 0;
+  accent-color: var(--color-accent);
+  cursor: inherit;
+}
+
+.radar-option-swatch {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 2px;
+}
+
+.radar-option-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.radar-option.is-disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.chart-container--radar {
+  min-width: 0;
+  height: 460px;
+}
+
+.chart-container--radar canvas {
+  max-height: 460px;
 }
 
 /* ---------------- 趋势视图 ---------------- */
@@ -2459,12 +2687,59 @@ main {
     padding: 0;
   }
 
+  .chart-figure-head {
+    grid-template-columns: 56px minmax(0, 1fr);
+    column-gap: 12px;
+    row-gap: 8px;
+    padding: 11px 0 10px;
+  }
+
+  .chart-figure-title {
+    font-size: 16px;
+  }
+
+  .chart-figure-side {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px 12px;
+    min-height: 24px;
+  }
+
+  .chart-readout {
+    width: 100%;
+    text-align: left;
+  }
+
+  .chart-figure + .chart-figure {
+    margin-top: 26px;
+  }
+
+  .radar-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .radar-picker {
+    height: 190px;
+  }
+
   .chart-container {
     height: 400px;
   }
 
   .chart-container canvas {
     max-height: 400px;
+  }
+
+  .chart-container.chart-container--radar {
+    height: 340px;
+  }
+
+  .chart-container--radar canvas {
+    max-height: 340px;
   }
 
   .trends-chart-container {

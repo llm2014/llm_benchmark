@@ -30,7 +30,7 @@
     />
 
     <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon.png" />
-    <link rel="stylesheet" href="assets/styles.css?v=20261113-tier-link-6" />
+    <link rel="stylesheet" href="assets/styles.css?v=20261119-radar-3" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -137,21 +137,90 @@
         </section>
 
         <section class="chart-section" id="chartSection" style="display: none;">
-          <div class="chart-controls">
-            <div class="control">
-              <label for="yAxisSelect" id="yAxisLabel">纵轴指标</label>
-              <select id="yAxisSelect" aria-label="">
-                <option value="cost">测试成本</option>
-                <option value="time">平均耗时</option>
-                <option value="token">Token 效率</option>
-              </select>
-            </div>
-            <div id="chartReadout" class="chart-readout" aria-live="polite"></div>
+          <header class="chart-section-head">
+            <h2 class="chart-section-heading" id="chartSectionHeading"></h2>
+            <span class="chart-section-head-rule" aria-hidden="true"></span>
+            <span class="chart-section-head-note" id="chartSectionNote"></span>
+          </header>
+
+          <div class="chart-figures">
+            <figure class="chart-figure" id="chartFigureCost" data-metric="cost">
+              <div class="chart-figure-head">
+                <span class="chart-figure-tag" id="chartTagCost"></span>
+                <div class="chart-figure-heading">
+                  <h3 class="chart-figure-title" id="chartTitleCost"></h3>
+                  <p class="chart-figure-axes" id="chartAxesCost"></p>
+                </div>
+                <div class="chart-figure-side">
+                  <span class="chart-figure-sample" id="chartSampleCost"></span>
+                  <div class="chart-readout" id="chartReadoutCost" aria-live="polite"></div>
+                </div>
+              </div>
+              <div class="chart-container">
+                <canvas id="benchmarkChartCost"></canvas>
+              </div>
+            </figure>
+
+            <figure class="chart-figure" id="chartFigureTime" data-metric="time">
+              <div class="chart-figure-head">
+                <span class="chart-figure-tag" id="chartTagTime"></span>
+                <div class="chart-figure-heading">
+                  <h3 class="chart-figure-title" id="chartTitleTime"></h3>
+                  <p class="chart-figure-axes" id="chartAxesTime"></p>
+                </div>
+                <div class="chart-figure-side">
+                  <span class="chart-figure-sample" id="chartSampleTime"></span>
+                  <div class="chart-readout" id="chartReadoutTime" aria-live="polite"></div>
+                </div>
+              </div>
+              <div class="chart-container">
+                <canvas id="benchmarkChartTime"></canvas>
+              </div>
+            </figure>
+
+            <figure class="chart-figure" id="chartFigureToken" data-metric="token">
+              <div class="chart-figure-head">
+                <span class="chart-figure-tag" id="chartTagToken"></span>
+                <div class="chart-figure-heading">
+                  <h3 class="chart-figure-title" id="chartTitleToken"></h3>
+                  <p class="chart-figure-axes" id="chartAxesToken"></p>
+                </div>
+                <div class="chart-figure-side">
+                  <span class="chart-figure-sample" id="chartSampleToken"></span>
+                  <div class="chart-readout" id="chartReadoutToken" aria-live="polite"></div>
+                </div>
+              </div>
+              <div class="chart-container">
+                <canvas id="benchmarkChartToken"></canvas>
+              </div>
+            </figure>
+
+            <figure class="chart-figure chart-figure--radar" id="chartFigureRadar" data-metric="radar">
+              <div class="chart-figure-head">
+                <span class="chart-figure-tag" id="chartTagRadar"></span>
+                <div class="chart-figure-heading">
+                  <h3 class="chart-figure-title" id="chartTitleRadar"></h3>
+                  <p class="chart-figure-axes" id="chartAxesRadar"></p>
+                </div>
+                <div class="chart-figure-side">
+                  <span class="chart-figure-sample" id="chartSampleRadar"></span>
+                  <div class="chart-readout" id="chartReadoutRadar" aria-live="polite"></div>
+                </div>
+              </div>
+              <div class="radar-layout">
+                <div class="radar-picker">
+                  <div class="radar-picker-head">
+                    <span class="radar-picker-label" id="radarPickerLabel"></span>
+                    <span class="radar-picker-count" id="radarPickerCount"></span>
+                  </div>
+                  <div class="radar-picker-list" id="radarPickerList" role="group" aria-label=""></div>
+                </div>
+                <div class="chart-container chart-container--radar">
+                  <canvas id="benchmarkChartRadar"></canvas>
+                </div>
+              </div>
+            </figure>
           </div>
-          <div class="chart-container">
-            <canvas id="benchmarkChart"></canvas>
-          </div>
-          <p class="chart-caption" id="chartCaption"></p>
         </section>
       </div>
 
@@ -175,9 +244,9 @@
       </section>
     </main>
     <footer class="page-footer">
-      <small>Vibe Coding by Codex -> Kimi K3</small>
+      <small>Vibe Coding by GPT-5.3-Codex -> Kimi K3 -> Hy4</small>
     </footer>
 
-    <script src="assets/app.js?v=20261113-tier-link-6" type="module"></script>
+    <script src="assets/app.js?v=20261119-radar-3" type="module"></script>
   </body>
 </html>
