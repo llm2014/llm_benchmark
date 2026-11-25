@@ -606,6 +606,10 @@ const TRANSLATIONS = {
     "zh-CN": "O: 无提示修复破损工程",
     "en-US": "O: Fix broken codebase without hint"
   },
+  "codev3Note.projectP":{
+    "zh-CN": "P: 平面排版，世界知识，美学，常识",
+    "en-US": "P: Graphic layout, general world knowledge, aesthetics, and common sense"
+  },
   "insight.task": {
     "zh-CN": "任务 {{id}}",
     "en-US": "Task {{id}}",
