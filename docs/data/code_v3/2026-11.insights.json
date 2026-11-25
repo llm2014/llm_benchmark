@@ -708,6 +708,50 @@
           }
         }
       ]
+    },
+    {
+      "rowId": "GLM-5.4 (max)",
+      "tasks": [
+        {
+          "taskId": "K",
+          "lines":{
+            "zh-CN":[
+              "- 多轮修复无法调通核心功能，找不到问题点"
+            ],
+            "en-US":[
+              "- Multiple rounds of troubleshooting couldn't get the core functionality working—the root cause remains unidentified"
+            ]
+          }
+        },
+        {
+          "taskId": "M",
+          "lines":{
+            "zh-CN":[
+              "- 明显视觉硬伤未发现",
+              "- 局部效果好，但不注重整体逻辑联系",
+              "- UI 粗糙"
+            ],
+            "en-US":[
+              "- Obvious visual flaws",
+              "- Some local effects work well, but the overall logical coherence is neglected",
+              "- The UI is rough"
+            ]
+          }
+        },
+        {
+          "taskId": "O",
+          "lines": {
+            "zh-CN": [
+              "- Debug 低效",
+              "- 无法自主闭环解决问题"
+            ],
+            "en-US": [
+              "- Inefficient debugging",
+              "- Unable to independently resolve issues end-to-end"
+            ]
+          }
+        }
+      ]
     }
   ]
 }
